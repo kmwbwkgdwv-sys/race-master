@@ -538,8 +538,8 @@ const MAXV = 30, ACC = 16, TURN = 1.24;
 const LS = { get(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
   raw(k){ try { return localStorage.getItem(k); } catch (e) { return null; } }, setRaw(k, v){ try { localStorage.setItem(k, v); return true; } catch (e) { return false; } } };
 const ci = (v, n) => clamp(v | 0, 0, n - 1);
-let best = LS.get('rm_best4', {}) || {}, opt = Object.assign({ lite:false, bgm:true, se:true, fs:true, sens:1 }, LS.get('rm_opt', {})), sel = Object.assign({ ch:0, kt:0, tire:0, wing:0, eng:0, col:0, gl:0, stage:0, mode:'ta', tod:'day', rnd:false, skin:false, hide:true, laps:3, items:true }, LS.get('rm_sel', {}));
-sel.ch = ci(sel.ch, CH.length); sel.kt = ci(sel.kt, KT.length); sel.tire = ci(sel.tire, TIRE.length); sel.wing = ci(sel.wing, WING.length); sel.eng = ci(sel.eng, ENG.length); sel.gl = ci(sel.gl, GLD.length); sel.col = ci(sel.col, COLS.length); sel.stage = ci(sel.stage, STAGES.length); opt.sens = ci(opt.sens, 3); if (typeof opt.hdl !== 'number') opt.hdl = [.85, 1, 1.2][opt.sens]; opt.hdl = clamp(Math.round(opt.hdl * 20) / 20, .6, 1.5);      // hdl = ハンドルの曲がる量（カスタム画面で変える）
+let best = LS.get('rm_best4', {}) || {}, opt = Object.assign({ lite:false, bgm:true, se:true, fs:true, sens:1, mix:true, view:'tp' }, LS.get('rm_opt', {})), sel = Object.assign({ ch:0, kt:0, tire:0, wing:0, eng:0, col:0, gl:0, stage:0, mode:'ta', tod:'day', rnd:false, skin:false, hide:true, laps:3, items:true }, LS.get('rm_sel', {}));
+sel.ch = ci(sel.ch, CH.length); sel.kt = ci(sel.kt, KT.length); sel.tire = ci(sel.tire, TIRE.length); sel.wing = ci(sel.wing, WING.length); sel.eng = ci(sel.eng, ENG.length); sel.gl = ci(sel.gl, GLD.length); sel.col = ci(sel.col, COLS.length); sel.stage = ci(sel.stage, STAGES.length); opt.sens = ci(opt.sens, 3); opt.view = opt.view === 'fp' ? 'fp' : 'tp'; opt.mix = opt.mix !== false; if (typeof opt.hdl !== 'number') opt.hdl = [.85, 1, 1.2][opt.sens]; opt.hdl = clamp(Math.round(opt.hdl * 20) / 20, .6, 1.5);      // hdl = ハンドルの曲がる量（カスタム画面で変える）
 sel.tod = sel.tod === 'night' ? 'night' : 'day'; sel.rnd = !!sel.rnd; sel.skin = !!sel.skin; if (!['ta', 'vs', 'on'].includes(sel.mode)) sel.mode = 'ta'; if (![1, 3, 5].includes(sel.laps)) sel.laps = 3; sel.items = sel.items !== false;
 const save = () => { LS.set('rm_best4', best); LS.set('rm_opt', opt); LS.set('rm_sel', sel); };
 // パーツの組み合わせから性能を作る
@@ -1218,7 +1218,7 @@ function audioInit(){
   if (AU.ctx) { if (AU.ctx.state !== 'running') { try { AU.ctx.resume().catch(() => {}); } catch (e) {} } return; }
   const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
   try {
-    const c = AU.ctx = new AC(); try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+    const c = AU.ctx = new AC();
     const cmp = c.createDynamicsCompressor(); cmp.threshold.value = -14; cmp.ratio.value = 5; cmp.attack.value = .004; cmp.release.value = .16; cmp.connect(c.destination);
     AU.out = c.createGain(); AU.out.gain.value = .9; AU.out.connect(cmp);            // 効果音
     AU.mus = c.createGain(); AU.mus.gain.value = 0; AU.mus.connect(cmp);            // BGM（レース中だけ上げる）
@@ -1226,11 +1226,21 @@ function audioInit(){
     const buf = AU.nbuf = c.createBuffer(1, c.sampleRate, c.sampleRate), ch = buf.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
     AU.noise = c.createBufferSource(); AU.noise.buffer = buf; AU.noise.loop = true; const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1800; AU.nzG = c.createGain(); AU.nzG.gain.value = 0; AU.noise.connect(bp); bp.connect(AU.nzG); AU.nzG.connect(AU.out); AU.noise.start();
     if (c.state !== 'running') c.resume().catch(() => {});
-    // iPhone / iPad：無音の音声を流しておくと、マナーモード（消音スイッチ）でもゲームの音が出る
-    if (/iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) { try { const n = 4410, w = new Uint8Array(44 + n), dv = new DataView(w.buffer), str = (o, t) => { for (let i = 0; i < t.length; i++) w[o + i] = t.charCodeAt(i); };
-      str(0, 'RIFF'); dv.setUint32(4, 36 + n, true); str(8, 'WAVEfmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 1, true); dv.setUint32(24, 44100, true); dv.setUint32(28, 44100, true); dv.setUint16(32, 1, true); dv.setUint16(34, 8, true); str(36, 'data'); dv.setUint32(40, n, true); w.fill(128, 44);
-      const a = AU.el = new Audio(URL.createObjectURL(new Blob([w], { type: 'audio/wav' }))); a.loop = true; a.setAttribute('playsinline', ''); a.volume = .01; const pr = a.play(); if (pr && pr.catch) pr.catch(() => {}); } catch (e) {} }
+    audioMode();
   } catch (e) { AU.ctx = null; }
+}
+// ほかのアプリの音（YouTube・Spotify など）との関係を決める。
+//   mix あり：ゲームの音を「まわりの音」あつかいにして、流れている音楽を止めずに重ねて鳴らす（iPhone はマナーモードだとゲームの音は出ない）
+//   mix なし：ゲームの音を主役にする（iPhone のマナーモードでも鳴るが、ほかのアプリの音楽は止まる）
+function audioMode(){
+  if (!AU.ctx) return; const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  try { if (navigator.audioSession) navigator.audioSession.type = opt.mix ? 'ambient' : 'playback'; } catch (e) {}
+  try { if ('mediaSession' in navigator) { navigator.mediaSession.metadata = null; navigator.mediaSession.playbackState = 'none'; } } catch (e) {}      // 再生中の音楽アプリの操作パネルを横取りしない
+  if (opt.mix || !ios) { if (AU.el) { try { AU.el.pause(); AU.el.removeAttribute('src'); AU.el.load(); } catch (e) {} AU.el = null; } return; }
+  if (AU.el) return;
+  try { const n = 4410, w = new Uint8Array(44 + n), dv = new DataView(w.buffer), str = (o, t) => { for (let i = 0; i < t.length; i++) w[o + i] = t.charCodeAt(i); };      // 無音の音声を流しておくと、消音スイッチでも音が出る
+    str(0, 'RIFF'); dv.setUint32(4, 36 + n, true); str(8, 'WAVEfmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 1, true); dv.setUint32(24, 44100, true); dv.setUint32(28, 44100, true); dv.setUint16(32, 1, true); dv.setUint16(34, 8, true); str(36, 'data'); dv.setUint32(40, n, true); w.fill(128, 44);
+    const a = AU.el = new Audio(URL.createObjectURL(new Blob([w], { type: 'audio/wav' }))); a.loop = true; a.setAttribute('playsinline', ''); a.volume = .01; const pr = a.play(); if (pr && pr.catch) pr.catch(() => {}); } catch (e) {}
 }
 // 画面にさわる・キーを押すたびに呼ぶ（全画面への切り替えやアプリの切り替えで止まった音を起こし直す）
 for (const ev of ['pointerdown', 'touchend', 'keydown']) addEventListener(ev, () => { if (AU.ctx && AU.ctx.state !== 'running') audioInit(); if (AU.el && AU.el.paused && AU.ctx) { const pr = AU.el.play(); if (pr && pr.catch) pr.catch(() => {}); } }, { capture: true, passive: true });
@@ -1803,6 +1813,7 @@ document.addEventListener('fullscreenchange', () => setTimeout(layout, 60));
 const loc = e => ({ x: e.clientX, y: e.clientY });
 function resize(){ const dpr = opt.lite ? 1 : Math.min(2, window.devicePixelRatio || 1), w = Math.round(cv.clientWidth * dpr), h = Math.round(cv.clientHeight * dpr); if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; } gl.viewport(0, 0, w, h); return w / Math.max(1, h); }
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const FP = () => opt.view === 'fp' && state !== 'replay';      // 一人称（運転席）の視点か
 const inMenu = () => state === 'home' || state === 'layout' || state === 'roul';
 const PV = () => tab === 'char' || tab === 'kart' || tab === 'paint' || tab === 'cpaint';      // マシンのプレビューを出すタブ
 
@@ -1869,10 +1880,11 @@ function render(dt){
     else if (tab === 'paint') { eye = [0, 5 + 2.6 * hz, -5.4 * hz]; tgt = [1.7 * (asp > 1.5 ? 1 : .3), .4, 0]; }
     else if (tab === 'kart') { eye = [0, 3.3 * hz, -10.8 * hz]; tgt = [2.5 * (asp > 1.5 ? 1 : .3), 3.9, 0]; }      // カスタム：上に性能表を出すので、マシンは下のほうに映す
     else { eye = [0, 3.1 * hz, -8.2 * hz]; tgt = [1.9 * (asp > 1.5 ? 1 : .3), 1.1, 0]; }
-  } else { const k = me, back = input.back && state !== 'replay' ? -1 : 1; cam.h += wrapA(k.h - cam.h) * Math.min(1, dt * 5.5); cam.ky += (k.y - cam.ky) * Math.min(1, dt * 6); cam.g += ((k.glide ? 1 : 0) - cam.g) * Math.min(1, dt * 2.6); cam.roll += ((k.roll || 0) * .55 * back - cam.roll) * Math.min(1, dt * 4);
+  } else { const k = me, back = input.back && state !== 'replay' ? -1 : 1, fp = FP(); cam.h += wrapA(k.h - cam.h) * Math.min(1, dt * (fp ? 16 : 5.5)); cam.ky += (k.y - cam.ky) * Math.min(1, dt * (fp ? 18 : 6)); cam.g += ((k.glide ? 1 : 0) - cam.g) * Math.min(1, dt * 2.6); cam.roll += ((k.roll || 0) * (fp ? 1 : .55) * back - cam.roll) * Math.min(1, dt * (fp ? 8 : 4));
     const s = Math.sin(cam.h) * back, c = Math.cos(cam.h) * back, g = cam.g; if (k.boost > 0) fov += k.rocket > 0 ? .22 : .13;
     // グライダー中はカメラを引いて高く上げ、着地する先の道が見えるようにする
-    eye = [k.x - s * (7.8 + 5 * g), cam.ky + 3.6 + 5.4 * g, k.z - c * (7.8 + 5 * g)]; tgt = [k.x + s * (6 + 16 * g), cam.ky + 1.2 - 3.4 * g, k.z + c * (6 + 16 * g)]; }
+    eye = [k.x - s * (7.8 + 5 * g), cam.ky + 3.6 + 5.4 * g, k.z - c * (7.8 + 5 * g)]; tgt = [k.x + s * (6 + 16 * g), cam.ky + 1.2 - 3.4 * g, k.z + c * (6 + 16 * g)];
+    if (fp) { const ey = cam.ky + 1.7, pt = clamp(Math.tan(k.pitch) * back, -.5, .5); fov += .1; eye = [k.x + s * .35, ey, k.z + c * .35]; tgt = [k.x + s * 12, ey + pt * 11.65 - 1.1 - 2.2 * g, k.z + c * 12]; } }      // 一人称：運転席の目の高さから前を見る（坂ではいっしょに上下を向く）
   const cr = menu ? 0 : cam.roll, view = lookAt(eye, tgt), VP = new Float32Array(mul(persp(fov, asp, .6, 9000), cr ? mul([Math.cos(cr), Math.sin(cr), 0, 0, -Math.sin(cr), Math.cos(cr), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1], view) : view));      // 傾いた道ではカメラも少し傾く
   gl.uniform1f(U.uA, 1); gl.uniform3f(U.uTint, 1, 1, 1); gl.uniformMatrix4fv(U.uM, false, IDENT);
   if (studio) {
@@ -1895,7 +1907,7 @@ function render(dt){
   drawChunks(world, eye, vfx, vfz, vfar); gl.uniform2f(U.uGr, 1, 0);
   gl.uniform3f(U.uTint, pl.em[0], pl.em[1], pl.em[2]); drawChunks(worldG, eye, vfx, vfz, vfar);
   DYN = pl.dyn;
-  for (const k of karts) drawRacer(k);
+  for (const k of karts) if (!(k === me && FP())) drawRacer(k); else if (k.shield > 0) { setT(k.x, k.y, k.z, k.h); d('sph', 0, 1.2, 4, 5, 3.4, .3, [.3, 1, .9], .14, 1); }      // 一人称では自分のマシンは描かない
   for (const bx of boxes) if (bx.t <= 0) drawBox(bx);
   drawGimmicks();
   for (const o of shots) drawShot(o);
@@ -2006,7 +2018,7 @@ $('#bItem').addEventListener('pointerdown', e => { e.preventDefault(); input.ite
 const keys = {};
 const keySteer = () => { if (steerId === null) input.steer = (keys.ArrowRight || keys.KeyD ? 1 : 0) - (keys.ArrowLeft || keys.KeyA ? 1 : 0); };
 addEventListener('keydown', e => { if (state !== 'race' && state !== 'count') return; keys[e.code] = true; keySteer();
-  if (e.code === 'Space' || e.code === 'ShiftLeft') { input.drift = true; e.preventDefault(); } if (e.code === 'ArrowDown' || e.code === 'KeyS') input.brake = true; if (e.code === 'KeyE' || e.code === 'Enter') input.item = true; if (e.code === 'KeyQ' || e.code === 'KeyB') input.back = true; });
+  if (e.code === 'Space' || e.code === 'ShiftLeft') { input.drift = true; e.preventDefault(); } if (e.code === 'ArrowDown' || e.code === 'KeyS') input.brake = true; if (e.code === 'KeyE' || e.code === 'Enter') input.item = true; if (e.code === 'KeyQ' || e.code === 'KeyB') input.back = true; if (e.code === 'KeyC' && !e.repeat) { opt.view = opt.view === 'fp' ? 'tp' : 'fp'; save(); } });
 addEventListener('keyup', e => { keys[e.code] = false; keySteer(); if (e.code === 'Space' || e.code === 'ShiftLeft') input.drift = false; if (e.code === 'ArrowDown' || e.code === 'KeyS') input.brake = false; if (e.code === 'KeyQ' || e.code === 'KeyB') input.back = false; });
 addEventListener('contextmenu', e => e.preventDefault());
 // パネルのスクロール（画面を回転していても指の動きに合わせる）。動かしたときはタップ扱いにしない
@@ -2115,7 +2127,8 @@ function renderPanel(){
     const tg = (key, t, s) => `<button class="tog" type="button" data-opt="${key}" aria-pressed="${!!opt[key]}"><span><b>${t}</b><small>${s}</small></span><span class="sw2"></span></button>`;
     h = `<h2>設定</h2><div class="scroll"><div class="box"><b>プレイヤー名</b><div class="field"><input id="pname" maxlength="12" placeholder="プレイヤー名（12文字まで）" value="${esc(pname)}" autocomplete="off"><button type="button" data-act="name">名前を保存</button></div></div>
       ${tg('fs', '全画面で遊ぶ', 'スマホを横向きにして画面をタップしたとき、全画面にする')}<div class="box"><b>ハンドルの曲がる量</b><small>「カスタム」の画面のいちばん上で、細かく変えられます（いま ${Math.round(opt.hdl * 100)}%）。</small><div class="chips">${chip('gotab', 'カスタムを開く', false, 'data-to="kart"')}</div></div>
-      ${tg('lite', '軽量化モード', '解像度を下げ、影とエフェクトを省いて動作を軽くする')}${tg('bgm', 'BGM', 'レース中の音楽')}${tg('se', '効果音', 'エンジン音・アイテム・ドリフトの音')}
+      <div class="box"><b>視点</b><div class="chips">${chip('view', '三人称（うしろから）', opt.view !== 'fp', 'data-v="tp"')}${chip('view', '一人称（運転席から）', opt.view === 'fp', 'data-v="fp"')}</div><small>レース中にキーボードの C でも切り替えられます。リプレイはいつも三人称です。</small></div>
+      ${tg('mix', 'ほかのアプリの音楽と一緒に鳴らす', 'YouTube や Spotify を流したまま、ゲームの音を重ねて鳴らす。オフにするとゲームの音が主役になり、iPhone のマナーモードでも鳴る（ほかの音楽は止まる）')}${tg('lite', '軽量化モード', '解像度を下げ、影とエフェクトを省いて動作を軽くする')}${tg('bgm', 'BGM', 'レース中の音楽')}${tg('se', '効果音', 'エンジン音・アイテム・ドリフトの音')}
       <button class="opt" type="button" data-act="layout"><b>ボタン配置を変える</b><small>DRIFT・BRAKE・ITEM・うしろ の位置と大きさをドラッグで調整</small></button>
       <p class="note"><b>ハンドル</b>：画面のどこでも触って左右にスライド（触れた場所が中心）<br><b>ドリフト</b>：曲がりながら右下の DRIFT を長押し。離すと、ドリフトしていた時間に応じてブースト（0.5秒以上で発動。長いほど長く続く。色は青・黄・紫と変わり、画面の下にもらえる秒数が出る）。タイムアタック・VS・オンラインのどれでも同じ<br><b>うしろ</b>：押している間だけ後ろを見る。押しながらアイテムを使うと、投げるアイテムは後ろへ飛ぶ<br><b>アクセル</b>は自動。キーボードは ←→ / Space / ↓ / E / Q（うしろ）<br>スマホは横画面専用です。縦に持っているあいだは遊べません（スマホを横にたおしてください）。共有メニューの「ホーム画面に追加」から開くと、アイコンつきのアプリとして全画面で遊べます。</p>
       <div class="box"><b>引き継ぎコード</b>${acct.code ? `<span class="code">${acct.code}</span><small>別の端末でこのコードを入力すると、記録を引き継げます。他の人には見せないでください。${acct.reg ? '' : '（まだサーバーと同期できていません。接続できたときに自動で同期します）'}</small><button class="mini" type="button" data-act="copy">コードをコピー</button>` : ''}
@@ -2158,7 +2171,7 @@ $('#panel').addEventListener('click', e => {
   else if (ds.tod) { sel.tod = ds.tod === 'night' ? 'night' : 'day'; }
   else if (ds.ch) { sel.ch = +ds.ch; syncProfile(); }
   else if (ds.part) { sel[ds.part] = ci(+ds.i, 10); if (ds.part === 'kt') { pe.undo = []; loadTex(carT); } }
-  else if (ds.col) sel.col = +ds.col; else if (ds.gl) sel.gl = +ds.gl; else if (ds.opt) opt[ds.opt] = !opt[ds.opt]; else return;
+  else if (ds.col) sel.col = +ds.col; else if (ds.gl) sel.gl = +ds.gl; else if (ds.opt) { opt[ds.opt] = !opt[ds.opt]; if (ds.opt === 'mix') { audioInit(); audioMode(); } } else return;
   audioInit(); se(660, .06, 'square', .04); save(); roomSyncMe(); renderPanel(); const sc = $('#panel .scroll'); if (sc) sc.scrollTop = keep;
 });
 $('#go').addEventListener('click', goRace); $('#rAgain').addEventListener('click', () => startRace());
@@ -2284,7 +2297,7 @@ const ACT = {
   phide(){ sel.hide = !sel.hide; save(); paintDirty(); renderPanel(); },
   skon(){ if (!chT.has) pe.msg = 'まだスキンが描かれていません。「スキンを描く」で描くか、保存したスキンを選んでください。'; else { sel.skin = true; pe.msg = ''; } save(); paintDirty(); renderPanel(); },
   skoff(){ sel.skin = false; pe.msg = ''; save(); paintDirty(); renderPanel(); },
-  layout(){ ledOpen(); }, sens(b, ds){ opt.sens = ci(+ds.v, 3); save(); renderPanel(); },
+  layout(){ ledOpen(); }, view(b, ds){ opt.view = ds.v === 'fp' ? 'fp' : 'tp'; save(); renderPanel(); }, sens(b, ds){ opt.sens = ci(+ds.v, 3); save(); renderPanel(); },
   // ---- 保存した絵（g = car / ch）
   gsave(b, ds){ const t = ds.g, o = t === 'car' ? carT : chT, g = GALS[t]();
     if (!o.has) pe.msg = 'まだ何も描かれていません。';
