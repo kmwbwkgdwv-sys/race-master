@@ -47,7 +47,8 @@
         "$other": {
           ".validate": false
         }
-      }
+      },
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true"
     },
     "icons": {
       "$pid": {
@@ -131,6 +132,9 @@
             "t": {
               ".validate": "newData.isNumber()"
             },
+            "pv": {
+              ".validate": "newData.isNumber()"
+            },
             "$other": {
               ".validate": false
             }
@@ -153,6 +157,12 @@
           "order": {
             ".validate": "newData.isString() && newData.val().length <= 600"
           },
+          "tod": {
+            ".validate": "newData.val() === 'day' || newData.val() === 'night'"
+          },
+          "rnd": {
+            ".validate": "newData.isNumber()"
+          },
           "$other": {
             ".validate": false
           }
@@ -168,6 +178,159 @@
             ".write": "auth != null && !data.exists() && data.parent().parent().child('players').child(auth.uid).exists()",
             ".validate": "newData.hasChildren(['k', 'from']) && newData.child('from').val() === auth.uid"
           }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "admins": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid"
+      }
+    },
+    "rankings_v2": {
+      "$stageId": {
+        ".read": true,
+        ".indexOn": [
+          "lapMs"
+        ],
+        "$pid": {
+          ".write": "auth != null && root.child('codes').child(root.child('secrets').child($pid).val()).child('uid').val() === auth.uid && newData.exists() && (!data.exists() || newData.child('lapMs').val() <= data.child('lapMs').val())",
+          ".validate": "newData.hasChildren(['name', 'icon', 'lapMs', 'achievedAt', 'mode'])",
+          "name": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 12"
+          },
+          "icon": {
+            ".validate": "newData.isString() && newData.val().length <= 32"
+          },
+          "lapMs": {
+            ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 15000 && newData.val() <= 600000 && ($stageId === 'master_circuit' || $stageId === 'neon_metropolis' || $stageId === 'ancient_desert' || $stageId === 'volcano_core' || $stageId === 'cosmo_skyway')"
+          },
+          "achievedAt": {
+            ".validate": "newData.val() === now || newData.val() === data.val()"
+          },
+          "mode": {
+            ".validate": "newData.val() === 'time_attack'"
+          },
+          "shortcuts": {
+            ".validate": "newData.isString() && newData.val().length <= 200"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "replays": {
+      "$stageId": {
+        "$pid": {
+          ".read": true,
+          ".write": "auth != null && root.child('codes').child(root.child('secrets').child($pid).val()).child('uid').val() === auth.uid && ($stageId === 'master_circuit' || $stageId === 'neon_metropolis' || $stageId === 'ancient_desert' || $stageId === 'volcano_core' || $stageId === 'cosmo_skyway')",
+          ".validate": "newData.hasChildren(['d', 'ms'])",
+          "d": {
+            ".validate": "newData.isString() && newData.val().length <= 60000"
+          },
+          "ms": {
+            ".validate": "newData.isNumber()"
+          },
+          "kt": {
+            ".validate": "newData.isNumber()"
+          },
+          "col": {
+            ".validate": "newData.isNumber()"
+          },
+          "ch": {
+            ".validate": "newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "skins": {
+      "$code": {
+        ".read": true,
+        ".write": "auth != null && !data.exists()",
+        ".validate": "$code.matches(/^[A-Z2-9]{8}$/) && newData.hasChildren(['t', 'n', 'd'])",
+        "t": {
+          ".validate": "newData.val() === 'car' || newData.val() === 'ch'"
+        },
+        "n": {
+          ".validate": "newData.isString() && newData.val().length <= 16"
+        },
+        "d": {
+          ".validate": "newData.isString() && newData.val().length <= 200000 && newData.val().beginsWith('data:image/')"
+        },
+        "b": {
+          ".validate": "newData.isNumber()"
+        },
+        "h": {
+          ".validate": "newData.isNumber()"
+        },
+        "by": {
+          ".validate": "newData.isString() && newData.val().length <= 12"
+        },
+        "at": {
+          ".validate": "newData.val() === now"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "matches": {
+      "$pid": {
+        ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+        "$mid": {
+          ".write": "auth != null && root.child('codes').child(root.child('secrets').child($pid).val()).child('uid').val() === auth.uid && !data.exists()",
+          ".validate": "newData.hasChildren(['at', 'stage', 'n', 'rank'])",
+          "at": {
+            ".validate": "newData.val() === now"
+          },
+          "stage": {
+            ".validate": "newData.isString() && newData.val().length <= 32"
+          },
+          "mode": {
+            ".validate": "newData.val() === 'vs' || newData.val() === 'online'"
+          },
+          "n": {
+            ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 12"
+          },
+          "hn": {
+            ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 12"
+          },
+          "rank": {
+            ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 12"
+          },
+          "laps": {
+            ".validate": "newData.isString() && newData.val().length <= 80"
+          },
+          "total": {
+            ".validate": "newData.isNumber()"
+          },
+          "tod": {
+            ".validate": "newData.val() === 'day' || newData.val() === 'night'"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "paints": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid === $uid",
+        "c": {
+          ".validate": "newData.isString() && newData.val().length <= 200000"
+        },
+        "s": {
+          ".validate": "newData.isString() && newData.val().length <= 200000"
+        },
+        "h": {
+          ".validate": "newData.isNumber()"
         },
         "$other": {
           ".validate": false
