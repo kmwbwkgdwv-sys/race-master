@@ -49,6 +49,18 @@ td.n{font-family:var(--display);font-variant-numeric:tabular-nums}
 td .rank{font-family:var(--display);font-size:17px;color:var(--volt)}td .rank.first{color:var(--hot)}
 .laps{display:flex;flex-wrap:wrap;gap:4px 10px;font-variant-numeric:tabular-nums}.laps i{font-style:normal;color:var(--dim);font-size:10.5px;margin-right:3px}
 .bests{display:flex;flex-wrap:wrap;gap:8px}.bests span{font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:99px}.bests b{font-family:var(--display);font-weight:400;color:var(--volt);margin-left:6px}
+.views{display:flex;flex-wrap:wrap;gap:8px}
+.views .btn[aria-pressed="true"]{background:var(--volt);border-color:var(--volt);color:var(--ink)}
+/* 最近のルーム戦：横一列に並べ、左右にスクロールしてタップで開く */
+.strip{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.rm{flex:none;width:210px;scroll-snap-align:start;display:flex;flex-direction:column;gap:4px;align-items:flex-start;text-align:left;padding:12px 14px;background:var(--panel);border:2px solid var(--line);border-radius:8px;border-left:6px solid var(--sw,var(--hot))}
+.rm:hover{border-color:var(--volt)}.rm[aria-pressed="true"]{border-color:var(--volt);background:rgba(255,214,10,.1)}
+.rm small{font-size:11px;color:var(--dim)}.rm b{font-weight:900;font-size:14.5px;line-height:1.3}.rm i{font-style:normal;font-family:var(--display);font-size:13px;color:var(--volt)}
+.rules{display:flex;flex-wrap:wrap;gap:8px}.rules span{font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:99px;color:var(--dim)}.rules b{color:var(--paper);margin-left:6px}
+td .pn{display:flex;align-items:center;gap:8px;font-weight:900}td .pn canvas{width:30px;height:30px;border-radius:50%;background:#1d2334;flex:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chips .btn{padding:7px 12px;font-size:12.5px}.chips .btn[aria-pressed="true"]{background:rgba(255,214,10,.14);border-color:var(--volt)}
+.btn.del{padding:5px 10px;font-size:12px;border-color:rgba(255,74,38,.6);color:#ff9d86}.btn.del:hover{background:var(--hot);color:#fff}
+tr.cut td{border-bottom:2px dashed var(--volt)}
 </style>
 </head>
 <body>
@@ -62,10 +74,27 @@ td .rank{font-family:var(--display);font-size:17px;color:var(--volt)}td .rank.fi
     <p class="note" id="lmsg">Firebase の「メール / パスワード」ログインで作った管理者アカウントでログインしてください。</p>
   </section>
   <section id="app" hidden style="display:flex;flex-direction:column;gap:16px">
-    <div class="bar"><div class="count"><b id="cnt">0</b>人のプレイヤーが登録されています</div><input id="q" type="search" placeholder="名前でさがす" aria-label="名前でさがす"></div>
+    <div class="views" role="tablist">
+      <button class="btn" type="button" data-view="rooms" aria-pressed="true">最近のルーム戦</button>
+      <button class="btn" type="button" data-view="players" aria-pressed="false">登録プレイヤー</button>
+      <button class="btn" type="button" data-view="rank" aria-pressed="false">ランキングの記録を消す</button>
+    </div>
     <p class="note" id="amsg" hidden></p>
-    <div class="card" id="detail" hidden></div>
-    <div class="grid" id="grid"></div>
+    <div id="vRooms" style="display:flex;flex-direction:column;gap:12px">
+      <div class="bar"><div class="count"><b id="rcnt">0</b>件のルーム戦（新しい順・左右にスクロールして、見たい試合をタップ）</div><button class="btn" type="button" id="rreload">更新</button></div>
+      <div class="strip" id="strip"></div>
+      <div class="card" id="rdetail" hidden></div>
+    </div>
+    <div id="vPlayers" hidden style="display:flex;flex-direction:column;gap:12px">
+      <div class="bar"><div class="count"><b id="cnt">0</b>人のプレイヤーが登録されています</div><input id="q" type="search" placeholder="名前でさがす" aria-label="名前でさがす"></div>
+      <div class="card" id="detail" hidden></div>
+      <div class="grid" id="grid"></div>
+    </div>
+    <div id="vRank" hidden style="display:flex;flex-direction:column;gap:12px">
+      <div class="chips" id="rkStages"></div>
+      <p class="note">ゲーム内のランキングには上位10件が表示されます（点線より上）。「削除」を押した記録は、リプレイといっしょに消えます。元には戻せません。</p>
+      <div class="card" id="rkBox"></div>
+    </div>
   </section>
 </main>
 <script>
@@ -144,8 +173,10 @@ function drawFace(cvs, ch){
   c.restore();
 }
 const iconOf = p => clamp(parseInt(String((p && p.icon) || '').slice(3)) || 0, 0, CH.length - 1);
+const SW = { master_circuit: '#4cc46a', neon_metropolis: '#ff3db4', ancient_desert: '#e0a44a', volcano_core: '#ff5a1f', cosmo_skyway: '#6fd3ff' };
+const RK = 'rankings_v3', RP = 'replays_v3';
 async function jf(url, o){ const r = await fetch(url, o); if (!r.ok) { const e = new Error('HTTP ' + r.status); e.status = r.status; try { e.body = await r.json(); } catch (x) {} throw e; } return r.json(); }
-let auth = null, players = [], cur = null;
+let auth = null, players = [], cur = null, view = 'rooms', rooms = [], rcur = null, rkStage = 'master_circuit', rkRows = [];
 try { auth = JSON.parse(sessionStorage.getItem('rm_admin') || 'null'); } catch (e) {}
 const keep = () => { try { sessionStorage.setItem('rm_admin', JSON.stringify(auth)); } catch (e) {} };
 async function token(){
@@ -153,7 +184,9 @@ async function token(){
   const r = await jf('https://securetoken.googleapis.com/v1/token?key=' + FB.key, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(auth.refresh) });
   auth.idToken = r.id_token; auth.refresh = r.refresh_token; auth.exp = Date.now() + r.expires_in * 1000; keep(); return auth.idToken;
 }
-const get = async path => jf(`${FB.db}/${path}.json?auth=${await token()}`);
+const get = async (path, q = '') => jf(`${FB.db}/${path}.json?${q}auth=${await token()}`);
+const del = async path => jf(`${FB.db}/${path}.json?auth=${await token()}`, { method: 'DELETE' });
+const faces = el => el.querySelectorAll('[data-face]').forEach(c => drawFace(c, CH[+c.dataset.face]));
 async function login(){
   const email = $('#em').value.trim(), password = $('#pw').value; if (!email || !password) { $('#lmsg').textContent = 'メールアドレスとパスワードを入力してください。'; return; }
   $('#lmsg').textContent = 'ログイン中…';
@@ -162,34 +195,89 @@ async function login(){
   catch (e) { const m = e.body && e.body.error && e.body.error.message || ''; $('#lmsg').textContent = /INVALID|EMAIL_NOT_FOUND|PASSWORD/.test(m) ? 'メールアドレスかパスワードが違います。' : /OPERATION_NOT_ALLOWED/.test(m) ? 'Firebase コンソールで「メール / パスワード」ログインを有効にしてください。' : 'ログインできませんでした。通信状態を確認してください。'; }
 }
 function logout(){ auth = null; try { sessionStorage.removeItem('rm_admin'); } catch (e) {} $('#app').hidden = true; $('#login').hidden = false; $('#out').hidden = true; $('#me').textContent = ''; $('#lmsg').textContent = 'ログアウトしました。'; }
-async function open(){
-  $('#login').hidden = true; $('#app').hidden = false; $('#out').hidden = false; $('#me').textContent = auth.email || ''; const msg = $('#amsg'); msg.hidden = false; msg.textContent = '読み込み中…'; $('#grid').innerHTML = ''; $('#detail').hidden = true;
-  try { const o = await get('profiles'); players = Object.entries(o || {}).map(([id, v]) => ({ id, ...v })).filter(p => p && p.name).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)); msg.hidden = true; list(); }
-  catch (e) { players = []; list();
-    msg.innerHTML = e.status === 401 || e.status === 403 ? `このアカウントには管理者の権限がありません。Firebase コンソールの Realtime Database で <code>admins/${esc(auth.uid)}</code> に <code>true</code> を入れると、このアカウントで見られるようになります。<br>あなたの UID：<code>${esc(auth.uid)}</code>` : '読み込めませんでした。通信状態を確認して、ページを開き直してください。'; }
+const denied = e => e.status === 401 || e.status === 403 ? `このアカウントには管理者の権限がありません。Firebase コンソールの Realtime Database で <code>admins/${esc(auth.uid)}</code> に <code>true</code> を入れると、このアカウントで見られるようになります（ルールも最新の <code>database.rules.json</code> に貼り直してください）。<br>あなたの UID：<code>${esc(auth.uid)}</code>` : '読み込めませんでした。通信状態を確認して、ページを開き直してください。';
+function open(){ $('#login').hidden = true; $('#app').hidden = false; $('#out').hidden = false; $('#me').textContent = auth.email || ''; setView(view); }
+function setView(v){
+  view = v; document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === v));
+  $('#vRooms').hidden = v !== 'rooms'; $('#vPlayers').hidden = v !== 'players'; $('#vRank').hidden = v !== 'rank'; $('#amsg').hidden = true;
+  if (v === 'rooms') loadRooms(); else if (v === 'players') loadPlayers(); else loadRank();
+}
+// ---------------------------------------------------------------- 最近のルーム戦（オンライン対戦）
+async function loadRooms(){
+  const msg = $('#amsg'); msg.hidden = false; msg.textContent = '読み込み中…';
+  try { const o = await get('roomlog', 'orderBy=%22%24key%22&limitToLast=40&'); rooms = Object.entries(o || {}).map(([id, v]) => ({ id, info: (v && v.info) || {}, res: (v && v.res) || {} })).sort((a, b) => a.id < b.id ? 1 : -1); msg.hidden = true; }
+  catch (e) { rooms = []; msg.innerHTML = denied(e); }
+  $('#rcnt').textContent = rooms.length; if (rcur && !rooms.some(r => r.id === rcur)) rcur = null; listRooms(); if (rcur) showRoom(rcur); else $('#rdetail').hidden = true;
+}
+const roomAt = r => r.info.at || +r.id.split('_')[0] || 0;
+function listRooms(){
+  $('#strip').innerHTML = rooms.map(r => { const i = r.info, n = i.n || Object.keys(i.pl || r.res).length, top = Object.values(r.res).sort((a, b) => a.rank - b.rank)[0];
+    return `<button class="rm" type="button" data-id="${esc(r.id)}" aria-pressed="${rcur === r.id}" style="--sw:${SW[i.stage] || '#ff4a26'}"><small>${day(roomAt(r))}</small><b>${esc(STG[i.stage] || i.stage || 'コース不明')}</b><small>${i.tod === 'night' ? '夜' : '昼'}・プレイヤー ${n | 0}人${i.ai ? '＋CPU ' + (i.ai | 0) + '台' : ''}</small><i>${top ? '最上位 ' + esc(top.name) + '（' + (top.rank | 0) + '位）' : 'ゴール記録なし'}</i></button>`; }).join('') ||
+    '<p class="note">まだルーム戦の記録がありません。オンライン対戦でレースが始まると、ここに1試合ずつ並びます。</p>';
+}
+function showRoom(id){
+  const r = rooms.find(x => x.id === id); if (!r) return; rcur = id; listRooms(); const el = $('#rdetail'), i = r.info, pl = i.pl || {}; el.hidden = false;
+  const ids = [...new Set([...Object.keys(pl), ...Object.keys(r.res)])], rows = ids.map(uid => ({ uid, name: (r.res[uid] && r.res[uid].name) || pl[uid] || 'PLAYER', r: r.res[uid] || null })).sort((a, b) => (a.r ? a.r.rank : 99) - (b.r ? b.r.rank : 99));
+  el.innerHTML = `<h2>${esc(STG[i.stage] || i.stage || 'コース不明')}<small style="font-family:var(--body);font-size:12px;color:var(--dim);margin-left:10px">${day(roomAt(r))}</small></h2>
+    <div><h2 style="font-size:14px;margin-bottom:6px">このレースのルール</h2><div class="rules"><span>ルームID<b>${esc(i.room || r.id.split('_')[1] || '-')}</b></span><span>ホスト<b>${esc(i.host || '-')}</b></span><span>コースの決め方<b>${i.rnd ? 'ランダム（ルーレット）' : 'ホストが指定'}</b></span><span>時間帯<b>${i.tod === 'night' ? '夜' : '昼'}</b></span><span>周回<b>${(i.laps | 0) || 3}周</b></span><span>アイテム<b>あり</b></span><span>プレイヤー<b>${(i.n | 0) || ids.length}人</b></span><span>CPU<b>${i.ai | 0}台</b></span><span>合計<b>${((i.n | 0) || ids.length) + (i.ai | 0)}台</b></span></div></div>
+    <h2 style="font-size:16px">参加したプレイヤーと順位（${ids.length}人）</h2>` + (rows.length ? `<div class="tw"><table><thead><tr><th>順位</th><th>プレイヤー</th><th>合計タイム</th><th>1周ごとのタイム</th><th>ゴールした時刻</th></tr></thead><tbody>` + rows.map(x => { const q = x.r, laps = q ? String(q.laps || '').split(',').filter(Boolean).map(Number) : [];
+      return `<tr><td>${q ? `<span class="rank${q.rank === 1 ? ' first' : ''}">${q.rank | 0}位</span>` : '<small style="color:var(--dim)">ゴールなし</small>'}</td><td><span class="pn">${q ? `<canvas width="60" height="60" data-face="${iconOf(q)}"></canvas>` : ''}${esc(x.name)}</span></td><td class="n">${q ? fmt(q.total) : '-'}</td><td><div class="laps">${laps.map((l, k) => `<span><i>${k + 1}周目</i>${(l / 1000).toFixed(3)}秒</span>`).join('') || '-'}</div></td><td>${q ? day(q.at) : '<small style="color:var(--dim)">途中でやめた・通信が切れた など</small>'}</td></tr>`; }).join('') + `</tbody></table></div><p class="note">順位は CPU をふくめた全${((i.n | 0) || ids.length) + (i.ai | 0)}台の中での順位です。</p>` : '<p class="note">参加者の記録がありません。</p>');
+  faces(el); el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+// ---------------------------------------------------------------- 登録プレイヤー
+async function loadPlayers(){
+  const msg = $('#amsg'); msg.hidden = false; msg.textContent = '読み込み中…'; $('#grid').innerHTML = '';
+  try { const o = await get('profiles'); players = Object.entries(o || {}).map(([id, v]) => ({ id, ...v })).filter(p => p && p.name).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)); msg.hidden = true; }
+  catch (e) { players = []; msg.innerHTML = denied(e); }
+  list(); if (cur) show(cur);
 }
 function list(){
   const q = $('#q').value.trim().toLowerCase(), rows = players.filter(p => !q || String(p.name).toLowerCase().includes(q)); $('#cnt').textContent = players.length;
   $('#grid').innerHTML = rows.map(p => `<button class="pl" type="button" data-id="${esc(p.id)}" aria-pressed="${cur === p.id}"><canvas width="128" height="128" data-face="${iconOf(p)}"></canvas><b>${esc(p.name)}</b><small>更新 ${day(p.updatedAt)}</small></button>`).join('') || (players.length ? '<p class="note">その名前のプレイヤーは見つかりません。</p>' : '');
-  $('#grid').querySelectorAll('[data-face]').forEach(c => drawFace(c, CH[+c.dataset.face]));
+  faces($('#grid'));
 }
 async function show(id){
   const p = players.find(x => x.id === id); if (!p) return; cur = id; list(); const el = $('#detail'); el.hidden = false;
   const head = `<div class="who"><canvas width="144" height="144" id="dface"></canvas><div><b>${esc(p.name)}</b><small>プレイヤーID：${esc(p.id)}　／　キャラ：${esc(CH[iconOf(p)].n)}　／　最終更新：${day(p.updatedAt)}</small></div></div>`;
-  el.innerHTML = head + '<p class="note">対戦の記録を読み込み中…</p>'; drawFace($('#dface'), CH[iconOf(p)]); el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  el.innerHTML = head + '<p class="note">記録を読み込み中…</p>'; drawFace($('#dface'), CH[iconOf(p)]); el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   let ms = [], bests = '', err = '';
   try { const o = await get('matches/' + id); ms = Object.values(o || {}).filter(m => m && m.stage).sort((a, b) => (b.at || 0) - (a.at || 0)); } catch (e) { err = '対戦の記録を読み込めませんでした。'; }
-  try { const rs = await Promise.all(Object.keys(STG).map(s => jf(`${FB.db}/rankings_v2/${s}/${id}.json`).catch(() => null))); bests = Object.keys(STG).map((s, i) => rs[i] && rs[i].lapMs ? `<span>${STG[s]}<b>${fmt(rs[i].lapMs)}</b></span>` : '').join(''); } catch (e) {}
+  try { const rs = await Promise.all(Object.keys(STG).map(s => jf(`${FB.db}/${RK}/${s}.json?orderBy=%22pid%22&equalTo=%22${encodeURIComponent(id)}%22`).catch(() => null)));
+    bests = Object.keys(STG).map((s, i) => { const v = Object.values(rs[i] || {}).filter(r => r && r.lapMs > 0).sort((a, b) => a.lapMs - b.lapMs); return v.length ? `<span>${STG[s]}<b>${fmt(v[0].lapMs)}</b>（記録 ${v.length}件）</span>` : ''; }).join(''); } catch (e) {}
   if (cur !== id) return;
+  const on = ms.filter(m => m.mode === 'online').length, wins = ms.filter(m => m.rank === 1).length;
   const rows = ms.map(m => { const laps = String(m.laps || '').split(',').filter(Boolean).map(Number);
     return `<tr><td>${day(m.at)}</td><td>${esc(STG[m.stage] || m.stage)}<br><small style="color:var(--dim)">${m.mode === 'online' ? 'オンライン対戦' : 'VSレース'}${m.tod === 'night' ? '・夜' : m.tod === 'day' ? '・昼' : ''}</small></td><td class="n">${m.n | 0}人<br><small style="font-family:var(--body);color:var(--dim)">プレイヤー ${m.hn | 0}／CPU ${(m.n | 0) - (m.hn | 0)}</small></td><td><span class="rank${m.rank === 1 ? ' first' : ''}">${m.rank | 0}位</span></td><td><div class="laps">${laps.map((l, i) => `<span><i>${i + 1}周目</i>${(l / 1000).toFixed(3)}秒</span>`).join('') || '-'}</div></td><td class="n">${fmt(m.total)}</td></tr>`; }).join('');
-  el.innerHTML = head + (bests ? `<div><h2 style="font-size:14px;margin-bottom:6px">タイムアタック自己ベスト（1周）</h2><div class="bests">${bests}</div></div>` : '') +
+  el.innerHTML = head + `<div class="rules"><span>対戦した回数<b>${ms.length}回</b></span><span>うちオンライン<b>${on}回</b></span><span>1位の回数<b>${wins}回</b></span></div>` + (bests ? `<div><h2 style="font-size:14px;margin-bottom:6px">タイムアタックのベストラップ（1周）</h2><div class="bests">${bests}</div></div>` : '<p class="note">タイムアタックのランキング記録はまだありません。</p>') +
     `<h2 style="font-size:16px">参加したマッチ（${ms.length}件）</h2>` + (err ? `<p class="note">${err}</p>` : ms.length ? `<div class="tw"><table><thead><tr><th>日時</th><th>コース</th><th>参加人数</th><th>順位</th><th>1周ごとのタイム</th><th>合計</th></tr></thead><tbody>${rows}</tbody></table></div>` : '<p class="note">まだ対戦の記録がありません。VSレースかオンライン対戦をゴールまで走ると、ここに記録されます。</p>');
   drawFace($('#dface'), CH[iconOf(p)]);
 }
+// ---------------------------------------------------------------- ランキングの記録を消す
+async function loadRank(){
+  $('#rkStages').innerHTML = Object.keys(STG).map(s => `<button class="btn" type="button" data-stage="${s}" aria-pressed="${s === rkStage}">${STG[s]}</button>`).join('');
+  const box = $('#rkBox'), st = rkStage; box.innerHTML = '<p class="note">読み込み中…</p>';
+  try { const o = await jf(`${FB.db}/${RK}/${st}.json?orderBy=%22lapMs%22&limitToFirst=60`); if (st !== rkStage) return;
+    rkRows = Object.entries(o || {}).map(([id, v]) => ({ id, ...v })).filter(v => v.lapMs > 0).sort((a, b) => a.lapMs - b.lapMs || a.achievedAt - b.achievedAt); drawRank(''); }
+  catch (e) { box.innerHTML = '<p class="note">読み込めませんでした。通信状態を確認してください。</p>'; }
+}
+function drawRank(msg){
+  $('#rkBox').innerHTML = `<h2 style="font-size:16px">${STG[rkStage]}（速い順に ${rkRows.length}件）</h2>` + (msg ? `<p class="note">${msg}</p>` : '') + (rkRows.length ? `<div class="tw"><table><thead><tr><th>順位</th><th>プレイヤー</th><th>タイム</th><th></th><th>記録した日時</th><th>プレイヤーID</th></tr></thead><tbody>` +
+    rkRows.map((r, i) => `<tr class="${i === 9 && rkRows.length > 10 ? 'cut' : ''}"><td><span class="rank${i === 0 ? ' first' : ''}">${i + 1}</span></td><td><span class="pn"><canvas width="60" height="60" data-face="${iconOf(r)}"></canvas>${esc(r.name || 'PLAYER')}</span></td><td class="n">${fmt(r.lapMs)}</td><td><button class="btn del" type="button" data-del="${esc(r.id)}">削除</button></td><td>${day(r.achievedAt)}</td><td><small style="color:var(--dim)">${esc(String(r.pid || '').slice(0, 8))}…</small></td></tr>`).join('') + `</tbody></table></div>` : '<p class="note">このコースにはまだ記録がありません。</p>');
+  faces($('#rkBox'));
+}
+async function delRank(id){
+  const r = rkRows.find(x => x.id === id); if (!r) return;
+  if (!confirm(`${STG[rkStage]} の記録を削除します。\n\n${r.name || 'PLAYER'}　${fmt(r.lapMs)}\n\n元には戻せません。よろしいですか？`)) return;
+  try { await del(`${RK}/${rkStage}/${id}`); try { await del(`${RP}/${rkStage}/${id}`); } catch (e) {} rkRows = rkRows.filter(x => x.id !== id); drawRank(`「${esc(r.name || 'PLAYER')}　${fmt(r.lapMs)}」を削除しました。`); }
+  catch (e) { drawRank(e.status === 401 || e.status === 403 ? '削除できませんでした。このアカウントに管理者の権限がないか、Firebase のルールが古いままです（最新の database.rules.json を貼り直してください）。' : '削除できませんでした。通信状態を確認してください。'); }
+}
 $('#in').addEventListener('click', login); $('#pw').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
-$('#out').addEventListener('click', logout); $('#q').addEventListener('input', list);
+$('#out').addEventListener('click', logout); $('#q').addEventListener('input', list); $('#rreload').addEventListener('click', loadRooms);
+document.querySelector('.views').addEventListener('click', e => { const b = e.target.closest('[data-view]'); if (b) setView(b.dataset.view); });
+$('#strip').addEventListener('click', e => { const b = e.target.closest('.rm'); if (b) showRoom(b.dataset.id); });
 $('#grid').addEventListener('click', e => { const b = e.target.closest('.pl'); if (b) show(b.dataset.id); });
+$('#rkStages').addEventListener('click', e => { const b = e.target.closest('[data-stage]'); if (b) { rkStage = b.dataset.stage; loadRank(); } });
+$('#rkBox').addEventListener('click', e => { const b = e.target.closest('[data-del]'); if (b) delRank(b.dataset.del); });
 if (auth && auth.refresh) open();
 })();
 </script>

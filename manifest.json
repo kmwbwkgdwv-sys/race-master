@@ -1,0 +1,11 @@
+{
+  "name": "race-master",
+  "short_name": "race-master",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#090b11",
+  "theme_color": "#090b11",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
