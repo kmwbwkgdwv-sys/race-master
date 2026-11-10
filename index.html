@@ -460,51 +460,51 @@ const CH = [
 //       bsp=ブースト中のスピード上乗せ bst=すべてのブーストの長さ gsp=グライダーのスピード
 const KT = [
   { n:'スタンダード', d:'くせのない万能型', v:0, top:1, acc:1, turn:1, mt:1, len:1, wing:1 },
-  { n:'ブレイザー', d:'最高速重視。加速とハンドリングは重い', v:1, top:1.06, acc:.86, turn:.92, mt:.92, len:1.14, wing:.8 },
-  { n:'スピナー', d:'小回りがきき、ドリフトのチャージが速い', v:2, top:.96, acc:1.1, turn:1.12, dc:1.25, len:.9, wing:1.25 },
-  { n:'タンク', d:'幅広で重い。コース外でも失速しにくい', v:3, top:1.01, acc:.92, turn:.95, len:1.06, wing:1, wide:1.14, off:.3 },
-  { n:'フォーミュラ', d:'長く低い車体。ダッシュパネルとジャンプ台のブーストが長く続く', v:4, top:1.03, acc:.94, turn:.94, pad:1.4, len:1.22, wing:.9 },
-  { n:'バギー', d:'コース外にいちばん強い。舗装路の最高速は低い', v:5, top:.96, acc:1.05, turn:1.02, len:.96, wing:1, off:.4 },
-  { n:'ミニ', d:'とても小さい。加速と小回りは最高、最高速は低い', v:6, top:.94, acc:1.22, turn:1.16, len:.8, wing:1.1, wide:.9 },
-  { n:'ホットロッド', d:'ドリフトのブーストが長い。ハンドリングは重い', v:7, top:1.02, acc:1.04, turn:.9, mt:1.3, len:1.1, wing:.9 },
+  { n:'ブレイザー', d:'最高速重視。加速とハンドリングは重く、カーブで失速しやすい', v:1, top:1.015, acc:.9, turn:.93, mt:.92, len:1.14, wing:.8 },
+  { n:'スピナー', d:'小回りがきき、ドリフトのチャージが速い', v:2, top:.99, acc:1.1, turn:1.12, dc:1.25, len:.9, wing:1.25 },
+  { n:'タンク', d:'幅広で重い。コース外でも失速しにくい', v:3, top:1, acc:.95, turn:.95, len:1.06, wing:1, wide:1.14, off:.3 },
+  { n:'フォーミュラ', d:'長く低い車体。ダッシュパネルとジャンプ台のブーストが長く続く', v:4, top:1.005, acc:.96, turn:.95, pad:1.4, len:1.22, wing:.9 },
+  { n:'バギー', d:'コース外にいちばん強い。舗装路の最高速は低い', v:5, top:.995, acc:1.05, turn:1.02, len:.96, wing:1, off:.4 },
+  { n:'ミニ', d:'とても小さい。加速と小回りは最高で、カーブでほとんど失速しない。最高速は低い', v:6, top:.99, acc:1.16, turn:1.14, len:.8, wing:1.1, wide:.9 },
+  { n:'ホットロッド', d:'ドリフトのブーストが長い。ハンドリングは重い', v:7, top:1, acc:1.03, turn:.93, mt:1.3, len:1.1, wing:.9 },
   { n:'ホバー', d:'ジャンプの着地ダッシュが長く、空中でもよく曲がる', v:8, top:1, acc:.97, turn:1.05, jump:1.6, air:1.5, len:1, wing:1 },
-  { n:'トラック', d:'重くて大きい。攻撃や障害物を受けても立ち直りが早い', v:9, top:1, acc:.9, turn:.92, tough:.55, len:1.12, wing:1, wide:1.2 },
+  { n:'トラック', d:'重くて大きい。攻撃や障害物を受けても立ち直りが早い', v:9, top:1, acc:.93, turn:.94, tough:.55, len:1.12, wing:1, wide:1.2 },
 ];
 const TIRE = [
   { n:'スタンダード', d:'どの路面でも安定', top:1, acc:1, turn:1, r:1, w:1, c:[.1,.1,.12], rim:[.85,.85,.88] },
-  { n:'スリック', d:'舗装路で最高速が伸びる。コース外は苦手', top:1.035, acc:.98, turn:.98, off:-.3, r:.94, w:1.22, c:[.07,.07,.08], rim:[1,.8,.2] },
-  { n:'オフロード', d:'ジャンプの着地ダッシュが長い。コース外もそこそこ走れる', top:.985, jump:1.5, off:.2, r:1.18, w:1.1, c:[.17,.14,.11], rim:[.6,.62,.66] },
-  { n:'ローラー', d:'小さく軽い。加速と小回りが良い', top:.97, acc:1.1, turn:1.06, r:.82, w:.9, c:[.12,.12,.2], rim:[.3,.9,1] },
-  { n:'モンスター', d:'巨大タイヤ。コース外にとても強いが、ふだんは遅い', top:.955, acc:.95, turn:.96, off:.4, r:1.34, w:1.3, c:[.13,.12,.11], rim:[.9,.3,.2] },
+  { n:'スリック', d:'舗装路で最高速が伸びる。コース外は苦手', top:1.01, acc:.98, turn:.98, off:-.3, r:.94, w:1.22, c:[.07,.07,.08], rim:[1,.8,.2] },
+  { n:'オフロード', d:'ジャンプの着地ダッシュが長い。コース外もそこそこ走れる', top:.995, jump:1.5, off:.2, r:1.18, w:1.1, c:[.17,.14,.11], rim:[.6,.62,.66] },
+  { n:'ローラー', d:'小さく軽い。加速と小回りが良い', top:.995, acc:1.1, turn:1.06, r:.82, w:.9, c:[.12,.12,.2], rim:[.3,.9,1] },
+  { n:'モンスター', d:'巨大タイヤ。コース外にとても強いが、ふだんは遅い', top:.99, acc:.97, turn:.96, off:.4, r:1.34, w:1.3, c:[.13,.12,.11], rim:[.9,.3,.2] },
   { n:'レーシング', d:'ブースト中のスピードがさらに伸びる。コース外はとても苦手', top:1, acc:.97, bsp:.05, off:-.4, r:.98, w:1.32, c:[.06,.06,.07], rim:[.95,.95,.98] },
-  { n:'ドリフト', d:'すべりやすく、ドリフトのブーストが長い', top:.99, turn:1.03, mt:1.25, off:-.1, r:.95, w:1.05, c:[.1,.1,.11], rim:[1,.35,.7] },
-  { n:'スポンジ', d:'やわらかい。攻撃や障害物からの立ち直りが早い。最高速は控えめ', top:.97, acc:1.05, tough:.6, r:1.05, w:1.15, c:[.85,.7,.2], rim:[.95,.9,.6] },
+  { n:'ドリフト', d:'すべりやすく、ドリフトのブーストが長い', top:.995, turn:1.03, mt:1.25, off:-.1, r:.95, w:1.05, c:[.1,.1,.11], rim:[1,.35,.7] },
+  { n:'スポンジ', d:'やわらかい。攻撃や障害物からの立ち直りが早い。最高速は控えめ', top:.995, acc:1.05, tough:.6, r:1.05, w:1.15, c:[.85,.7,.2], rim:[.95,.9,.6] },
   { n:'ネオン', d:'光るホイール。ドリフトのチャージが速い', top:1, turn:1.02, dc:1.22, r:1, w:1.05, c:[.08,.08,.12], rim:[.3,1,.9] },
-  { n:'ウッド', d:'細い木の車輪。ダッシュパネルのブーストが長い。コース外も少し走れる', top:.985, turn:1.03, pad:1.3, off:.12, r:1.12, w:.78, c:[.42,.28,.16], rim:[.7,.52,.3] },
+  { n:'ウッド', d:'細い木の車輪。ダッシュパネルのブーストが長い。コース外も少し走れる', top:.995, turn:1.03, pad:1.3, off:.12, r:1.12, w:.78, c:[.42,.28,.16], rim:[.7,.52,.3] },
 ];
 const WING = [
   { n:'スタンダード', d:'標準のリアウィング', v:0, top:1, turn:1, s:1 },
-  { n:'ビッグウィング', d:'曲がりやすく、ドリフトのブーストが伸びる', v:1, top:.98, turn:1.06, mt:1.12, s:1.3 },
-  { n:'ローダウン', d:'低い羽。ダッシュパネルとジャンプ台のブーストが長い', v:2, top:1.005, turn:.98, pad:1.3, s:.8 },
+  { n:'ビッグウィング', d:'曲がりやすくカーブで失速しにくい。ドリフトのブーストも伸びる', v:1, top:.995, turn:1.06, mt:1.12, s:1.3 },
+  { n:'ローダウン', d:'低い羽。ダッシュパネルとジャンプ台のブーストが長い', v:2, top:1, turn:.98, pad:1.3, s:.8 },
   { n:'ツインフィン', d:'2枚の垂直フィン。コース外で減速しにくい', v:3, top:1, turn:1.01, off:.15, s:1 },
-  { n:'トリプルデッキ', d:'3枚羽。空中でよく曲がり、着地ダッシュが長い。最高速は落ちる', v:4, top:.975, turn:1.03, air:1.5, jump:1.4, s:1.2 },
+  { n:'トリプルデッキ', d:'3枚羽。空中でよく曲がり、着地ダッシュが長い。最高速は落ちる', v:4, top:.99, turn:1.03, air:1.5, jump:1.4, s:1.2 },
   { n:'スワンネック', d:'高い位置の細い羽。ドリフトのチャージが速い', v:5, top:1, turn:1.02, dc:1.18, s:1.1 },
-  { n:'ダックテール', d:'小さなはね上げ。ブースト中のスピードが伸びる', v:6, top:1.005, turn:.98, bsp:.04, s:.7 },
-  { n:'デルタ', d:'大きな三角の羽。グライダーで飛ぶスピードが上がる', v:7, top:1.01, turn:1, gsp:1.07, s:1.15 },
-  { n:'ウィングレス', d:'羽なし。最高速は最大、ハンドリングはいちばん重い', v:8, top:1.04, turn:.92, mt:.9, s:.5 },
+  { n:'ダックテール', d:'小さなはね上げ。ブースト中のスピードが伸びる', v:6, top:1, turn:.98, bsp:.04, s:.7 },
+  { n:'デルタ', d:'大きな三角の羽。グライダーで飛ぶスピードが上がる', v:7, top:1, turn:1, gsp:1.07, s:1.15 },
+  { n:'ウィングレス', d:'羽なし。最高速は最大、ハンドリングはいちばん重く、カーブで失速しやすい', v:8, top:1.008, turn:.93, mt:.9, s:.5 },
   { n:'ジェットフィン', d:'背の高い2枚フィン。攻撃や障害物からの立ち直りが早い', v:9, top:1, turn:1.02, tough:.7, s:1.05 },
 ];
 const ENG = [
   { n:'バランス', d:'標準のエンジン', v:0, top:1, acc:1 },
   { n:'ターボ', d:'ドリフトのブーストが長い。立ち上がりは少し遅い', v:1, top:1, acc:.93, mt:1.2 },
-  { n:'クイック', d:'加速重視。最高速は控えめ', v:2, top:.975, acc:1.2 },
-  { n:'エコブースト', d:'ダッシュパネルとジャンプ台のブーストが長く続く', v:3, top:.99, acc:1.02, pad:1.4 },
-  { n:'V8ビッグブロック', d:'最高速は最大級。加速はとても遅い', v:4, top:1.05, acc:.8 },
+  { n:'クイック', d:'加速重視。最高速は控えめ', v:2, top:.995, acc:1.18 },
+  { n:'エコブースト', d:'ダッシュパネルとジャンプ台のブーストが長く続く', v:3, top:1, acc:1.02, pad:1.4 },
+  { n:'V8ビッグブロック', d:'最高速は最大級。加速はとても遅く、カーブのあとの立ち上がりが苦手', v:4, top:1.012, acc:.84 },
   { n:'ジェットタービン', d:'ブースト中のスピードが大きく伸びる。ブーストは短め', v:5, top:1, acc:.94, bsp:.07, bst:.85 },
-  { n:'エレクトリック', d:'静かでなめらか。ドリフトのチャージが速く、加速もよい', v:6, top:.97, acc:1.1, dc:1.2 },
-  { n:'ツインターボ', d:'最高速・加速・ブーストが少しずつ伸びる', v:7, top:1.02, acc:1.02, bst:1.08 },
-  { n:'ロケットモーター', d:'あらゆるブーストが長く続く。ふだんの速さは控えめ', v:8, top:.975, acc:.95, bst:1.3 },
-  { n:'ハイブリッド', d:'加速がよく、コース外でも減速しにくい', v:9, top:.995, acc:1.08, off:.15 },
+  { n:'エレクトリック', d:'静かでなめらか。ドリフトのチャージが速く、加速もよい', v:6, top:.99, acc:1.1, dc:1.2 },
+  { n:'ツインターボ', d:'最高速・加速・ブーストが少しずつ伸びる', v:7, top:1.004, acc:1.02, bst:1.08 },
+  { n:'ロケットモーター', d:'あらゆるブーストが長く続く。ふだんの速さは控えめ', v:8, top:.99, acc:.97, bst:1.3 },
+  { n:'ハイブリッド', d:'加速がよく、コース外でも減速しにくい', v:9, top:1, acc:1.08, off:.15 },
 ];
 // グライダー：spd=滑空スピード / ctl=空中の操作性（左右に動ける幅も広がる） / arc=飛ぶ高さ / land=着地したときのブースト秒数 / lch=発進ブーストの長さ / ring=リングのブーストの長さ / rr=リングをくぐれる広さ
 const GLD = [
@@ -1463,6 +1463,7 @@ function aiInput(k){
   let al = k.aiLat; for (const ob of TR.obst) { const dd = (ob.idx - k.idx + N) % N; if (dd < 16) al = Math.sin((raceT + dd * SEG / Math.max(10, k.v)) * ob.sp + ob.ph) > 0 ? -ST.width * .32 : ST.width * .32; }      // 障害物をよける
   const tx = Tp.x + Tp.nx * al, tz = Tp.z + Tp.nz * al, diff = wrapA(Math.atan2(tx - k.x, tz - k.z) - k.h);
   const a = P[(k.idx + 3) % N], b = P[(k.idx + 14) % N], curv = Math.abs(wrapA(Math.atan2(b.tx, b.tz) - Math.atan2(a.tx, a.tz)));
+  if (k.pro) { k.vmul = 1; return { steer: clamp(diff * 2.6, -1, 1), drift: curv > .3 && Math.abs(diff) > .12 && !(k.drift && k.charge > 2.2), brake: false }; }      // 調整用のテストドライバー（減速せず、カーブでドリフトする）
   k.vmul = k.skill * (1 - Math.min(.4, curv * .42)) * (k.fin ? .6 : 1);
   if (k.item && !k.fin && !(k.item === 'shield' && k.shield > 0)) { k.itemT -= 1 / 60; if (k.itemT <= 0) useItem(k); }
   return { steer: clamp(diff * 2.6, -1, 1), drift: false, brake: false };
@@ -1474,6 +1475,8 @@ function endDrift(k, fire){
 }
 function startRescue(k, why){ k.rescue = 2; endDrift(k, false); k.boost = k.nitro = k.rocket = 0; k.air = k.vy = k.airT = k.fallT = k.lavaT = 0; k.sc = null; k.glide = false; k.on = k.lastOn = 1; if (k === me) { say(why || 'ドローン救助中', true, 1.6); se(500, .5, 'sine', .07, .3); } }
 
+// カーブでの失速：ハンドルを大きく切るほど最高速が下がる。ハンドリングが高いほど下がりにくく、ドリフト中は下がりにくい。下がった速さは加速で取りもどす（＝最高速・加速・ハンドリングのどれもタイムに効く）
+const BAL = { scrub: .22, drift: .4, tk: 2.8 };
 const GRAV = 26; let dboost = { t: 0, sec: 0 };
 function updateKart(k, inp, dt){
   if (k.rescue > 0) {
@@ -1493,6 +1496,7 @@ function updateKart(k, inp, dt){
 
   // コースの外は約3割の減速（offF）。道から遠く離れるほどさらに重くなる。コース外に強いパーツでも、減速は少し残る
   let max = MAXV * kt.top * k.vmul * (1 + .012 * k.chips) * (k.off && k.nitro <= 0 ? 1 - (1 - k.offF) * (1 - kt.offRes) : 1) * (k.slowT > 0 ? k.slow : 1) * (k.glide ? k.gl.spd * kt.gsp : 1), acc = ACC * kt.acc;
+  if (!k.glide && k.air < .6) { const cs = Math.min(1, Math.abs(k.yaw) / TURN); max *= 1 - BAL.scrub * cs * clamp(1 + (1 - kt.turn) * BAL.tk, .4, 1.9) * (k.drift ? BAL.drift : 1); }
   if (k.boost > 0) { max *= 1.35 + kt.bsp; acc *= 3; }
   if (k.rocket > 0) { max *= 1.3; acc *= 1.6; }
   if (k.rev > 0) k.v = Math.max(-9, k.v - 40 * dt);
@@ -2039,7 +2043,7 @@ function statHtml(kt){
   const g = GLD[sel.gl], pct = v => (v >= 1 ? '+' : '−') + Math.abs(Math.round((v - 1) * 100)) + '%', tags = SPEC.filter(q => Math.abs(kt[q[0]] - 1) > .005).map(q => `<i>${q[1]} ${pct(kt[q[0]])}</i>`);
   if (kt.bsp) tags.push(`<i>ブースト中の速さ +${Math.round(kt.bsp * 100)}%</i>`); if (kt.tough < .995) tags.push(`<i>立ち直り ${Math.round((1 - kt.tough) * 100)}%早い</i>`);
   if (g.lch) tags.push(`<i>発進ブースト長い</i>`); if (g.ring) tags.push(`<i>リングブースト長い</i>`); if (g.rr) tags.push(`<i>リングが広い</i>`);
-  return `<b>いまの性能<em>ハンドル ${Math.round(opt.hdl * 100)}%</em></b><span class="bars"><span>最高速</span>${bar(1 + (kt.top - 1) * 1.7, 1)}<span>加速</span>${bar(1 + (kt.acc - 1) * .6, 1)}<span>ハンドリング</span>${bar(1 + (kt.turn - 1) * 1, 1)}<span>ドリフトブースト</span>${bar(1 + (kt.mt - 1) * .3, 1)}<span>コース外</span>${bar(1 + kt.offRes * .5, 1)}</span>` +
+  return `<b>いまの性能<em>ハンドル ${Math.round(opt.hdl * 100)}%</em></b><span class="bars"><span>最高速</span>${bar(1 + (kt.top - 1) * 6, 1)}<span>加速</span>${bar(1 + (kt.acc - 1) * .6, 1)}<span>ハンドリング</span>${bar(1 + (kt.turn - 1) * 1, 1)}<span>ドリフトブースト</span>${bar(1 + (kt.mt - 1) * .3, 1)}<span>コース外</span>${bar(1 + kt.offRes * .5, 1)}</span>` +
     `<span class="bars"><span>空のスピード</span>${bar(1 + (g.spd * kt.gsp - 1) * 2, 1)}<span>空の操作性</span>${bar(1 + (g.ctl - 1) * .42, 1)}<span>着地ブースト</span>${bar(.8 + g.land * .34, .97)}</span><span class="tags">${tags.join('') || '<i class="none">とくべつな効果なし</i>'}</span>`;
 }
 const chip = (act, label, on, extra = '') => `<button class="chip" type="button" data-act="${act}" ${extra} aria-pressed="${!!on}">${label}</button>`;
@@ -2471,7 +2475,7 @@ function start(saved){
   if (saved && saved.tab) tab = saved.tab;
   layout(); selectStage(sel.stage); loadTex(carT); loadTex(chT); applyLayout(); boot(); renderPanel(); requestAnimationFrame(frame);
 }
-window.__rm = { get P(){ return P; }, get ST(){ return ST; }, updateKart, TH, surfUnder, opt, STAGES, get state(){ return state; }, get me(){ return me; }, get karts(){ return karts; }, input, sel, step, selectStage, startRace, toHome, goRace, roulette, startReplay, rec, LS, ACT, onb, ensureWorld, get rep(){ return rep; }, get boxes(){ return boxes; }, rpaint, paintFetch, paintSend, get TR(){ return TR; }, get tab(){ return tab; }, carT, chT, setTab(t, st){ tab = t; if (st) raceStep = st; if (t === 'paint') pe.t = 'car'; if (t === 'cpaint') pe.t = 'ch'; renderPanel(); }, room, acct, roomCreate, roomJoin, roomStart, ledOpen, get online(){ return online; } };
+window.__rm = { BAL, get P(){ return P; }, get ST(){ return ST; }, updateKart, TH, surfUnder, opt, STAGES, get state(){ return state; }, get me(){ return me; }, get karts(){ return karts; }, input, sel, step, selectStage, startRace, toHome, goRace, roulette, startReplay, rec, LS, ACT, onb, ensureWorld, get rep(){ return rep; }, get boxes(){ return boxes; }, rpaint, paintFetch, paintSend, get TR(){ return TR; }, get tab(){ return tab; }, carT, chT, setTab(t, st){ tab = t; if (st) raceStep = st; if (t === 'paint') pe.t = 'car'; if (t === 'cpaint') pe.t = 'ch'; renderPanel(); }, room, acct, roomCreate, roomJoin, roomStart, ledOpen, get online(){ return online; } };
 const hot = window.claude && window.claude.hot;
 if (hot && hot.snapshot) hot.snapshot(() => ({ stage: sel.stage, tab }));
 if (hot && hot.ready) hot.ready(start); else start((hot && hot.data) || {});
