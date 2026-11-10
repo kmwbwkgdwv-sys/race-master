@@ -119,6 +119,18 @@
             "joinedAt": {
               ".validate": "newData.val() <= now"
             },
+            "icon": {
+              ".validate": "newData.isString() && newData.val().length <= 32"
+            },
+            "kt": {
+              ".validate": "newData.isNumber()"
+            },
+            "col": {
+              ".validate": "newData.isNumber()"
+            },
+            "t": {
+              ".validate": "newData.isNumber()"
+            },
             "$other": {
               ".validate": false
             }
@@ -138,8 +150,23 @@
           "nonce": {
             ".validate": "newData.val() === now"
           },
+          "order": {
+            ".validate": "newData.isString() && newData.val().length <= 600"
+          },
           "$other": {
             ".validate": false
+          }
+        },
+        "pos": {
+          "$id": {
+            ".write": "auth != null && data.parent().parent().child('hostUid').exists() && ($id === auth.uid || data.parent().parent().child('hostUid').val() === auth.uid)",
+            ".validate": "newData.hasChildren(['x', 'z', 'h'])"
+          }
+        },
+        "ev": {
+          "$e": {
+            ".write": "auth != null && !data.exists() && data.parent().parent().child('players').child(auth.uid).exists()",
+            ".validate": "newData.hasChildren(['k', 'from']) && newData.child('from').val() === auth.uid"
           }
         },
         "$other": {

@@ -40,7 +40,7 @@ button:focus-visible{outline:3px solid var(--volt);outline-offset:2px}
 .logo span{display:block;color:var(--hot)}
 .logo i{display:block;font-style:normal;font-family:var(--body);font-weight:900;font-size:10px;letter-spacing:.34em;color:var(--dim);margin-top:8px}
 .tabs{display:flex;flex-direction:column;gap:4px;margin-top:6px}
-.tab{text-align:left;padding:8px 12px;font-weight:900;font-size:14px;border-left:4px solid transparent;color:var(--dim);border-radius:0 4px 4px 0}
+.tab{text-align:left;padding:6px 12px;font-weight:900;font-size:13.5px;border-left:4px solid transparent;color:var(--dim);border-radius:0 4px 4px 0}
 .tab[aria-selected="true"]{color:var(--paper);border-left-color:var(--hot);background:linear-gradient(90deg,rgba(255,74,38,.28),transparent)}
 .mid{position:relative;min-width:0}
 .plate{position:absolute;left:4px;bottom:16px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
@@ -108,6 +108,34 @@ button:focus-visible{outline:3px solid var(--volt);outline-offset:2px}
 .code{font-family:var(--display);font-size:15px;letter-spacing:.06em;color:var(--volt);-webkit-user-select:text;user-select:text}
 .box{display:flex;flex-direction:column;gap:6px;padding:10px 12px;background:var(--glass);border-radius:4px}
 .box>b{font-weight:900;font-size:14px}.box small{font-size:11px;color:var(--dim);line-height:1.6}
+
+.seg3{grid-template-columns:1fr 1fr 1fr}
+.opt.pri{background:var(--hot);border-color:var(--hot);color:#fff}.opt.pri small{color:rgba(255,255,255,.85)}
+.pwrap{flex:none;border:2px solid var(--line);border-radius:4px;overflow:hidden;background:repeating-conic-gradient(#2a2d36 0 25%,#21242c 0 50%) 0 0/20px 20px}
+#pcv{display:block;width:100%;aspect-ratio:2/1;touch-action:none;cursor:crosshair}
+.sw.s{width:28px;height:28px}
+.field span{font-size:12px;font-weight:900;white-space:nowrap}.field input[type=range]{padding:0;accent-color:var(--hot)}
+.tag{font-size:10px;padding:1px 7px;border-radius:99px;border:1px solid var(--volt);color:var(--volt);margin-left:6px;font-weight:900}
+#led{position:absolute;left:50%;top:8px;transform:translateX(-50%);display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;padding:8px 12px;background:var(--glass);border:1px solid var(--line);border-radius:6px;font-size:12px;font-weight:700;z-index:5;max-width:94%}
+#led button{padding:7px 12px;border:2px solid var(--line);border-radius:4px;font-weight:900;font-size:12px}
+#led button.pri{background:var(--hot);border-color:var(--hot)}
+#hud.editing .tl,#hud.editing .tr,#hud.editing #map{opacity:.2}
+.btn.sel{outline:3px dashed var(--volt);outline-offset:4px}
+
+#home.top{grid-template-columns:minmax(300px,44%) minmax(0,1fr);background:linear-gradient(90deg,rgba(9,11,17,.78) 0%,rgba(9,11,17,.28) 38%,rgba(9,11,17,0) 62%)}
+#home.top .panel{display:none}
+#home.top .logo{font-size:clamp(34px,7.4vw,70px)}
+#home.top .tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;max-width:360px}
+#home.top .tab{font-size:15px;padding:12px 14px;color:var(--paper);background:var(--glass);border-left:4px solid var(--hot);border-radius:0 6px 6px 0}
+#home.top .tab.back,#home.top #go{display:none}
+.tab.back{margin-top:8px;font-size:12px;color:var(--dim)}
+.opt.big{padding:14px 16px}.opt.big b{font-family:var(--display);font-weight:400;font-size:18px;margin-bottom:3px}.opt.big small{font-size:12px;line-height:1.6;display:block}
+
+.gal{display:flex;flex-direction:column;gap:6px}
+.gitem{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:6px 8px;background:var(--glass);border-radius:4px}
+.gitem img{width:96px;height:48px;border-radius:3px;display:block}
+.gitem b{font-size:13px;font-weight:900;flex:1;min-width:84px}
+.gitem .mini{padding:6px 9px;font-size:11.5px}
 
 /* ---------- HUD ---------- */
 #hud{position:absolute;inset:0;pointer-events:none}
@@ -188,16 +216,19 @@ button:focus-visible{outline:3px solid var(--volt);outline-offset:2px}
     <div id="nova"></div>
   </div>
 
+  <div id="led" hidden><span>ボタンをドラッグして移動</span><button type="button" data-led="down">小さく</button><button type="button" data-led="up">大きく</button><button type="button" data-led="reset">初期配置に戻す</button><button type="button" class="pri" data-led="done">保存して戻る</button></div>
+
   <div id="home">
     <nav class="rail">
       <div class="logo">race-<span>master</span><i>ACTION KART RACING</i></div>
       <div class="tabs" role="tablist" id="tabs">
-        <button class="tab" role="tab" data-t="race" aria-selected="true" type="button">レース</button>
+        <button class="tab" role="tab" data-t="race" aria-selected="false" type="button">あそぶ</button>
         <button class="tab" role="tab" data-t="char" aria-selected="false" type="button">キャラクター</button>
         <button class="tab" role="tab" data-t="kart" aria-selected="false" type="button">マシン</button>
         <button class="tab" role="tab" data-t="item" aria-selected="false" type="button">アイテム図鑑</button>
         <button class="tab" role="tab" data-t="rank" aria-selected="false" type="button">ランキング</button>
         <button class="tab" role="tab" data-t="set" aria-selected="false" type="button">設定</button>
+        <button class="tab back" data-t="top" type="button">← ホームにもどる</button>
       </div>
     </nav>
     <div class="mid">
@@ -240,21 +271,21 @@ function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let 
 // pts: [x, z, height]。mode: open=コース外は悪路 / wall=ガードあり / lava=外は溶岩 / void=ガードなし
 // sc: 近道（制御点 a から b へまっすぐ結ぶ）
 const STAGES = [
-  { id:'master_circuit', name:'マスター・サーキット', feat:'王道のアスファルト。ダートの近道あり', sw:'#4cc46a', mode:'open', off:.55, width:10,
+  { id:'master_circuit', name:'マスター・サーキット', feat:'丘を越える王道コース。谷はグライダーで', sw:'#4cc46a', mode:'open', off:.55, width:10,
     skyT:[.25,.52,.9], sky:[.66,.84,.96], ground:[.3,.58,.28], road:[.27,.28,.32], fog:[120,620], sc:[3,5], root:110,
-    pts:[[0,0],[70,0],[130,10],[160,50],[140,95],[90,100],[60,70],[20,75],[0,110],[-50,120],[-90,90],[-80,40],[-50,10]] },
+    gz:[.5,.58], pts:[[0,0,0],[70,0,0],[130,10,6],[160,50,16],[140,95,24],[90,100,14],[60,70,8],[20,75,12],[0,110,20],[-50,120,27],[-90,90,16],[-80,40,6],[-50,10,0]] },
   { id:'neon_metropolis', name:'ネオン・メトロポリス', feat:'夜の高架ハイウェイ。ビルの間を渡る細い橋', sw:'#ff3db4', mode:'wall', off:1, width:10,
     skyT:[.02,.01,.08], sky:[.16,.05,.26], ground:[.03,.03,.07], road:[.13,.13,.21], fog:[90,520], sc:[1,3], root:98,
-    pts:[[0,0,0],[60,0,0],[110,-30,8],[150,0,16],[140,60,16],[90,80,6],[40,60,0],[0,90,9],[-60,80,17],[-90,30,10],[-60,-10,2]] },
+    gz:[.52,.6], pts:[[0,0,0],[60,0,0],[110,-30,10],[150,0,22],[140,60,24],[90,80,10],[40,60,0],[0,90,10],[-60,80,22],[-90,30,12],[-60,-10,2]] },
   { id:'ancient_desert', name:'古代の砂漠', feat:'砂煙の向こうに遺跡を抜ける隠し道', sw:'#e0a44a', mode:'open', off:.4, width:10,
     skyT:[.5,.62,.8], sky:[.95,.8,.56], ground:[.84,.67,.4], road:[.5,.4,.3], fog:[40,300], sc:[3,5], root:104,
-    pts:[[0,0],[90,-10],[150,30],[120,80],[160,130],[100,160],[40,130],[-10,150],[-70,120],[-50,60],[-100,20],[-60,-20]] },
+    gz:[.56,.64], pts:[[0,0,0],[90,-10,4],[150,30,14],[120,80,24],[160,130,12],[100,160,4],[40,130,10],[-10,150,20],[-70,120,28],[-50,60,16],[-100,20,6],[-60,-20,0]] },
   { id:'volcano_core', name:'ボルケーノ・コア', feat:'外は溶岩。岩の橋か、ニトロで強行突破', sw:'#ff5a1f', mode:'lava', off:.6, width:10,
     skyT:[.03,.01,.02], sky:[.3,.07,.03], ground:[1,.42,.06], road:[.21,.18,.18], fog:[90,520], sc:[2,4], root:92,
-    pts:[[0,0],[60,0],[100,40],[60,70],[100,110],[50,140],[0,110],[-40,140],[-90,100],[-50,60],[-90,20],[-40,-10]] },
+    gz:[.5,.58], pts:[[0,0,3],[60,0,3],[100,40,10],[60,70,18],[100,110,10],[50,140,3],[0,110,12],[-40,140,22],[-90,100,14],[-50,60,6],[-90,20,12],[-40,-10,5]] },
   { id:'cosmo_skyway', name:'コスモ・スカイウェイ', feat:'宇宙に浮かぶガードなしコース。落下注意', sw:'#6fd3ff', mode:'void', off:1, width:11,
     skyT:[.0,.0,.03], sky:[.06,.03,.16], ground:null, road:[.2,.22,.42], fog:[400,2400], sc:[4,6], root:123,
-    pts:[[0,0,0],[70,0,0],[120,30,9],[100,80,18],[40,70,11],[10,110,4],[-50,100,11],[-90,50,20],[-60,0,9],[-30,-30,2]] },
+    gz:[.72,.8], pts:[[0,0,0],[70,0,0],[120,30,12],[100,80,26],[40,70,14],[10,110,4],[-50,100,14],[-90,50,28],[-60,0,10],[-30,-30,2]] },
 ];
 // [名前, 0=かわいい/1=かっこいい, 肌, スーツ, 髪orヘルメット, 耳, 耳色, 目, 目色, 鼻, 頭の飾り, 飾り色]
 const CH = [
@@ -294,6 +325,13 @@ const KT = [
   { n:'ブレイザー', d:'最高速重視。曲がりは重い', top:1.06, acc:.85, turn:.92, mt:.9, len:1.14, wing:.8 },
   { n:'スピナー', d:'小回りとミニターボが得意', top:.96, acc:1.15, turn:1.12, mt:1.25, len:.9, wing:1.25 },
 ];
+// グライダー：spd=滑空スピード / ctl=空中の操作性 / arc=飛ぶ高さ / land=着地したときのブースト秒数
+const GLD = [
+  { n:'スタンダードウィング', d:'バランスのよい基本の翼', shape:'std', spd:1.05, ctl:1, arc:7, land:.5 },
+  { n:'スピードカイト', d:'空中がとにかく速い。低く飛び、曲がりにくい', shape:'kite', spd:1.17, ctl:.7, arc:5, land:.3 },
+  { n:'クラウドパラ', d:'高く飛んで左右に大きく動ける。スピードは控えめ', shape:'para', spd:.97, ctl:1.5, arc:10, land:.4 },
+  { n:'ロケットウィング', d:'着地した瞬間に長いブーストがかかる', shape:'rocket', spd:1.02, ctl:.9, arc:6, land:1.5 },
+];
 const COLS = ['#ff3b1f','#ffd60a','#2a7dff','#22c55e','#ff5ca8','#f4f6fa','#8b5cf6','#20252e'];
 const ITEMS = {
   orb:{ n:'プラズマ・オーブ', c:'#5cc8ff', d:'前方へまっすぐ飛ぶ高速弾。当たった相手のブーストを消し、最高速度を下げる。' },
@@ -309,14 +347,14 @@ const TIER_COL = [[.9,.9,.9],[.25,.6,1],[1,.85,.1],[.78,.35,1]];
 const MAXV = 30, ACC = 16, TURN = 1.55, LAPS = 3;
 
 // ================================================================ saved state
-let best = {}, opt = { lite:false, bgm:true, se:true }, sel = { ch:0, kt:0, col:0, stage:0, mode:'ta' };
+let best = {}, opt = { lite:false, bgm:true, se:true }, sel = { ch:0, kt:0, col:0, gl:0, stage:0, mode:'ta' };
 try { best = JSON.parse(localStorage.getItem('rm_best') || '{}') || {}; Object.assign(opt, JSON.parse(localStorage.getItem('rm_opt') || '{}')); Object.assign(sel, JSON.parse(localStorage.getItem('rm_sel') || '{}')); } catch (e) {}
-sel.ch = clamp(sel.ch | 0, 0, CH.length - 1); sel.kt = clamp(sel.kt | 0, 0, 2); sel.col = clamp(sel.col | 0, 0, COLS.length - 1); sel.stage = clamp(sel.stage | 0, 0, 4);
+sel.ch = clamp(sel.ch | 0, 0, CH.length - 1); sel.kt = clamp(sel.kt | 0, 0, 2); sel.gl = clamp(sel.gl | 0, 0, GLD.length - 1); sel.col = clamp(sel.col | 0, 0, COLS.length - 1); sel.stage = clamp(sel.stage | 0, 0, 4);
 const save = () => { try { localStorage.setItem('rm_best', JSON.stringify(best)); localStorage.setItem('rm_opt', JSON.stringify(opt)); localStorage.setItem('rm_sel', JSON.stringify(sel)); } catch (e) {} };
 
 // ================================================================ track
 const TRACKS = {};
-let ST = STAGES[0], TR = null, P = [], SEG = 2.5, bounds = null, pads = [], boxesAt = [], SC = null;
+let ST = STAGES[0], TR = null, P = [], SEG = 2.5, bounds = null, pads = [], boxesAt = [], SC = null, G0 = 0, G1 = 0;
 function buildTrack(st){
   const c = st.pts, n = c.length, dense = [], g = (p, k) => p[k] || 0;
   for (let i = 0; i < n; i++) {
@@ -343,24 +381,34 @@ function buildTrack(st){
     x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); z0 = Math.min(z0, p.z); z1 = Math.max(z1, p.z);
   }
   for (let i = 0; i < N; i++) { const a = pts[i], b = pts[(i + 6) % N]; a.curv = wrapA(Math.atan2(b.tx, b.tz) - Math.atan2(a.tx, a.tz)); }
+  // グライダー区間：この間は路面がなく、手前のパネルから飛ぶ。gh は地形用の高さ（区間内は谷にする）
+  const G0 = Math.floor(N * st.gz[0]), G1 = Math.floor(N * st.gz[1]);
+  for (let i = 0; i < N; i++) { const g = i >= G0 && i < G1; pts[i].g = g; pts[i].gh = Math.max(st.mode === 'lava' ? 0 : -8, g ? pts[i].y - 14 : pts[i].y); }
+  const clear = f => f < st.gz[0] - .04 || f > st.gz[1] + .02;
   const near = q => { let bi = 0, bd = 1e9; for (let i = 0; i < N; i++) { const d = (pts[i].x - q[0]) ** 2 + (pts[i].z - q[1]) ** 2; if (d < bd) { bd = d; bi = i; } } return bi; };
   const A = pts[near(c[st.sc[0]])], B = pts[near(c[st.sc[1]])], len = Math.hypot(B.x - A.x, B.z - A.z);
   const elevated = st.mode === 'wall' || st.mode === 'void';
-  return { P: pts, SEG: seg, N,
+  return { P: pts, SEG: seg, N, G0, G1,
     bounds: { x0, x1, z0, z1, cx: (x0 + x1) / 2, cz: (z0 + z1) / 2, r: Math.max(x1 - x0, z1 - z0) / 2 },
-    pads: [.12, .37, .62, .86].map((f, i) => ({ idx: Math.floor(N * f), lat: (i % 2 ? 1 : -1) * st.width * .2 })),
-    boxesAt: [.22, .48, .73, .93].map(f => Math.floor(N * f)),
+    pads: [.05, .12, .3, .37, .45, .62, .68, .86, .95].filter(clear).map((f, i) => ({ idx: Math.floor(N * f), lat: (i % 2 ? 1 : -1) * st.width * .2 })),
+    boxesAt: [.22, .48, .73, .93].map(f => Math.floor(N * (clear(f) && (f < st.gz[0] - .06 || f > st.gz[1] + .03) ? f : st.gz[1] + .05))),
     sc: { ax: A.x, az: A.z, ay: A.y, bx: B.x, bz: B.z, by: B.y, len, ux: (B.x - A.x) / len, uz: (B.z - A.z) / len, w: elevated ? 5.5 : 6.5, arc: elevated ? 2.2 : 0 } };
 }
 // 近道の上にいるか。いれば 0〜1 の進み具合、いなければ -1
 function onSc(x, z, pad = 0){ const s = SC, dx = x - s.ax, dz = z - s.az, t = dx * s.ux + dz * s.uz; if (t < 0 || t > s.len) return -1; return Math.abs(dx * s.uz - dz * s.ux) < s.w / 2 + pad ? t / s.len : -1; }
-const scY = f => SC.ay + (SC.by - SC.ay) * f + SC.arc * Math.sin(Math.PI * f);
+const GROUND = () => ST.mode === 'open' || ST.mode === 'lava';
+const sstep = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+// コースから離れるほど地面は低くなる（溶岩ステージは路肩のすぐ外が崖）
+const fall = dd => ST.mode === 'lava' ? 1 - sstep(ST.width / 2 + 2.5, ST.width / 2 + 9, dd) : 1 - sstep(30, 110, dd);
+function TH(x, z){ let bd = 1e9, bi = 0; for (let i = 0; i < P.length; i++) { const p = P[i], q = (x - p.x) ** 2 + (z - p.z) ** 2; if (q < bd) { bd = q; bi = i; } } return P[bi].gh * fall(Math.sqrt(bd)); }
+const glideY = (idx, frac, arc) => { const t = clamp((idx - G0 + frac) / (G1 - G0), 0, 1); return P[G0].y + (P[G1 % P.length].y - P[G0].y) * t + arc * Math.sin(Math.PI * t); };
+const scY = f => GROUND() ? Math.max(TH(SC.ax + SC.ux * SC.len * f, SC.az + SC.uz * SC.len * f) + .08, ST.mode === 'lava' ? 1.2 : -99) : SC.ay + (SC.by - SC.ay) * f + SC.arc * Math.sin(Math.PI * f);
 // o.idx 付近から最寄りのコース点を探し、横ずれ(lat)と路面高さ(ty)を求める
 function locate(o, wide){
   const N = P.length; let bestD = 1e9, bi = o.idx;
   if (!wide) for (let j = -6; j <= 14; j++) { const i = (o.idx + j + N) % N, p = P[i], d = (o.x - p.x) ** 2 + (o.z - p.z) ** 2; if (d < bestD) { bestD = d; bi = i; } }
   if (wide || bestD > 1600) for (let i = 0; i < N; i++) { const p = P[i], d = (o.x - p.x) ** 2 + (o.z - p.z) ** 2; if (d < bestD) { bestD = d; bi = i; } }
-  o.idx = bi;
+  o.idx = bi; o.d2 = bestD;
   const p = P[bi], dx = o.x - p.x, dz = o.z - p.z;
   o.lat = dx * p.nx + dz * p.nz;
   const s = clamp((dx * p.tx + dz * p.tz) / SEG, -1, 1); o.frac = s;
@@ -369,12 +417,12 @@ function locate(o, wide){
 }
 
 // ================================================================ GL
-const VS = 'attribute vec3 p;attribute vec3 c;uniform mat4 uVP,uM;uniform vec3 uTint;varying vec3 vC;varying float vD;void main(){vec4 w=uM*vec4(p,1.);gl_Position=uVP*w;vC=c*uTint;vD=gl_Position.w;}';
-const FS = 'precision mediump float;uniform vec3 uFog;uniform vec2 uFogR;uniform float uA;varying vec3 vC;varying float vD;void main(){float f=clamp((vD-uFogR.x)/(uFogR.y-uFogR.x),0.,1.);gl_FragColor=vec4(mix(vC,uFog,f),uA);}';
+const VS = 'attribute vec3 p;attribute vec3 c;uniform mat4 uVP,uM;uniform vec3 uTint;uniform vec4 uUV;varying vec3 vC;varying vec3 vS;varying vec2 vUV;varying vec2 vW;varying float vD;void main(){vec4 w=uM*vec4(p,1.);gl_Position=uVP*w;vW=w.xz;vC=c*uTint;vS=c;vUV=vec2(uUV.x+p.z*uUV.y,uUV.z+p.x*uUV.w);vD=gl_Position.w;}';
+const FS = 'precision mediump float;uniform vec3 uFog;uniform vec2 uFogR;uniform float uA;uniform float uUseTex;uniform sampler2D uTex;varying vec3 vC;varying vec3 vS;uniform vec2 uGr;varying vec2 vUV;varying vec2 vW;varying float vD;void main(){vec4 t=texture2D(uTex,vUV);vec3 b=mix(vC,vS*t.rgb,t.a*uUseTex);vec2 g=mod(floor(vW*uGr.x),289.);b*=1.+(fract(sin(dot(g,vec2(12.9898,78.233)))*43758.5453)-.5)*uGr.y;float f=clamp((vD-uFogR.x)/(uFogR.y-uFogR.x),0.,1.);gl_FragColor=vec4(mix(b,uFog,f),uA);}';
 function sh(type, src){ const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; }
 const prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog); gl.useProgram(prog);
 const aP = gl.getAttribLocation(prog, 'p'), aC = gl.getAttribLocation(prog, 'c');
-const U = {}; ['uVP','uM','uTint','uFog','uFogR','uA'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
+const U = {}; ['uVP','uM','uTint','uFog','uFogR','uA','uUV','uUseTex','uTex','uGr'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
 gl.enableVertexAttribArray(aP); gl.enableVertexAttribArray(aC);
 
 const LIGHT = [.37, .84, .4];
@@ -384,16 +432,16 @@ function mesh(xf){
   const v = [];
   const lit = n => { const l = Math.hypot(n[0], n[1], n[2]) || 1; return .62 + .42 * Math.max(0, (n[0] * LIGHT[0] + n[1] * LIGHT[1] + n[2] * LIGHT[2]) / l) + .06 * n[1] / l; };
   const m = {
-    v,
+    v, oy: 0,
     // 陰影つきの四角（n = 法線）
     q(a, b, c, d, n, col){ if (xf) { a = xf(a); b = xf(b); c = xf(c); d = xf(d); n = xf(n); } const k = lit(n), r = col[0] * k, g = col[1] * k, bl = col[2] * k; for (const p of [a, b, c, a, c, d]) v.push(p[0], p[1], p[2], r, g, bl); },
     // 陰影なしの四角（路面・発光体）
     flat(a, b, c, d, col){ for (const p of [a, b, c, a, c, d]) v.push(p[0], p[1], p[2], col[0], col[1], col[2]); },
-    box(cx, cy, cz, sx, sy, sz, col, yaw = 0, glow){
+    box(cx, cy, cz, sx, sy, sz, col, yaw = 0, glow){ cy += m.oy;
       const co = Math.cos(yaw), si = Math.sin(yaw), R = p => [cx + co * p[0] * sx + si * p[2] * sz, cy + p[1] * sy, cz - si * p[0] * sx + co * p[2] * sz];
       for (const f of FACES) { const pts = [0, 1, 2, 3].map(i => R(f[i])); if (glow) m.flat(...pts, col); else m.q(...pts, [co * f[4][0] + si * f[4][2], f[4][1], -si * f[4][0] + co * f[4][2]], col); }
     },
-    sph(cx, cy, cz, rx, ry, rz, col, seg = 10, rings = 6, glow){
+    sph(cx, cy, cz, rx, ry, rz, col, seg = 10, rings = 6, glow){ cy += m.oy;
       for (let i = 0; i < rings; i++) for (let j = 0; j < seg; j++) {
         const pt = (ii, jj) => { const a = Math.PI * ii / rings, b = 2 * Math.PI * jj / seg; return [Math.sin(a) * Math.cos(b), Math.cos(a), Math.sin(a) * Math.sin(b)]; };
         const A = pt(i, j), B = pt(i, j + 1), C = pt(i + 1, j + 1), D = pt(i + 1, j), w = p => [cx + p[0] * rx, cy + p[1] * ry, cz + p[2] * rz], nn = pt(i + .5, j + .5);
@@ -402,7 +450,7 @@ function mesh(xf){
       }
     },
     // 縦の円柱（r2=0 で円すい）
-    cyl(cx, cy, cz, r, h, col, seg = 10, r2 = r, glow){
+    cyl(cx, cy, cz, r, h, col, seg = 10, r2 = r, glow){ cy += m.oy;
       for (let j = 0; j < seg; j++) {
         const a = 2 * Math.PI * j / seg, b = 2 * Math.PI * (j + 1) / seg, ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b), mid = (a + b) / 2;
         const A = [cx + ca * r, cy, cz + sa * r], B = [cx + cb * r, cy, cz + sb * r], C = [cx + cb * r2, cy + h, cz + sb * r2], D = [cx + ca * r2, cy + h, cz + sa * r2], n = [Math.cos(mid), (r - r2) / (h || 1) * .6, Math.sin(mid)];
@@ -425,6 +473,28 @@ const SHAPES = {
 };
 let world = null, skyObj = null, skyQuad = null;
 
+// ---------------------------------------------------------------- paint texture（車体に上から投影する 512x256 の絵。右が前）
+const paintCv = document.createElement('canvas'); paintCv.width = 512; paintCv.height = 256;
+const pctx = paintCv.getContext('2d'); let hasPaint = false;
+const paintTex = gl.createTexture();
+function uploadPaint(){
+  gl.bindTexture(gl.TEXTURE_2D, paintTex); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, paintCv);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+}
+uploadPaint(); gl.uniform1i(U.uTex, 0); gl.uniform1f(U.uUseTex, 0);
+const pkey = () => 'rm_paint_k' + sel.kt;      // ペイントはマシンのタイプごとに保存
+const savePaint = () => { try { localStorage.setItem(pkey(), hasPaint ? paintCv.toDataURL('image/png') : ''); return true; } catch (e) { return false; } };
+function drawPaintUrl(durl, done){ const im = new Image(); im.onload = () => { pctx.clearRect(0, 0, 512, 256); pctx.drawImage(im, 0, 0, 512, 256); hasPaint = true; uploadPaint(); if (done) done(); }; im.src = durl; }
+function loadPaintFor(){
+  pctx.clearRect(0, 0, 512, 256); hasPaint = false; uploadPaint(); let durl = '';
+  try { const v = localStorage.getItem(pkey()); durl = v !== null ? v : (sel.kt === 0 ? localStorage.getItem('rm_paint') || '' : ''); } catch (e) {}
+  if (durl) drawPaintUrl(durl, () => { if (tab === 'paint') peRedraw(); });
+}
+// 保存した絵（どのマシンにも読み込める）
+let gallery = []; try { gallery = JSON.parse(localStorage.getItem('rm_gal') || '[]') || []; } catch (e) {}
+const saveGallery = () => { try { localStorage.setItem('rm_gal', JSON.stringify(gallery)); return true; } catch (e) { return false; } };
+
 // ---------------------------------------------------------------- world building
 function buildWorld(st){
   const m = mesh(), sk = mesh(), N = P.length, h = st.width / 2, R = rng(st.id.length * 977 + 5), b = bounds, id = st.id;
@@ -436,14 +506,24 @@ function buildWorld(st){
   const elevated = st.mode === 'wall' || st.mode === 'void';
 
   // ground
-  if (st.ground) { const s = 3000, y = st.mode === 'wall' ? -45 : -.08; m.flat([b.cx - s, y, b.cz - s], [b.cx + s, y, b.cz - s], [b.cx + s, y, b.cz + s], [b.cx - s, y, b.cz + s], st.ground); }
-  if (id === 'master_circuit') for (let k = 0; k < 160; k++) { const [x, z] = spot(260); m.cyl(x, -.07, z, rnd(8, 30), .01, mul3(st.ground, rnd(.86, 1.14)), 9, undefined, true); }
-  if (id === 'ancient_desert') for (let k = 0; k < 150; k++) { const [x, z] = spot(260); m.cyl(x, -.07, z, rnd(8, 30), .01, mul3(st.ground, rnd(.88, 1.1)), 9, undefined, true); }
+  const G = (x, z) => GROUND() ? TH(x, z) - .4 : 0;
+  const plane = (xa, za, xb, zb, y, col) => m.flat([xa, y, za], [xb, y, za], [xb, y, zb], [xa, y, zb], col);
+  if (st.ground && st.mode !== 'open') plane(b.cx - 3000, b.cz - 3000, b.cx + 3000, b.cz + 3000, st.mode === 'wall' ? -45 : -.08, st.ground);
+  // 起伏のある地形（コースの高さに沿って盛り上がり、グライダー区間の下は谷になる）
+  if (GROUND()) { const cs = 7, pad = 170, gx0 = b.x0 - pad, gz0 = b.z0 - pad, nx = Math.ceil((b.x1 - b.x0 + 2 * pad) / cs), nz = Math.ceil((b.z1 - b.z0 + 2 * pad) / cs), gx1 = gx0 + nx * cs, gz1 = gz0 + nz * cs, H = [], open = st.mode === 'open';
+    if (open) { const S = 3000, y = -.42; plane(b.cx - S, b.cz - S, b.cx + S, gz0, y, st.ground); plane(b.cx - S, gz1, b.cx + S, b.cz + S, y, st.ground); plane(b.cx - S, gz0, gx0, gz1, y, st.ground); plane(gx1, gz0, b.cx + S, gz1, y, st.ground);
+      if (id === 'master_circuit') plane(gx0, gz0, gx1, gz1, -2.6, [.2, .5, .78]); }      // 谷にたまる水
+    for (let j = 0; j <= nz; j++) { H.push([]); for (let i = 0; i <= nx; i++) H[j].push(G(gx0 + i * cs, gz0 + j * cs)); }
+    for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) { const h00 = H[j][i], h10 = H[j][i + 1], h11 = H[j + 1][i + 1], h01 = H[j + 1][i]; if (!open && Math.max(h00, h10, h11, h01) < -.06) continue;
+      const xa = gx0 + i * cs, za = gz0 + j * cs, hm = (h00 + h10 + h11 + h01) / 4, sl = Math.hypot(h00 + h01 - h10 - h11, h00 + h10 - h01 - h11) / (2 * cs); let col;
+      if (!open) col = mix3([.55, .2, .08], [.25, .17, .16], clamp(hm / 2.5, 0, 1));
+      else { col = mix3(mul3(st.ground, .93 + .09 * Math.sin(xa * .13) * Math.cos(za * .11) + clamp(hm / 80, -.05, .1)), id === 'master_circuit' ? [.52, .47, .4] : [.66, .46, .29], sstep(.4, .85, sl)); if (id === 'master_circuit' && hm < -1.9) col = [.74, .68, .48]; }
+      m.q([xa, h00, za], [xa + cs, h10, za], [xa + cs, h11, za + cs], [xa, h01, za + cs], [h00 + h01 - h10 - h11, 2 * cs, h00 + h10 - h01 - h11], col); } }
   if (id === 'volcano_core') for (let k = 0; k < 520; k++) { const [x, z] = spot(300); if (!far(x, z, h + 3.5)) continue; m.cyl(x, -.07, z, rnd(5, 20), .01, [rnd(.16, .3), rnd(.04, .08), .03], 7, undefined, true); }
 
   // road surface
   for (let i = 0; i < N; i++) {
-    const a = P[i], c = P[(i + 1) % N];
+    const a = P[i], c = P[(i + 1) % N]; if (a.g) continue;
     const base = id === 'cosmo_skyway' ? hsv((i / N + .55) % 1, .55, .5) : st.road, rc = mul3(base, (i >> 1) & 1 ? 1 : .9);
     m.flat(edge(a, -h), edge(a, h), edge(c, h), edge(c, -h), rc);
     if (i % 6 < 3) m.flat(edge(a, -.15, .04), edge(a, .15, .04), edge(c, .15, .04), edge(c, -.15, .04), mul3(st.road, 2.3));
@@ -462,7 +542,7 @@ function buildWorld(st){
     if (st.mode === 'wall' && i % 12 === 0) { m.cyl(a.x, -45, a.z, 1.6, a.y + 44, [.11, .11, .2], 8); }
     if (st.mode === 'void' && i % 16 === 8) { m.cyl(a.x, a.y - 9, a.z, .1, 8.4, [.4, .8, 1], 6, 2.4, true); }
     // コーナーの矢印ボード
-    if (Math.abs(a.curv) > .42 && i % 4 === 0 && !elevated) { const s = a.curv > 0 ? -1 : 1, e = edge(a, s * (h + 3.2)); if (far(e[0], e[2], h + 1.5) || true) { m.box(e[0], 1.1, e[2], 1.2, .5, .08, (i >> 2) & 1 ? [.95, .2, .12] : [.97, .97, .95], yaw); m.box(e[0], .3, e[2], .08, .3, .08, [.2, .2, .2], yaw); } }
+    if (Math.abs(a.curv) > .42 && i % 4 === 0 && !elevated) { const s = a.curv > 0 ? -1 : 1, e = edge(a, s * (h + 3.2)); if (far(e[0], e[2], h + 1.5) || true) { m.box(e[0], a.y + 1.1, e[2], 1.2, .5, .08, (i >> 2) & 1 ? [.95, .2, .12] : [.97, .97, .95], yaw); m.box(e[0], a.y + .3, e[2], .08, .3, .08, [.2, .2, .2], yaw); } }
     // 街灯
     if ((id === 'master_circuit' || id === 'neon_metropolis') && i % 14 === 5) { const s = (i / 14 | 0) % 2 ? 1 : -1, e = edge(a, s * (h + (elevated ? .25 : 1.8))); m.cyl(e[0], a.y, e[2], .09, 5, [.3, .3, .34], 5); m.sph(e[0] - a.nx * s * .6, a.y + 5, e[2] - a.nz * s * .6, .4, .22, .4, id === 'neon_metropolis' ? [1, .5, .9] : [1, .97, .8], 6, 4, true); }
     // ゲートリング
@@ -473,6 +553,9 @@ function buildWorld(st){
   { const p = P[1], yaw = Math.atan2(p.tx, p.tz), gc = hex(st.sw); for (const s of [-1, 1]) { const e = edge(p, s * (h + .9)); m.box(e[0], p.y + 3.6, e[2], .35, 3.6, .35, [.85, .85, .88], yaw); } m.box(p.x, p.y + 7.2, p.z, h + 1.6, .9, .3, gc, yaw); for (let k = 0; k < 12; k++) { const d = -h - .6 + (k + .5) * (st.width + 1.2) / 12; m.box(p.x + p.nx * d, p.y + 7.2 + ((k & 1) ? .3 : -.3), p.z + p.nz * d, (st.width + 1.2) / 24, .3, .34, (k & 1) ? [.05, .05, .05] : [1, 1, 1], yaw, true); } }
   // dash panels
   for (const pd of pads) for (let r = 0; r < 3; r++) { const p = P[(pd.idx + r) % N], q = P[(pd.idx + r + 1) % N]; m.flat(edge(p, pd.lat - 1.6, .06), edge(p, pd.lat + 1.6, .06), edge(q, pd.lat + 1.6, .06), edge(q, pd.lat - 1.6, .06), r & 1 ? [1, .5, .05] : [1, .92, .15]); }
+  // glider launch panel + gate
+  for (let r = 1; r <= 5; r++) { const p = P[(G0 - r + N) % N], q = P[(G0 - r + 1 + N) % N]; m.flat(edge(p, -h, .07), edge(p, h, .07), edge(q, h, .07), edge(q, -h, .07), r & 1 ? [.2, .75, 1] : [.88, .98, 1]); }
+  { const p = P[(G0 - 1 + N) % N], yaw = Math.atan2(p.tx, p.tz), gc = [.2, .78, 1]; for (const s of [-1, 1]) { const e = edge(p, s * (h + .6)); m.box(e[0], p.y + 3.2, e[2], .25, 3.2, .25, gc, yaw, true); } m.box(p.x, p.y + 6.6, p.z, h + .9, .35, .25, gc, yaw, true); m.box(p.x, p.y + 7.6, p.z, 2.6, .12, .9, [1, 1, 1], yaw, true); }
   // shortcut
   { const s = SC, K = Math.max(8, Math.round(s.len / 3)), w = s.w / 2, px = s.uz, pz = -s.ux;
     const sc = id === 'master_circuit' ? [.56, .42, .26] : id === 'ancient_desert' ? [.62, .5, .34] : id === 'volcano_core' ? [.3, .22, .2] : id === 'neon_metropolis' ? [.22, .2, .34] : [.3, .5, .7];
@@ -485,12 +568,13 @@ function buildWorld(st){
   }
   // stage scenery
   if (id === 'master_circuit') {
-    for (let k = 0; k < 420; k++) { const [x, z] = spot(170); if (!far(x, z, h + 10)) continue; const s = rnd(1.4, 3);
+    for (let k = 0; k < 420; k++) { const [x, z] = spot(170); if (!far(x, z, h + 10)) continue; m.oy = G(x, z); if (m.oy < -1.6) continue; const s = rnd(1.4, 3);
       if (R() < .6) { m.cyl(x, 0, z, s * .16, s * 1.1, [.42, .28, .16], 5); m.cyl(x, s * .8, z, s * .95, s * 1.7, [.13, rnd(.4, .52), .2], 7, 0); m.cyl(x, s * 1.9, z, s * .7, s * 1.5, [.16, rnd(.48, .6), .24], 7, 0); }
       else { m.cyl(x, 0, z, s * .18, s * 1.3, [.45, .3, .18], 5); m.sph(x, s * 2, z, s * 1.05, s * .95, s * 1.05, [rnd(.2, .32), rnd(.56, .68), .22], 7, 5); } }
+    m.oy = 0;
     // grandstand along the start straight
     for (const side of [-1, 1]) for (let t = 0; t < 3; t++) { const p = P[(N + 6 + t * 9) % N], yaw = Math.atan2(p.tx, p.tz); for (let r = 0; r < 4; r++) { const e = edge(p, side * (h + 7 + r * 1.8)); m.box(e[0], 1 + r * .9, e[2], .9, 1 + r * .9, 10, [.72, .74, .78], yaw); for (let cnt = 0; cnt < 9; cnt++) { const o = (cnt - 4) * 2.1; m.sph(e[0] + p.tx * o, 2.35 + r * 1.8, e[2] + p.tz * o, .34, .4, .34, hsv(R(), .7, .95), 5, 3); } } const e = edge(p, side * (h + 16)); m.box(e[0], 9.4, e[2], 5.5, .25, 10.5, [.9, .2, .15], yaw); }
-    for (let k = 0; k < 9; k++) { const p = P[Math.floor(R() * N)], s = R() < .5 ? 1 : -1, e = edge(p, s * (h + 13)); if (!far(e[0], e[2], h + 9)) continue; const yaw = Math.atan2(p.tx, p.tz) + Math.PI / 2; m.box(e[0], 4.5, e[2], 5, 1.8, .2, hsv(R(), .75, .95), yaw); m.box(e[0], 1.4, e[2], .2, 1.4, .2, [.3, .3, .32], yaw); }
+    for (let k = 0; k < 9; k++) { const p = P[Math.floor(R() * N)], s = R() < .5 ? 1 : -1, e = edge(p, s * (h + 13)); e[1] = 0; if (!far(e[0], e[2], h + 9)) continue; const yaw = Math.atan2(p.tx, p.tz) + Math.PI / 2; m.oy = G(e[0], e[2]); m.box(e[0], 4.5, e[2], 5, 1.8, .2, hsv(R(), .75, .95), yaw); m.box(e[0], 1.4, e[2], .2, 1.4, .2, [.3, .3, .32], yaw); }
     for (let k = 0; k < 26; k++) { const a = R() * 6.28, d = rnd(700, 1900); sk.sph(b.cx + Math.cos(a) * d, rnd(210, 420), b.cz + Math.sin(a) * d, rnd(90, 190), rnd(22, 40), rnd(60, 120), [1, 1, 1], 10, 6, true); }
     for (let k = 0; k < 22; k++) { const a = k / 22 * 6.28 + R() * .2, d = 2300; sk.cyl(b.cx + Math.cos(a) * d, -20, b.cz + Math.sin(a) * d, rnd(420, 700), rnd(260, 520), mix3([.36, .5, .62], st.sky, .35), 7, 0); }
     sk.sph(b.cx + 1500, 1400, b.cz + 900, 150, 150, 150, [1, .98, .82], 12, 8, true);
@@ -505,9 +589,9 @@ function buildWorld(st){
     sk.sph(b.cx - 1200, 1500, b.cz + 2000, 240, 240, 240, [1, .93, .98], 14, 9, true); sk.sph(b.cx - 1130, 1560, b.cz + 1830, 70, 70, 70, [.9, .8, .9], 8, 6, true);
   }
   if (id === 'ancient_desert') {
-    for (let k = 0; k < 9; k++) { const a = k / 9 * 6.28 + R(), d = rnd(240, 520), s = rnd(40, 95); m.cyl(b.cx + Math.cos(a) * d, -.5, b.cz + Math.sin(a) * d, s, s * .78, mul3([.82, .64, .38], rnd(.9, 1.1)), 4, 0); }
-    for (let k = 0; k < 60; k++) { const [x, z] = spot(280); if (!far(x, z, 42)) continue; m.sph(x, -1, z, rnd(18, 46), rnd(3, 8), rnd(14, 34), mul3(st.ground, rnd(.94, 1.1)), 8, 4); }
-    for (let k = 0; k < 300; k++) { const [x, z] = spot(140); if (!far(x, z, h + 8)) continue; const t = R();
+    for (let k = 0; k < 9; k++) { const a = k / 9 * 6.28 + R(), d = rnd(240, 520), s = rnd(40, 95); m.oy = G(b.cx + Math.cos(a) * d, b.cz + Math.sin(a) * d); m.cyl(b.cx + Math.cos(a) * d, -.5, b.cz + Math.sin(a) * d, s, s * .78, mul3([.82, .64, .38], rnd(.9, 1.1)), 4, 0); }
+    for (let k = 0; k < 60; k++) { const [x, z] = spot(280); if (!far(x, z, 42)) continue; m.oy = G(x, z); m.sph(x, -1, z, rnd(18, 46), rnd(3, 8), rnd(14, 34), mul3(st.ground, rnd(.94, 1.1)), 8, 4); }
+    for (let k = 0; k < 300; k++) { const [x, z] = spot(140); if (!far(x, z, h + 8)) continue; m.oy = G(x, z); const t = R();
       if (t < .32) { const c = rnd(4, 9); m.cyl(x, 0, z, .9, c, [.83, .68, .45], 8); m.box(x, c + .3, z, 1.2, .3, 1.2, [.78, .62, .4]); if (R() < .5) m.box(x + 3, c + .9, z, 4.4, .45, 1.1, [.76, .6, .38]); if (R() < .5) m.cyl(x + 6, 0, z, .9, c, [.8, .65, .43], 8); }
       else if (t < .55) { const c = rnd(3.5, 6); m.cyl(x, 0, z, .22, c, [.5, .36, .2], 5, .16); for (let l = 0; l < 6; l++) { const a = l * 1.047; m.box(x + Math.cos(a) * 1.3, c - .2, z + Math.sin(a) * 1.3, 1.4, .08, .42, [.22, .55, .2], -a); } }
       else if (t < .7) { const c = rnd(6, 13); m.cyl(x, 0, z, 1, c, [.72, .56, .36], 4, .5); m.cyl(x, c, z, .5, 1.4, [.9, .78, .4], 4, 0); }
@@ -516,8 +600,9 @@ function buildWorld(st){
     for (let k = 0; k < 16; k++) { const a = k / 16 * 6.28 + R() * .2, d = 2500; sk.cyl(b.cx + Math.cos(a) * d, -20, b.cz + Math.sin(a) * d, rnd(500, 800), rnd(160, 300), mix3([.8, .58, .36], st.sky, .5), 6, rnd(100, 250)); }
   }
   if (id === 'volcano_core') {
-    for (let k = 0; k < 340; k++) { const [x, z] = spot(200); if (!far(x, z, h + 6)) continue; const s = rnd(1.2, 5.5);
+    for (let k = 0; k < 340; k++) { const [x, z] = spot(200); if (!far(x, z, h + 6)) continue; m.oy = Math.max(0, G(x, z)); const s = rnd(1.2, 5.5);
       if (R() < .6) m.cyl(x, -.2, z, s, s * rnd(2, 4.4), [rnd(.2, .28), .13, .12], 6, 0); else m.sph(x, 0, z, s * 1.3, s, s * 1.1, [rnd(.17, .24), .11, .1], 6, 4); }
+    m.oy = 0;
     for (let k = 0; k < 5; k++) { const a = k / 5 * 6.28 + .6, d = rnd(520, 900), r = rnd(240, 380), hh = rnd(260, 420); const x = b.cx + Math.cos(a) * d, z = b.cz + Math.sin(a) * d; m.cyl(x, -1, z, r, hh, [.2, .1, .09], 9, r * .22); m.cyl(x, hh - 4, z, r * .2, 6, [1, .55, .1], 9, r * .2, true); m.cyl(x, hh, z, r * .12, 260, [1, .4, .08], 6, r * .3, true); }
     for (let k = 0; k < 60; k++) { const a = R() * 6.28, d = rnd(900, 2600); sk.sph(b.cx + Math.cos(a) * d, rnd(500, 900), b.cz + Math.sin(a) * d, rnd(160, 380), rnd(40, 90), rnd(120, 260), mul3([.28, .1, .07], rnd(.6, 1.2)), 7, 4, true); }
   }
@@ -528,7 +613,29 @@ function buildWorld(st){
     sk.sph(b.cx + 1700, 500, b.cz + 1900, 520, 520, 520, [.95, .62, .35], 18, 12); sk.cyl(b.cx + 1700, 495, b.cz + 1900, 1050, 10, [.9, .8, .6], 28, 760);
     sk.sph(b.cx - 2200, -300, b.cz - 900, 340, 340, 340, [.35, .6, .95], 16, 10); sk.sph(b.cx - 600, 1500, b.cz - 2400, 150, 150, 150, [.8, .8, .85], 12, 8);
   }
-  world = upload(m); skyObj = upload(sk);
+  // ---- 追加の作り込み
+  m.oy = 0;
+  for (let g = 0; g < 12; g++) { const row = Math.floor(g / 2), p = P[(N - 3 - row * 3 + N) % N], lat = (g % 2 ? 1 : -1) * st.width * .22, yaw = Math.atan2(p.tx, p.tz), wc = [.95, .95, .92];      // スターティンググリッド
+    m.box(p.x + p.nx * lat + p.tx * 1.3, p.y + .045, p.z + p.nz * lat + p.tz * 1.3, 1.1, .005, .09, wc, yaw, true);
+    for (const sd of [-1, 1]) m.box(p.x + p.nx * (lat + sd * 1.1) + p.tx * .8, p.y + .045, p.z + p.nz * (lat + sd * 1.1) + p.tz * .8, .09, .005, .5, wc, yaw, true); }
+  if (GROUND()) for (let i = 0; i < N; i++) { const a = P[i]; if (a.g || Math.abs(a.curv) < .5) continue; const s = a.curv > 0 ? -1 : 1, e = edge(a, s * (h + (st.mode === 'lava' ? 1.6 : 2.1))); if (onSc(e[0], e[2], 1.5) >= 0) continue;      // コーナー外側のタイヤバリア
+    m.cyl(e[0], a.y - .15, e[2], .5, .85, (i & 1) ? [.12, .12, .13] : (st.mode === 'lava' ? [.95, .5, .1] : [.93, .93, .93]), 7); }
+  if (id === 'master_circuit') {
+    for (let i = 4; i < N; i += 9) { const a = P[i]; if (a.g || Math.abs(a.curv) > .15) continue; for (const s of [-1, 1]) { const e = edge(a, s * (h + 2.4)); m.cyl(e[0], a.y - .2, e[2], .06, 4.4, [.9, .9, .9], 4); m.box(e[0] + a.tx * .6, a.y + 3.7, e[2] + a.tz * .6, .03, .4, .6, hsv(i * .07 % 1, .8, .95), Math.atan2(a.tx, a.tz)); } }
+    for (let k = 0; k < 8; k++) { const [x, z] = spot(120), y = rnd(60, 130), c = hsv(R(), .7, 1); m.sph(x, y, z, 9, 10.5, 9, c, 10, 7); m.sph(x, y, z, 9.1, 3, 9.1, [1, 1, 1], 10, 3); m.cyl(x, y - 11.5, z, 1.3, 3.2, mul3(c, .8), 6, 5); m.cyl(x, y - 13.2, z, 1.4, 1.6, [.5, .35, .2], 6); }
+  }
+  if (st.mode === 'open') for (let k = 0; k < 1100; k++) { const p = P[Math.floor(R() * N)]; if (p.g) continue; const s = R() < .5 ? 1 : -1, dd = h + 1.7 + R() * R() * 24, x = p.x + p.nx * s * dd, z = p.z + p.nz * s * dd; if (!far(x, z, h + 1.3)) continue; m.oy = G(x, z); if (m.oy < -1.6) continue;      // 道ばたの草花・小石
+    if (id === 'master_circuit') { if (R() < .7) { m.cyl(x, 0, z, .05, .36, [.2, .5, .2], 3); m.sph(x, .44, z, .17, .13, .17, [[1, .9, .3], [1, .5, .7], [1, 1, 1], [.65, .55, 1]][Math.floor(R() * 4)], 5, 3); } else m.cyl(x, 0, z, .5, .7, [.2, rnd(.48, .6), .22], 5, 0); }
+    else if (R() < .6) m.sph(x, .1, z, rnd(.3, .9), rnd(.2, .5), rnd(.3, .9), [.62, .48, .32], 5, 3); else { m.cyl(x, 0, z, .14, rnd(.9, 1.8), [.3, .52, .26], 5); m.sph(x, 1.3, z, .32, .5, .32, [.36, .56, .28], 5, 3); } }
+  m.oy = 0;
+  if (id === 'ancient_desert' || id === 'volcano_core') for (let i = 30; i < N - 10; i += 46) { const a = P[i]; if (a.g || P[(i + 4) % N].g || P[(i - 4 + N) % N].g) continue; const yaw = Math.atan2(a.tx, a.tz), c = id === 'ancient_desert' ? [.82, .66, .44] : [.27, .18, .17];      // コースをまたぐ石のアーチ
+    for (const s of [-1, 1]) { const e = edge(a, s * (h + 1.7)); m.cyl(e[0], a.y - .5, e[2], 1.15, 9.3, c, 8, .95); m.box(e[0], a.y + 9.1, e[2], 1.4, .35, 1.4, mul3(c, 1.1), yaw); }
+    m.box(a.x, a.y + 10.1, a.z, h + 3.4, .7, 1.25, c, yaw); m.box(a.x, a.y + 11.1, a.z, h + 2, .35, 1, mul3(c, .9), yaw); }
+  if (id === 'neon_metropolis') for (let k = 0; k < 170; k++) { const [x, z] = spot(200); if (!far(x, z, h + 5)) continue; m.box(x, rnd(-25, 55), z, rnd(1.2, 3.2), .22, .3, R() < .5 ? [1, .85, .4] : R() < .5 ? [1, .25, .3] : [.5, .9, 1], R() * 6.28, true); }      // 空を走る車の光
+  if (id === 'volcano_core') for (let k = 0; k < 110; k++) { const p = P[Math.floor(R() * N)], s = R() < .5 ? 1 : -1, dd = h + 3 + R() * 26, x = p.x + p.nx * s * dd, z = p.z + p.nz * s * dd; if (!far(x, z, h + 2.6)) continue; m.oy = Math.max(0, G(x, z)); const t = rnd(.9, 3); m.cyl(x, -.1, z, t * .3, t, [1, rnd(.5, .85), .15], 5, 0, true); m.cyl(x + .4, -.1, z + .3, t * .2, t * .6, [1, .4, .1], 5, 0, true); }      // 光る結晶
+  m.oy = 0;
+  if (id === 'cosmo_skyway') { const sx = b.cx - 900, sy = 800, sz = b.cz + 1500; sk.sph(sx, sy, sz, 90, 90, 90, [.8, .82, .9], 12, 8); for (let k = 0; k < 24; k++) { const a = k / 24 * 6.283; sk.box(sx + Math.cos(a) * 260, sy + Math.sin(a) * 90, sz + Math.sin(a) * 240, 36, 14, 22, k % 3 ? [.7, .72, .8] : [.4, .9, 1], a, k % 3 === 0); } for (let k = 0; k < 4; k++) { const a = k / 4 * 6.283 + .4; sk.box(sx + Math.cos(a) * 130, sy + Math.sin(a) * 45, sz + Math.sin(a) * 120, 130, 5, 5, [.6, .62, .7], -a); } }
+  m.oy = 0; world = upload(m); skyObj = upload(sk);
   const q = mesh(); q.flat([-1, -1, .999], [1, -1, .999], [1, .1, .999], [-1, .1, .999], st.sky); const top = st.skyT;
   for (const p of [[-1, .1, st.sky], [1, .1, st.sky], [1, 1, top], [-1, .1, st.sky], [1, 1, top], [-1, 1, top]]) q.v.push(p[0], p[1], .999, p[2][0], p[2][1], p[2][2]);
   skyQuad = upload(q);
@@ -544,17 +651,18 @@ function lookAt(e, c){ let zx = e[0] - c[0], zy = e[1] - c[1], zz = e[2] - c[2];
 function mul(a, b){ const o = new Array(16); for (let c = 0; c < 4; c++) for (let r = 0; r < 4; r++) o[c * 4 + r] = a[r] * b[c * 4] + a[4 + r] * b[c * 4 + 1] + a[8 + r] * b[c * 4 + 2] + a[12 + r] * b[c * 4 + 3]; return o; }
 const IDENT = new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]);
 const Q = { cube: [], sph: [], cylx: [], cone: [] }, QT = [];   // 不透明キュー / 半透明キュー
-let T = { x: 0, y: 0, z: 0, c: 1, s: 0 };
-const setT = (x, y, z, h) => { T = { x, y, z, c: Math.cos(h), s: Math.sin(h) }; };
+let T = { x: 0, y: 0, z: 0, c: 1, s: 0, cp: 1, sp: 0 };
+const setT = (x, y, z, h, pitch = 0) => { T = { x, y, z, c: Math.cos(h), s: Math.sin(h), cp: Math.cos(pitch), sp: Math.sin(pitch) }; };
 // 現在の基準 T のローカル座標 (ox,oy,oz) に、大きさ (sx,sy,sz) の形を置く
-function d(shape, ox, oy, oz, sx, sy, sz, col, a = 1, add = 0){
-  const c = T.c, s = T.s, e = [c * sx, 0, -s * sx, 0, 0, sy, 0, 0, s * sz, 0, c * sz, 0, T.x + c * ox + s * oz, T.y + oy, T.z - s * ox + c * oz, 1, col[0], col[1], col[2], a];
+function d(shape, ox, oy, oz, sx, sy, sz, col, a = 1, add = 0, tex = 0){
+  const c = T.c, s = T.s, cp = T.cp, sp = T.sp, ux = -s * sp, uz = -c * sp, fx = s * cp, fz = c * cp;      // 右=(c,0,-s) 上=(ux,cp,uz) 前=(fx,sp,fz)
+  const e = [c * sx, 0, -s * sx, 0, ux * sy, cp * sy, uz * sy, 0, fx * sz, sp * sz, fz * sz, 0, T.x + c * ox + ux * oy + fx * oz, T.y + cp * oy + sp * oz, T.z - s * ox + uz * oy + fz * oz, 1, col[0], col[1], col[2], a, tex, oz / 3.6 + .5, sz / 3.6, ox / 1.9 + .5, sx / 1.9];
   if (a < 1 || add) QT.push([shape, e, add]); else Q[shape].push(e);
 }
 function flush(){
   const M = new Float32Array(16);
   gl.uniform1f(U.uA, 1);
-  for (const k in Q) { const L = Q[k]; if (!L.length) continue; bind(SHAPES[k]); const n = SHAPES[k].n; for (const e of L) { for (let i = 0; i < 16; i++) M[i] = e[i]; gl.uniformMatrix4fv(U.uM, false, M); gl.uniform3f(U.uTint, e[16], e[17], e[18]); gl.drawArrays(gl.TRIANGLES, 0, n); } L.length = 0; }
+  for (const k in Q) { const L = Q[k]; if (!L.length) continue; bind(SHAPES[k]); const n = SHAPES[k].n; for (const e of L) { for (let i = 0; i < 16; i++) M[i] = e[i]; gl.uniformMatrix4fv(U.uM, false, M); gl.uniform3f(U.uTint, e[16], e[17], e[18]); if (e[20]) { gl.uniform1f(U.uUseTex, 1); gl.uniform4f(U.uUV, e[21], e[22], e[23], e[24]); } gl.drawArrays(gl.TRIANGLES, 0, n); if (e[20]) gl.uniform1f(U.uUseTex, 0); } L.length = 0; }
   if (QT.length) { gl.enable(gl.BLEND); gl.depthMask(false);
     for (const [k, e, add] of QT) { gl.blendFunc(gl.SRC_ALPHA, add ? gl.ONE : gl.ONE_MINUS_SRC_ALPHA); bind(SHAPES[k]); for (let i = 0; i < 16; i++) M[i] = e[i]; gl.uniformMatrix4fv(U.uM, false, M); gl.uniform3f(U.uTint, e[16], e[17], e[18]); gl.uniform1f(U.uA, e[19]); gl.drawArrays(gl.TRIANGLES, 0, SHAPES[k].n); }
     QT.length = 0; gl.disable(gl.BLEND); gl.depthMask(true); gl.uniform1f(U.uA, 1); }
@@ -562,20 +670,28 @@ function flush(){
 
 // ---------------------------------------------------------------- kart + character models
 const DK = [.1, .1, .12], GY = [.55, .57, .62];
-function drawKart(kt, col, steer){
-  const L = kt.len, wz = .74 * L;
-  d('cube', 0, .42, 0, 1.22, .3, 2.1 * L, col);
-  d('sph', 0, .5, 1.0 * L, 1.05, .5, 1.25, mul3(col, 1.08));
+function drawKart(kt, col, steer, pt){
+  const L = kt.len, wz = .74 * L; pt = pt ? 1 : 0;
+  d('cube', 0, .42, 0, 1.22, .3, 2.1 * L, col, 1, 0, pt);
+  d('sph', 0, .5, 1.0 * L, 1.05, .5, 1.25, mul3(col, 1.08), 1, 0, pt);
   d('cube', 0, .3, 1.25 * L, 1.5, .1, .3, DK);                                   // front bumper
-  for (const s of [-1, 1]) { d('cube', s * .72, .44, -.12, .34, .3, 1.05 * L, mul3(col, .62)); d('cube', s * .72, .62, -.12, .28, .06, .9 * L, [.95, .95, .95]); }
+  for (const s of [-1, 1]) { d('cube', s * .72, .44, -.12, .34, .3, 1.05 * L, mul3(col, .62), 1, 0, pt); d('cube', s * .72, .62, -.12, .28, .06, .9 * L, [.95, .95, .95]); }
   d('cube', 0, .88, -.62, .84, .62, .2, DK);                                     // seat back
   d('cube', 0, .62, -.98 * L, .74, .36, .5, GY);                                 // engine
   for (const s of [-1, 1]) { d('cylx', s * .26, .76, -1.2 * L, .16, .16, .16, [.8, .8, .82]); d('cube', s * .26, .76, -1.25 * L, .12, .12, .3, [.3, .3, .32]); }
   for (const s of [-1, 1]) d('cube', s * .5, .95, -1.08 * L, .08, .42, .1, DK);
-  d('cube', 0, 1.18, -1.1 * L, 1.55, .08, .4 * kt.wing, mul3(col, .78));
+  d('cube', 0, 1.18, -1.1 * L, 1.55, .08, .4 * kt.wing, mul3(col, .78), 1, 0, pt);
   for (const s of [-1, 1]) d('cube', s * .78, 1.2, -1.1 * L, .06, .22, .44 * kt.wing, [.95, .95, .95]);
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) { const front = sz > 0, r = front ? .62 : .72; d('cylx', sx * .82, r / 2, sz * wz, front ? .34 : .42, r, r, DK); d('cylx', sx * (.82 + (front ? .12 : .16)), r / 2, sz * wz, .14, r * .5, r * .5, [.85, .85, .88]); }
   d('cube', 0, .9, .38, .08, .08, .5, DK); d('cylx', 0, 1.0, .18, .08, .46, .46, [.2, .2, .22]);          // steering column + wheel
+}
+function drawGlider(g, col){
+  const W = [1, 1, 1];
+  for (const s of [-1, 1]) d('cube', s * .5, 2.35, -.25, .05, .95, .05, DK);
+  if (g.shape === 'std') { d('cube', 0, 2.85, -.25, 3.8, .07, 1.3, col); d('cube', 0, 2.88, -.25, .5, .08, 1.45, W); d('cube', 0, 3, -.8, .06, .3, .4, W); }
+  else if (g.shape === 'kite') { d('cube', 0, 2.85, 0, 1.1, .07, 2.4, col); for (const s of [-1, 1]) { d('cube', s * 1.05, 2.85, -.5, 1.1, .07, 1.5, mul3(col, .85)); d('cube', s * 1.9, 2.85, -.95, .8, .07, .8, W); } d('cube', 0, 3.05, -1, .06, .4, .6, W); }
+  else if (g.shape === 'para') { for (let i = -2; i <= 2; i++) { d('cube', i * .95, 3.75 - Math.abs(i) * .28, -.25, 1, .26, 1.7, i & 1 ? W : col); d('cube', i * .7, 3 - Math.abs(i) * .1, -.25, .03, 1.3 - Math.abs(i) * .2, .03, DK); } }
+  else { d('cube', 0, 2.85, -.25, 3.2, .09, 1.1, col); for (const s of [-1, 1]) { d('cube', s * 1.3, 2.7, -.3, .36, .36, 1.5, GY); d('cone', s * 1.3, 2.7, .6, .36, .4, .36, [.9, .2, .15]); d('sph', s * 1.3, 2.7, -1.25, .34, .34, .8 + Math.random() * .5, [1, .6, .1], .9, 1); } }
 }
 function drawChar(ch, lean){
   const hx = lean * .06, hy = 1.56, hz = -.22;
@@ -716,30 +832,38 @@ const mode = () => sel.mode;
 function newKart(i, ai, name, chIdx, color, kt){
   return { ai, name, ch: CH[chIdx], color, kt, x: 0, y: 0, z: 0, h: 0, v: 0, yaw: 0, idx: 0, lat: 0, ty: 0, frac: 0, drift: false, dDir: 0, charge: 0, tier: 0,
     boost: 0, nitro: 0, slow: 1, slowT: 0, shield: 0, spin: 0, inv: 0, rev: 0, chips: 0, item: null, itemT: 0, lapNo: 0, sectors: 0, debt: false, lapStart: 0, last: 0,
-    safe: 0, rescue: 0, off: false, sc: false, fin: false, finT: 0, prog: 0, vmul: 1, skill: 1, aiLat: 0, aiPhase: i * 1.7, st: 0 };
+    safe: 0, rescue: 0, off: false, sc: false, glide: false, pitch: 0, fin: false, finT: 0, prog: 0, vmul: 1, skill: 1, aiLat: 0, aiPhase: i * 1.7, st: 0 };
 }
 function selectStage(i){
   sel.stage = i; ST = STAGES[i]; TR = TRACKS[ST.id] || (TRACKS[ST.id] = buildTrack(ST));
-  P = TR.P; SEG = TR.SEG; bounds = TR.bounds; pads = TR.pads; boxesAt = TR.boxesAt; SC = TR.sc;
+  P = TR.P; SEG = TR.SEG; bounds = TR.bounds; pads = TR.pads; boxesAt = TR.boxesAt; SC = TR.sc; G0 = TR.G0; G1 = TR.G1;
   buildWorld(ST); gl.clearColor(ST.sky[0], ST.sky[1], ST.sky[2], 1); save();
 }
-function startRace(){
+function startRace(o){
+  o = o && o.online ? o : null; online = !!o;
   audioInit();
-  const N = P.length, n = mode() === 'vs' ? 12 : 1; karts = []; shots = []; traps = []; parts = [];
-  const R = rng(Date.now() & 0xffff), pool = CH.map((_, i) => i).filter(i => i !== sel.ch); for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
-  for (let i = 0; i < n; i++) {
-    const isMe = i === n - 1, ci = isMe ? sel.ch : pool[i];
-    const k = newKart(i, !isMe, isMe ? 'あなた' : CH[ci].n, ci, isMe ? hex(COLS[sel.col]) : mix3(CH[ci].suit, [1, 1, 1], .08), isMe ? KT[sel.kt] : KT[Math.floor(R() * 3)]);
+  const N = P.length; karts = []; shots = []; traps = []; parts = []; me = null;
+  const R = rng(o ? o.seed : Date.now() & 0xffff), pool = CH.map((_, i) => i); for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  let ents = [];
+  if (o) { ents = o.order.map(id => ({ id, me: id === acct.uid })); for (let i = 0; i < o.aiCount; i++) ents.push({ id: 'ai' + i, ai: true }); }
+  else { if (sel.mode !== 'ta') for (let i = 0; i < 11; i++) ents.push({ id: 'ai' + i, ai: true }); ents.push({ id: 'me', me: true }); }
+  const n = ents.length;
+  ents.forEach((en, i) => {
+    let ci, name, color, kt, gld;
+    if (en.me) { ci = sel.ch; name = 'あなた'; color = hex(COLS[sel.col]); kt = KT[sel.kt]; gld = GLD[sel.gl]; }
+    else if (en.ai) { ci = pool[i % pool.length]; name = CH[ci].n; color = mix3(CH[ci].suit, [1, 1, 1], .08); kt = KT[Math.floor(R() * 3)]; gld = GLD[Math.floor(R() * GLD.length)]; }
+    else { const p = ((room.data || {}).players || {})[en.id] || {}; ci = chOf(p); name = p.name || 'PLAYER'; color = hex(COLS[clamp(p.col | 0, 0, COLS.length - 1)]); kt = KT[clamp((p.kt | 0) % 10, 0, 2)]; gld = GLD[clamp(Math.floor((p.kt | 0) / 10), 0, GLD.length - 1)]; }
+    const k = newKart(i, !!en.ai, name, ci, color, kt); k.id = en.id; k.gl = gld; k.paint = !!en.me; k.remote = !en.me && (!en.ai || (!!o && !room.host)); k.net = null;
     const row = Math.floor(i / 2), idx = (N - 3 - row * 3 + N) % N, p = P[idx], lat = n === 1 ? 0 : (i % 2 ? 1 : -1) * ST.width * .22;
-    k.x = p.x + p.nx * lat; k.z = p.z + p.nz * lat; k.y = p.y; k.h = Math.atan2(p.tx, p.tz); k.idx = idx; k.safe = idx; k.skill = .86 + .12 * (1 - i / 11); k.aiLat = lat;
-    karts.push(k); if (isMe) me = k;
-  }
-  boxes = mode() === 'vs' ? boxesAt.flatMap(idx => [-1, 0, 1].map(s => ({ idx, lat: s * ST.width * .28, t: 0 }))) : [];
+    k.x = p.x + p.nx * lat; k.z = p.z + p.nz * lat; k.y = p.y; k.h = Math.atan2(p.tx, p.tz); k.idx = idx; k.safe = idx; k.skill = .86 + .12 * (1 - (i % 12) / 11); k.aiLat = lat;
+    karts.push(k); if (en.me) me = k;
+  });
+  boxes = vsLike() ? boxesAt.flatMap(idx => [-1, 0, 1].map(s => ({ idx, lat: s * ST.width * .28, t: 0 }))) : [];
   raceT = 0; countT = 3.3; endT = 0; novaT = 0; state = 'count'; cam.h = me.h; cam.ky = me.y;
-  $('#home').hidden = true; $('#result').hidden = true; $('#hud').hidden = false; $('#bItem').hidden = mode() !== 'vs'; $('#pos').style.display = mode() === 'vs' ? '' : 'none';
+  $('#home').hidden = true; $('#result').hidden = true; $('#hud').hidden = false; $('#bItem').hidden = !vsLike(); $('#pos').style.display = vsLike() ? '' : 'none';
   input.steer = 0; input.drift = input.brake = input.item = false; say('3'); se(440, .12);
 }
-function toHome(){ state = 'home'; $('#home').hidden = false; $('#result').hidden = true; $('#hud').hidden = true; renderPanel(); }
+function toHome(){ state = 'home'; if (online || room.id) { tab = 'race'; raceStep = 'go'; } online = false; $('#led').hidden = true; $('#hud').classList.remove('editing'); $('#home').hidden = false; $('#result').hidden = true; $('#hud').hidden = true; renderPanel(); }
 function say(t, small, dur = 1){ const m = $('#msg'); m.textContent = t; m.className = 'on' + (small ? ' small' : ''); msgT = dur; }
 const rankVal = k => k.fin ? 1e9 - k.finT : k.prog;
 function rankOf(k){ let r = 0; const v = rankVal(k); for (const o of karts) if (o !== k && rankVal(o) > v) r++; return r; }
@@ -752,15 +876,15 @@ function hit(k, slow, dur, kind){
   if (kind === 'homing') k.inv = 1.5; else if (kind === 'nova') { k.rev = 1.1; if (k === me) novaT = 2.4; } else { k.v *= .35; k.spin = .7; }
   if (k === me) { say(kind === 'homing' ? 'ハンドル反転！' : kind === 'nova' ? 'まぶしい！' : 'ヒット！', true, .9); se(200, .35, 'sawtooth', .09, .3); }
 }
-function useItem(k){
+function useItem0(k){
   const it = k.item; if (!it) return; k.item = null; const fx = Math.sin(k.h), fz = Math.cos(k.h), mine = k === me;
   if (it === 'nitro') { k.boost = Math.max(k.boost, 3); k.nitro = 3; if (mine) se(160, .7, 'sawtooth', .09, 4); }
   else if (it === 'shield') { k.shield = 9; if (mine) se(660, .25, 'triangle', .08, 1.5); }
   else if (it === 'chip') { k.chips = Math.min(10, k.chips + 1); if (mine) se(880, .1, 'square', .06, 1.5); }
   else if (it === 'orb') { shots.push({ kind: 'orb', x: k.x + fx * 2.5, z: k.z + fz * 2.5, h: k.h, idx: k.idx, ty: k.y, y: k.y, life: 3, owner: k }); if (mine) se(900, .25, 'square', .06, .3); }
   else if (it === 'homing') { const r = rankOf(k), t = r > 0 ? byRank(r - 1) : null; shots.push({ kind: 'homing', x: k.x + fx * 2.5, z: k.z + fz * 2.5, h: k.h, idx: k.idx, ty: k.y, y: k.y, life: 7, owner: k, target: t }); if (mine) se(500, .3, 'sawtooth', .06, 2.4); }
-  else if (it === 'trap') { traps.push({ x: k.x - fx * 3, z: k.z - fz * 3, y: k.y, life: 28, arm: .6 }); if (mine) se(240, .2, 'triangle', .08, .6); }
-  else if (it === 'nova') { const t = byRank(0); if (t && t !== k) hit(t, .6, 1.6, 'nova'); if (mine) se(1200, .6, 'sine', .08, .2); }
+  else if (it === 'trap') { const tp = { x: +(k.x - fx * 3).toFixed(2), z: +(k.z - fz * 3).toFixed(2), y: +k.y.toFixed(2) }; if (online) evSend({ k: 'trap', ...tp }); else traps.push({ ...tp, life: 28, arm: .6 }); if (mine) se(240, .2, 'triangle', .08, .6); }
+  else if (it === 'nova') { const t = byRank(0); if (t && t !== k) strike(t, .6, 1.6, 'nova'); if (mine) se(1200, .6, 'sine', .08, .2); }
   else if (it === 'warp') { const r = rankOf(k), t = byRank(Math.max(0, r - 3));
     if (t && t !== k) { for (let i = 0; i < 14; i++) spark(k.x, k.y + 1, k.z, [1, .4, .7], 6);
       k.x = t.x - Math.sin(t.h) * 4; k.z = t.z - Math.cos(t.h) * 4; k.h = t.h; k.y = t.y; k.idx = t.idx; k.lapNo = t.lapNo; k.sectors = t.sectors; k.debt = t.debt; k.lapStart = t.lapStart; k.safe = t.safe; k.v = Math.max(k.v, t.v); locate(k, true);
@@ -793,13 +917,14 @@ function updateKart(k, inp, dt){
     else { const p = P[k.safe]; k.x = p.x; k.z = p.z; k.h = Math.atan2(p.tx, p.tz); k.idx = k.safe; k.v = 0; k.yaw = 0; k.y = p.y + Math.max(0, k.rescue) * 6; k.lat = 0; k.off = false; }
     return;
   }
+  const x0 = k.x, y0 = k.y, z0 = k.z;
   const kt = k.kt, steer = inp.steer * (k.inv > 0 ? -1 : 1); k.st += (steer - k.st) * .2;
   if (!k.drift) { if (inp.drift && k.v > 9 && Math.abs(steer) > .2) { k.drift = true; k.dDir = Math.sign(steer); k.charge = 0; k.tier = 0; } }
   else if (k.v < 5) endDrift(k, false);
   else if (!inp.drift) endDrift(k, true);
   else { const t0 = k.tier; k.charge += (1 + Math.abs(k.v * k.yaw) / 9.81 * .12) * dt; k.tier = k.charge >= 4 ? 3 : k.charge >= 2.4 ? 2 : k.charge >= 1 ? 1 : 0; if (k === me && k.tier > t0) se(500 + k.tier * 220, .09, 'square', .05); }
 
-  let max = MAXV * kt.top * k.vmul * (1 + .012 * k.chips) * (k.off && k.nitro <= 0 ? ST.off : 1) * (k.slowT > 0 ? k.slow : 1), acc = ACC * kt.acc;
+  let max = MAXV * kt.top * k.vmul * (1 + .012 * k.chips) * (k.off && k.nitro <= 0 ? ST.off : 1) * (k.slowT > 0 ? k.slow : 1) * (k.glide ? k.gl.spd : 1), acc = ACC * kt.acc;
   if (k.boost > 0) { max *= 1.35; acc *= 3; }
   if (k.rev > 0) k.v = Math.max(-9, k.v - 40 * dt);
   else if (k.boost > 0) k.v = Math.min(max, k.v + acc * dt);
@@ -807,28 +932,35 @@ function updateKart(k, inp, dt){
   else k.v = Math.min(Math.max(k.v, max), k.v + acc * dt);
   if (k.v > max) k.v = Math.max(max, k.v - ACC * 1.5 * dt);
 
-  const turn = TURN * kt.turn;
+  const turn = TURN * kt.turn * (k.glide ? k.gl.ctl * .8 : 1);
   const want = k.drift ? k.dDir * turn * 1.25 * (.65 + .45 * steer * k.dDir) : steer * turn * clamp(Math.abs(k.v) / 6, 0, 1) * (k.v < 0 ? -1 : 1);
   k.yaw += (want - k.yaw) * Math.min(1, dt * 10); k.h += k.yaw * dt;
   const dir = k.h - (k.drift ? k.dDir * .22 : 0);
   k.x += Math.sin(dir) * k.v * dt; k.z += Math.cos(dir) * k.v * dt;
 
   const prev = k.idx, N = P.length; locate(k, k.sc);
-  const half = ST.width / 2, a = Math.abs(k.lat), p = P[k.idx]; k.off = false; k.sc = false; let y = k.ty;
-  if (a > half) {
+  const half = ST.width / 2, a = Math.abs(k.lat), p = P[k.idx]; k.off = false; k.sc = false; let y = k.ty; const wasG = k.glide; k.glide = !!p.g;
+  if (k.glide) {      // グライダー：コースに沿って山なりに飛ぶ。左右は少しだけ動ける
+    y = glideY(k.idx, k.frac, k.gl.arc); if (k.drift) endDrift(k, true); const lim = half + 3 + k.gl.ctl * 2.5;
+    if (a > lim) { const dd = (a - lim) * Math.sign(k.lat); k.x -= p.nx * dd; k.z -= p.nz * dd; }
+    if (!wasG) { k.boost = Math.max(k.boost, .8); if (k === me) se(520, .5, 'sine', .07, 1.8); }
+  } else if (a > half) {
     const f = onSc(k.x, k.z);
     if (f >= 0) { k.sc = true; y = scY(f); }
     else if (ST.mode === 'open') k.off = true;
     else if (ST.mode === 'wall') { if (a > half + 3) return startRescue(k); const dd = (a - half + .05) * Math.sign(k.lat); k.x -= p.nx * dd; k.z -= p.nz * dd; k.v *= .975; }
     else if (ST.mode === 'lava') { if (a > half + 2.5 && k.nitro <= 0) return startRescue(k); k.off = k.nitro <= 0; }
     else if (a > half + .6) return startRescue(k);
+    if (GROUND() && !k.sc) y = p.gh * fall(Math.sqrt(k.d2)) - .25;
   }
-  if (a < half - 1) k.safe = (k.idx - 2 + N) % N;
-  k.y = y;
+  if (wasG && !k.glide) { k.boost = Math.max(k.boost, k.gl.land); if (k === me) se(260, .3, 'sawtooth', .07, 2.4); }      // 着地ブースト
+  if (a < half - 1 && !k.glide && !P[(k.idx + 4) % N].g) k.safe = (k.idx - 2 + N) % N;
+  k.y += (y - k.y) * (k.glide || wasG ? 1 : .5);
 
-  for (const pd of pads) { const dd = (k.idx - pd.idx + N) % N; if (dd < 3 && Math.abs(k.lat - pd.lat) < 1.9 && !k.off && !k.sc) { if (k === me && k.boost <= 0) se(240, .3, 'sawtooth', .07, 3); k.boost = Math.max(k.boost, .9); } }
+  for (const pd of pads) { const dd = (k.idx - pd.idx + N) % N; if (dd < 3 && Math.abs(k.lat - pd.lat) < 1.9 && !k.off && !k.sc && !k.glide) { if (k === me && k.boost <= 0) se(240, .3, 'sawtooth', .07, 3); k.boost = Math.max(k.boost, .9); } }
   for (const key of ['boost', 'nitro', 'slowT', 'shield', 'spin', 'inv', 'rev']) if (k[key] > 0) k[key] -= dt;
 
+  { const mv = Math.hypot(k.x - x0, k.z - z0), tp = mv > .03 ? clamp(Math.atan2(k.y - y0, mv), -.6, .6) * (k.v < 0 ? -1 : 1) : 0; k.pitch += (tp - k.pitch) * .2; }      // 坂に合わせて車体を傾ける
   // laps：1周を8区間に分け、6区間以上を通っていれば有効（近道ぶんの余裕）
   k.sectors |= 1 << Math.floor(k.idx / N * 8);
   if (prev > N * .85 && k.idx < N * .15) {
@@ -844,7 +976,7 @@ function updateKart(k, inp, dt){
   k.prog = (k.lapNo - 1) * N + k.idx + k.frac - (k.debt ? N : 0);
 }
 function onLap(k, valid){
-  if (mode() === 'vs') {
+  if (vsLike()) {
     if (valid && k.lapNo > LAPS && !k.fin) { k.fin = true; k.finT = raceT; if (k === me) { endT = 1.8; say('FINISH!'); [523, 659, 784, 1047].forEach((f, i) => se(f, .25, 'square', .07, 1, i * .12)); } }
     else if (k === me && valid && k.lapNo === LAPS) { say('FINAL LAP'); se(784, .15); se(1047, .3, 'square', .07, 1, .15); }
     return;
@@ -866,27 +998,27 @@ function step(dt){
   if (state !== 'race') return;
   raceT += dt; if (novaT > 0) novaT -= dt;
   if (input.item) { input.item = false; useItem(me); }
-  for (const k of karts) updateKart(k, k.ai || k.fin ? aiInput(k) : input, dt);
+  for (const k of karts) { if (k.remote) updateRemote(k, dt); else updateKart(k, k.ai || k.fin ? aiInput(k) : input, dt); }
   for (let i = 0; i < karts.length; i++) for (let j = i + 1; j < karts.length; j++) {
     const a = karts[i], b = karts[j]; if (a.rescue > 0 || b.rescue > 0 || Math.abs(a.y - b.y) > 2) continue;
     const dx = b.x - a.x, dz = b.z - a.z, dd = Math.hypot(dx, dz);
-    if (dd < 1.9 && dd > .001) { const p = (1.9 - dd) / 2 / dd; a.x -= dx * p; a.z -= dz * p; b.x += dx * p; b.z += dz * p; }
+    if (dd < 1.9 && dd > .001) { const p = (1.9 - dd) / 2 / dd; if (!a.remote) { a.x -= dx * p; a.z -= dz * p; } if (!b.remote) { b.x += dx * p; b.z += dz * p; } }
   }
   for (const bx of boxes) {
     if (bx.t > 0) { bx.t -= dt; continue; }
     const p = P[bx.idx], x = p.x + p.nx * bx.lat, z = p.z + p.nz * bx.lat;
-    for (const k of karts) if (!k.item && k.rescue <= 0 && (k.x - x) ** 2 + (k.z - z) ** 2 < 5.3) { k.item = rollItem(k); k.itemT = 1.5 + Math.random() * 4; bx.t = 4; if (k === me) { se(700, .08); se(1050, .14, 'square', .06, 1, .08); } for (let i = 0; i < 8; i++) spark(x, p.y + 1.2, z, [1, 1, .6], 5); break; }
+    for (const k of karts) if (!k.remote && !k.item && k.rescue <= 0 && (k.x - x) ** 2 + (k.z - z) ** 2 < 5.3) { k.item = rollItem(k); k.itemT = 1.5 + Math.random() * 4; bx.t = 4; if (k === me) { se(700, .08); se(1050, .14, 'square', .06, 1, .08); } for (let i = 0; i < 8; i++) spark(x, p.y + 1.2, z, [1, 1, .6], 5); break; }
   }
   for (const o of shots) {
     o.life -= dt;
-    if (o.kind === 'homing' && o.target && o.target.rescue <= 0) { const t = o.target, dx = t.x - o.x, dz = t.z - o.z, l = Math.hypot(dx, dz) || 1; o.x += dx / l * 46 * dt; o.z += dz / l * 46 * dt; o.y += (t.y - o.y) * .1; if (l < 2.4) { hit(t, .8, 1.5, 'homing'); o.life = 0; } }
+    if (o.kind === 'homing' && o.target && o.target.rescue <= 0) { const t = o.target, dx = t.x - o.x, dz = t.z - o.z, l = Math.hypot(dx, dz) || 1; o.x += dx / l * 46 * dt; o.z += dz / l * 46 * dt; o.y += (t.y - o.y) * .1; if (l < 2.4) { if (!o.cos) strike(t, .8, 1.5, 'homing'); o.life = 0; } }
     else { o.x += Math.sin(o.h) * 58 * dt; o.z += Math.cos(o.h) * 58 * dt; locate(o); o.y = o.ty;
-      for (const k of karts) if (k !== o.owner && k.rescue <= 0 && (k.x - o.x) ** 2 + (k.z - o.z) ** 2 < 6.5) { hit(k, o.kind === 'homing' ? .8 : .5, 1.5, o.kind); o.life = 0; break; } }
+      if (!o.cos) for (const k of karts) if (k !== o.owner && k.rescue <= 0 && (k.x - o.x) ** 2 + (k.z - o.z) ** 2 < 6.5) { strike(k, o.kind === 'homing' ? .8 : .5, 1.5, o.kind); o.life = 0; break; } }
     spark(o.x, o.y + .8, o.z, hex(ITEMS[o.kind].c), 1.5, .3, .25);
   }
   shots = shots.filter(o => o.life > 0);
   for (const t of traps) { t.life -= dt; t.arm -= dt; if (t.arm > 0) continue;
-    for (const k of karts) if (k.rescue <= 0 && (k.x - t.x) ** 2 + (k.z - t.z) ** 2 < 5) { hit(k, .3, 2, 'trap'); t.life = 0; break; } }
+    for (const k of karts) if (!k.remote && k.rescue <= 0 && (k.x - t.x) ** 2 + (k.z - t.z) ** 2 < 5) { hit(k, .3, 2, 'trap'); t.life = 0; if (online && t.id) evSend({ k: 'trapDel', id: t.id }); break; } }
   traps = traps.filter(t => t.life > 0);
   // effects
   for (const k of karts) { if (k.rescue > 0) continue; const n0 = parts.length; const s = Math.sin(k.h), c = Math.cos(k.h), rear = (ox) => [k.x + c * ox - s * 1.1, k.z - s * ox - c * 1.1];
@@ -903,7 +1035,144 @@ function showResult(){
   $('#rTitle').textContent = r + '位でゴール';
   $('#rSub').textContent = ST.name + '　' + fmt(me.finT);
   $('#rList').innerHTML = order.map((k, i) => `<li class="${k === me ? 'me' : ''}"><span>${i + 1}. ${k.name}</span><span class="num">${k.fin ? fmt(k.finT) : '走行中'}</span></li>`).join('');
+  $('#rAgain').hidden = online; $('#rMenu').textContent = online ? 'ロビーへ戻る' : 'ホームへ';
   $('#hud').hidden = true; $('#result').hidden = false;
+}
+
+// ================================================================ online rooms（Firebase Realtime Database：REST + ストリーミング）
+//   /rooms/{id} = { hostUid, stageId, players/{uid}, start, pos/{uid|aiN}, ev/{pushId} }
+//   自分のマシンは各端末で動かし、位置を約0.15秒ごとに送る。CPUはホストが動かして送る。
+//   攻撃が当たったかどうかは撃った側が判定し、ev に書いて相手の端末で効果を出す。
+const SV = { '.sv': 'timestamp' };
+const room = { id: null, data: null, es: null, host: false, seen: {}, startSeen: 0, hb: 0, sent: 0, off: -Infinity, msg: '', first: true, busy: false };
+let online = false;
+const vsLike = () => sel.mode !== 'ta';
+const chOf = p => clamp(parseInt(String((p && p.icon) || '').slice(3)) || 0, 0, CH.length - 1);
+const roomUrl = (p, tk) => `${FB.db}/rooms/${room.id}${p}.json?auth=${tk}`;
+const roomPut = (p, body, method = 'PUT') => token().then(tk => jf(roomUrl(p, tk), { method, body: method === 'DELETE' ? undefined : JSON.stringify(body) })).catch(() => {});
+const meNode = () => ({ name: myName(), icon: 'ch:' + sel.ch, kt: sel.kt + sel.gl * 10, col: sel.col, joinedAt: SV, t: SV });   // kt = マシン + グライダー×10
+const roomSyncMe = () => { if (room.id) roomPut('/players/' + acct.uid, { name: myName(), icon: 'ch:' + sel.ch, kt: sel.kt + sel.gl * 10, col: sel.col }, 'PATCH'); };
+const roomPlayers = () => Object.entries((room.data || {}).players || {}).filter(e => e[1] && e[1].name).sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0) || (a[0] < b[0] ? -1 : 1)).slice(0, 12);
+function setPath(obj, path, data, merge){
+  const ks = path.split('/').filter(Boolean), put = (o, k, v) => { if (v === null) delete o[k]; else o[k] = v; };
+  if (!ks.length) { if (!merge) return data; for (const k in data) put(obj, k, data[k]); return obj; }
+  let o = obj; for (let i = 0; i < ks.length - 1; i++) { if (typeof o[ks[i]] !== 'object' || o[ks[i]] === null) o[ks[i]] = {}; o = o[ks[i]]; }
+  const last = ks[ks.length - 1];
+  if (merge) { if (typeof o[last] !== 'object' || o[last] === null) o[last] = {}; for (const k in data) put(o[last], k, data[k]); } else put(o, last, data);
+  return obj;
+}
+async function roomCreate(){
+  if (room.busy) return; room.busy = true; room.msg = 'ルームを作成中…'; renderPanel();
+  try { const tk = await token(); let id = ''; for (let i = 0; i < 6; i++) id += CODEC[Math.floor(Math.random() * 32)];
+    room.id = id; await jf(roomUrl('', tk), { method: 'PUT', body: JSON.stringify({ hostUid: acct.uid, maxPlayers: 12, createdAt: SV, stageId: ST.id, players: { [acct.uid]: meNode() } }) });
+    room.msg = ''; await roomOpen(id); }
+  catch (e) { room.id = null; room.msg = 'ルームを作れませんでした。通信状態と Firebase の設定を確認してください。'; }
+  room.busy = false; renderPanel();
+}
+async function roomJoin(id){
+  if (room.busy) return; if (id.length !== 6) { room.msg = 'ルームIDは6文字です。'; return renderPanel(); }
+  room.busy = true; room.msg = '参加中…'; renderPanel();
+  try { const tk = await token(); room.id = id; const r = await jf(roomUrl('', tk));
+    if (!r || !r.hostUid) throw new Error('そのルームIDは見つかりません。'); if (Object.keys(r.players || {}).length >= 12) throw new Error('このルームは満員です。');
+    await jf(roomUrl('/players/' + acct.uid, tk), { method: 'PUT', body: JSON.stringify(meNode()) }); room.msg = ''; await roomOpen(id); }
+  catch (e) { room.id = null; room.msg = /ルーム/.test(e.message) ? e.message : '参加できませんでした。通信状態を確認してください。'; }
+  room.busy = false; renderPanel();
+}
+async function roomOpen(id){
+  room.id = id; room.data = {}; room.seen = {}; room.first = true; room.hb = 0; room.off = -Infinity; if (room.es) room.es.close();
+  const tk = await token(), es = room.es = new EventSource(roomUrl('', tk));
+  const on = merge => ev => { if (room.es !== es) return; let m; try { m = JSON.parse(ev.data); } catch (e) { return; } if (!m) return; room.data = setPath(room.data || {}, m.path, m.data, merge) || {}; roomChanged(m.path); };
+  es.addEventListener('put', on(false)); es.addEventListener('patch', on(true));
+  es.addEventListener('auth_revoked', () => { if (room.es === es) roomOpen(id); });       // トークン期限切れ：つなぎ直す
+}
+function roomChanged(path){
+  const d = room.data;
+  if (!d || !d.hostUid) return roomLeave('ルームが閉じられました。', true);
+  if (!room.first && !(d.players || {})[acct.uid]) return roomLeave('接続が切れたため、ルームから外れました。', true);
+  room.host = d.hostUid === acct.uid;
+  const mine = (d.players || {})[acct.uid]; if (mine && typeof mine.t === 'number') room.off = Math.max(room.off, mine.t - Date.now());   // サーバー時刻とのずれ
+  if (room.first) { room.first = false; for (const id in (d.ev || {})) room.seen[id] = 1; room.startSeen = d.start ? d.start.nonce : 0; }
+  if (d.start && d.start.nonce && d.start.nonce !== room.startSeen) { room.startSeen = d.start.nonce; room.seen = {}; return onlineStart(d.start); }
+  const top = path.split('/')[1] || '';
+  if (online && (top === 'pos' || top === '')) netPos();
+  if (top === 'ev' || top === '') netEv();
+  if (state === 'home' && top !== 'pos' && top !== 'ev' && !/\/t$/.test(path)) {
+    if (!room.host) { const i = STAGES.findIndex(s => s.id === d.stageId); if (i >= 0 && i !== sel.stage) selectStage(i); }
+    if (tab === 'race' && sel.mode === 'on') { const a = document.activeElement; if (!a || a.tagName !== 'INPUT') renderPanel(); }
+  }
+}
+function roomLeave(msg, gone){
+  const id = room.id; if (!id) return; if (room.es) room.es.close(); room.es = null;
+  if (!gone) { const host = room.host; token().then(tk => jf(`${FB.db}/rooms/${id}${host ? '' : '/players/' + acct.uid}.json?auth=${tk}`, { method: 'DELETE' })).catch(() => {}); }
+  room.id = null; room.data = null; room.host = false; room.msg = msg || '';
+  if (online && state !== 'home') { online = false; toHome(); } else { online = false; if (state === 'home') renderPanel(); }
+}
+function roomStart(){
+  if (!room.host) return; const ps = roomPlayers().map(e => e[0]);
+  roomPut('', { pos: null, ev: null, start: { stageId: ST.id, aiCount: 12 - ps.length, seed: Math.floor(Math.random() * 1e9), order: ps.join(','), nonce: SV } }, 'PATCH');
+}
+function onlineStart(st){
+  const order = String(st.order || '').split(',').filter(Boolean), i = STAGES.findIndex(s => s.id === st.stageId);
+  if (i < 0 || !order.includes(acct.uid)) return;            // 開始後に入った人は次のレースから
+  $('#led').hidden = true; $('#hud').classList.remove('editing'); sel.mode = 'on'; tab = 'race'; raceStep = 'go';
+  if (i !== sel.stage) selectStage(i);
+  startRace({ online: true, seed: st.seed | 0, order, aiCount: clamp(st.aiCount | 0, 0, 11) });
+}
+// ---- レース中の同期
+function netSend(){
+  const u = {}; for (const k of karts) if (!k.remote) u[k.id] = { x: +k.x.toFixed(2), z: +k.z.toFixed(2), h: +k.h.toFixed(3), v: +k.v.toFixed(1), l: k.lapNo, p: +k.prog.toFixed(1), f: k.fin ? +k.finT.toFixed(3) : 0, d: k.drift ? k.tier + 1 : 0, dd: k.dDir, b: k.boost > 0 ? 1 : 0, r: k.rescue > 0 ? 1 : 0, s: k.shield > 0 ? 1 : 0 };
+  roomPut('/pos', u, 'PATCH');
+}
+function netPos(){
+  const pos = (room.data || {}).pos || {};
+  for (const k of karts) { if (!k.remote) continue; const n = pos[k.id]; if (!n || n === k.netRaw || typeof n.x !== 'number') continue; k.netRaw = n;
+    k.net = { x: n.x, z: n.z, h: n.h, v: n.v || 0, at: performance.now() }; k.lapNo = n.l | 0; k.prog = +n.p || 0; if (n.f && !k.fin) { k.fin = true; k.finT = n.f; }
+    k.drift = !!n.d; k.tier = n.d ? n.d - 1 : 0; k.dDir = n.dd || 0; k.boost = n.b ? 1 : 0; k.rescue = n.r ? 1 : 0; k.shield = n.s ? 1 : 0; }
+}
+function updateRemote(k, dt){
+  const n = k.net; if (!n) return; const x0 = k.x, y0 = k.y, z0 = k.z; const age = Math.min(.5, (performance.now() - n.at) / 1000);
+  const px = n.x + Math.sin(n.h) * n.v * age, pz = n.z + Math.cos(n.h) * n.v * age;      // 最後に届いた位置から少し先を予測して追いかける
+  k.x += (px - k.x) * .22; k.z += (pz - k.z) * .22; k.h += wrapA(n.h - k.h) * .22; k.v = n.v; k.st *= .9; if (k.spin > 0) k.spin -= dt;
+  locate(k, true); const pp = P[k.idx]; k.glide = !!pp.g; let y = k.ty; if (k.glide) y = glideY(k.idx, k.frac, k.gl.arc); else if (Math.abs(k.lat) > ST.width / 2) { const f = onSc(k.x, k.z); if (f >= 0) y = scY(f); else if (GROUND()) y = pp.gh * fall(Math.sqrt(k.d2)) - .25; }
+  k.y += (y - k.y) * .35;
+  const mv = Math.hypot(k.x - x0, k.z - z0); k.pitch += ((mv > .03 ? clamp(Math.atan2(k.y - y0, mv), -.6, .6) : 0) - k.pitch) * .2;
+}
+const evSend = e => { e.from = acct.uid; token().then(tk => jf(roomUrl('/ev', tk), { method: 'POST', body: JSON.stringify(e) })).catch(() => {}); };
+// 相手が別の端末で動いているなら、効果はその端末に任せる
+function strike(k, slow, dur, kind){ if (online && k.remote) { evSend({ k: 'hit', to: k.id, s: slow, d: dur, kind }); k.spin = .5; } else hit(k, slow, dur, kind); }
+function netEv(){
+  const ev = (room.data || {}).ev || {};
+  for (const id in ev) { if (room.seen[id]) continue; room.seen[id] = 1; const e = ev[id]; if (!e || !online || state !== 'race') continue;
+    if (e.k === 'hit') { const k = karts.find(q => q.id === e.to && !q.remote); if (k) hit(k, +e.s || .5, +e.d || 1.5, e.kind); }
+    else if (e.k === 'shot' && e.from !== acct.uid && ITEMS[e.kind]) { const o = { kind: e.kind, x: +e.x, z: +e.z, h: +e.h, idx: 0, ty: 0, y: 0, life: e.kind === 'homing' ? 7 : 3, owner: null, cos: true, target: karts.find(q => q.id === e.to) || null }; locate(o, true); o.y = o.ty; shots.push(o); }
+    else if (e.k === 'trap') traps.push({ id, x: +e.x, z: +e.z, y: +e.y || 0, life: 28, arm: .6 });
+    else if (e.k === 'trapDel') traps = traps.filter(t => t.id !== e.id); }
+}
+function useItem(k){
+  const it = k.item, n = shots.length; useItem0(k);
+  if (online && shots.length > n) { const o = shots[shots.length - 1]; evSend({ k: 'shot', kind: it, x: +o.x.toFixed(2), z: +o.z.toFixed(2), h: +o.h.toFixed(3), to: o.target ? o.target.id : '' }); }
+}
+function netTick(){
+  if (!room.id || room.first) return; const now = Date.now();
+  if (online && (state === 'race' || state === 'count') && now - room.sent > 150) { room.sent = now; netSend(); }
+  if (now - room.hb > 4000) { room.hb = now; roomPut(`/players/${acct.uid}/t`, SV);
+    const d = room.data || {}, sn = now + room.off; if (!isFinite(room.off)) return;
+    for (const [id, p] of Object.entries(d.players || {})) { if (id === acct.uid || !p || typeof p.t !== 'number') continue; const stale = sn - p.t;
+      if (room.host && stale > 15000) roomPut('/players/' + id, null, 'DELETE'); else if (!room.host && id === d.hostUid && stale > 22000) return roomLeave('ホストとの接続が切れました。'); } }
+}
+setInterval(netTick, 50);
+function roomHtml(){
+  const nameF = `<div class="field"><input id="pname" maxlength="12" placeholder="プレイヤー名（12文字まで）" value="${esc(pname)}" autocomplete="off"><button type="button" data-act="name">名前を保存</button></div>`;
+  if (!room.id || room.first) return nameF + `<button class="opt pri" type="button" data-act="rcreate"><b>ルームを作る</b><small>できたルームIDを友だちに伝える</small></button>
+    <div class="field"><input id="rid" maxlength="6" placeholder="ルームID（6文字）" autocomplete="off" autocapitalize="characters"><button type="button" data-act="rjoin">参加する</button></div>
+    <p class="note">${room.msg ? esc(room.msg) : '最大12人。空いた枠にはCPUが入ります。<br>オンライン対戦は GitHub Pages などで公開したページで動きます。'}</p>`;
+  const d = room.data || {}, ps = roomPlayers();
+  return `<div class="box"><b>ルームID　<span class="code">${room.id}</span></b><button class="mini" type="button" data-act="ridcopy">IDをコピー</button></div>` +
+    (room.host ? `<div class="chips">` + STAGES.map((s, i) => `<button class="chip" type="button" data-stage="${i}" aria-pressed="${i === sel.stage}">${i + 1}. ${s.name}</button>`).join('') + `</div>` : `<div class="grp">ステージ：${ST.name}</div>`) +
+    ps.map(([id, p]) => `<div class="rk"><span class="r"></span><canvas width="68" height="68" data-face="${chOf(p)}"></canvas><span class="nm2">${esc(p.name || 'PLAYER')}${id === d.hostUid ? '<span class="tag">ホスト</span>' : ''}${id === acct.uid ? '<span class="tag">あなた</span>' : ''}</span><span class="tm"></span></div>`).join('') +
+    `<p class="note">参加 ${ps.length} 人。残り ${12 - ps.length} 枠はCPUが走ります。${esc(room.msg)}</p>` +
+    (room.host ? `<button class="opt pri" type="button" data-act="rstart"><b>レース開始</b><small>全員の画面で同時に始まります</small></button>` : `<p class="note">ホストがレースを始めるのを待っています。</p>`) +
+    `<button class="mini" type="button" data-act="rleave">ルームを出る</button>`;
 }
 
 // ================================================================ render
@@ -916,8 +1185,9 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function drawRacer(k){
   const spin = k.spin > 0 ? k.spin * 18 : 0, h = k.h + (k.drift ? k.dDir * .38 : 0) + spin;
-  setT(k.x, k.y, k.z, h); drawKart(k.kt, k.color, k.st); drawChar(k.ch, k.st);
-  if (!opt.lite && k.rescue <= 0) d('disc', 0, .07, 0, 2.3, 1, 3.2, [0, 0, 0], .32);
+  setT(k.x, k.y, k.z, h, k.pitch); drawKart(k.kt, k.color, k.st, k.paint && hasPaint); drawChar(k.ch, k.st);
+  if (k.glide) drawGlider(k.gl, k.ch.suit);
+  if (!opt.lite && k.rescue <= 0 && !k.glide) d('disc', 0, .07, 0, 2.3, 1, 3.2, [0, 0, 0], .32);
   if (k.shield > 0) d('sph', 0, .9, 0, 3.3, 2.6, 3.9, [.3, 1, .9], .22 + .06 * Math.sin(time * 9), 1);
   if (k.inv > 0) for (let i = 0; i < 3; i++) { const a = time * 7 + i * 2.1; d('sph', Math.cos(a) * .7, 2.6, -.2 + Math.sin(a) * .7, .2, .2, .2, [1, .9, .2], 1, 1); }
   if (k.chips > 0) d('cube', 0, 2.75, -.2, .1 + k.chips * .07, .1, .1, [.5, 1, .36], 1, 1);
@@ -926,8 +1196,8 @@ function drawRacer(k){
 }
 function render(dt){
   const asp = resize(); let eye, tgt, fov = 1.02;
-  if (state === 'home') { const p = P[0], a = Math.atan2(p.tx, p.tz) + (reduce ? .5 : Math.sin(time * .25) * .5 + .35), sx = Math.sin(a), cz = Math.cos(a);
-    eye = [p.x - sx * 6 - cz * .4, p.y + 2.3, p.z - cz * 6 + sx * .4]; tgt = [p.x + cz * 1.5 * (asp > 1.5 ? 1 : .4), p.y + .55, p.z - sx * 1.5 * (asp > 1.5 ? 1 : .4)]; fov = .9; }
+  if (state === 'home' || state === 'layout') { const p = P[0], a = Math.atan2(p.tx, p.tz) + (reduce ? .5 : Math.sin(time * .25) * .5 + .35), sx = Math.sin(a), cz = Math.cos(a);
+    const hz = homeZoom * (tab === 'kart' ? 1.45 : 1); eye = [p.x - sx * 6 * hz - cz * .4, p.y + .6 + 1.7 * hz + (tab === 'paint' ? 1.6 : 0), p.z - cz * 6 * hz + sx * .4]; tgt = [p.x + cz * 1.5 * (asp > 1.5 ? 1 : .4), p.y + (tab === 'kart' ? 1.5 : .55), p.z - sx * 1.5 * (asp > 1.5 ? 1 : .4)]; fov = .9; }
   else { const k = me; cam.h += wrapA(k.h - cam.h) * Math.min(1, dt * 5.5); cam.ky += (k.y - cam.ky) * Math.min(1, dt * 6);
     const s = Math.sin(cam.h), c = Math.cos(cam.h); if (k.boost > 0) fov += .13;
     eye = [k.x - s * 7.8, cam.ky + 3.6, k.z - c * 7.8]; tgt = [k.x + s * 6, cam.ky + 1.2, k.z + c * 6]; }
@@ -937,9 +1207,9 @@ function render(dt){
   gl.disable(gl.DEPTH_TEST); gl.uniform2f(U.uFogR, 1e8, 2e8); gl.uniformMatrix4fv(U.uVP, false, IDENT); bind(skyQuad); gl.drawArrays(gl.TRIANGLES, 0, skyQuad.n);
   gl.enable(gl.DEPTH_TEST); gl.uniformMatrix4fv(U.uVP, false, VP); bind(skyObj); gl.drawArrays(gl.TRIANGLES, 0, skyObj.n); gl.clear(gl.DEPTH_BUFFER_BIT);
   const pulse = ST.id === 'volcano_core' ? 1 + .08 * Math.sin(time * 2.2) : 1;
-  gl.uniform2f(U.uFogR, ST.fog[0], ST.fog[1]); gl.uniform3f(U.uTint, pulse, pulse, pulse); bind(world); gl.drawArrays(gl.TRIANGLES, 0, world.n);
+  gl.uniform2f(U.uFogR, ST.fog[0], ST.fog[1]); gl.uniform3f(U.uTint, pulse, pulse, pulse); gl.uniform2f(U.uGr, 3.2, opt.lite ? 0 : .05); bind(world); gl.drawArrays(gl.TRIANGLES, 0, world.n); gl.uniform2f(U.uGr, 1, 0);
 
-  if (state === 'home') { const p = P[0]; setT(p.x, p.y, p.z, Math.atan2(p.tx, p.tz) + 2.5 + (reduce ? 0 : time * .4)); drawKart(KT[sel.kt], hex(COLS[sel.col]), 0); drawChar(CH[sel.ch], Math.sin(time * 1.4)); setT(p.x, p.y, p.z, 0); d('disc', 0, .07, 0, 3, 1, 3, [0, 0, 0], .3); }
+  if (state === 'home' || state === 'layout') { const p = P[0]; setT(p.x, p.y, p.z, Math.atan2(p.tx, p.tz) + 2.5 + homeYaw + (reduce || tab === 'paint' ? 0 : time * .4)); drawKart(KT[sel.kt], hex(COLS[sel.col]), 0, hasPaint); drawChar(CH[sel.ch], Math.sin(time * 1.4)); if (tab === 'kart') drawGlider(GLD[sel.gl], CH[sel.ch].suit); setT(p.x, p.y, p.z, 0); d('disc', 0, .07, 0, 3, 1, 3, [0, 0, 0], .3); }
   else {
     for (const k of karts) drawRacer(k);
     for (const bx of boxes) if (bx.t <= 0) { const p = P[bx.idx], hh = time * 2 + bx.lat; setT(p.x + p.nx * bx.lat, p.y + 1.15 + Math.sin(time * 3 + bx.lat) * .15, p.z + p.nz * bx.lat, hh); d('cube', 0, 0, 0, 1.15, 1.15, 1.15, [.6 + .4 * Math.sin(hh), .6 + .4 * Math.sin(hh + 2), .6 + .4 * Math.sin(hh + 4)], .82); d('cube', 0, 0, 0, .5, .5, .5, [1, 1, 1], 1, 1); }
@@ -957,6 +1227,7 @@ function drawMap(ctx, tr, w, h, dots){
   ctx.setLineDash([4, 5]); ctx.beginPath(); ctx.moveTo(X(tr.sc.ax), Z(tr.sc.az)); ctx.lineTo(X(tr.sc.bx), Z(tr.sc.bz)); ctx.lineWidth = Math.max(2, w / 45); ctx.strokeStyle = '#ffd60a'; ctx.stroke(); ctx.setLineDash([]);
   ctx.beginPath(); for (let i = 0; i < pts.length; i += 2) ctx.lineTo(X(pts[i].x), Z(pts[i].z)); ctx.closePath();
   ctx.lineWidth = Math.max(5, w / 20); ctx.strokeStyle = 'rgba(9,11,17,.75)'; ctx.stroke(); ctx.lineWidth = Math.max(2.4, w / 44); ctx.strokeStyle = 'rgba(246,242,232,.9)'; ctx.stroke();
+  ctx.beginPath(); for (let i = tr.G0; i <= tr.G1; i++) ctx.lineTo(X(pts[i % pts.length].x), Z(pts[i % pts.length].z)); ctx.lineWidth = Math.max(2.4, w / 44); ctx.strokeStyle = '#3cc8ff'; ctx.stroke();
   ctx.fillStyle = '#ff4a26'; ctx.fillRect(X(pts[0].x) - 3, Z(pts[0].z) - 3, 6, 6);
   if (dots) for (const o of dots) { ctx.fillStyle = o === me ? '#ff4a26' : '#ffd60a'; ctx.beginPath(); ctx.arc(X(o.x), Z(o.z), o === me ? 8 : 5, 0, 7); ctx.fill(); if (o === me) { ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); } }
 }
@@ -1004,8 +1275,8 @@ function drawItemIcon(cvs, id){
 
 const mapCtx = $('#map').getContext('2d'); let lastItem = '';
 function hud(){
-  if (state === 'home' || state === 'result') return;
-  const k = me, vs = mode() === 'vs';
+  if (state === 'home' || state === 'result' || state === 'layout') return;
+  const k = me, vs = vsLike();
   $('#lap').textContent = vs ? 'LAP ' + clamp(k.lapNo, 1, LAPS) + '/' + LAPS : 'LAP ' + Math.max(1, k.lapNo);
   $('#time').textContent = state === 'count' ? '0:00.000' : fmt(Math.max(.0001, vs ? raceT : raceT - k.lapStart));
   $('#best').textContent = vs ? '' : 'BEST ' + fmt(best[ST.id]);
@@ -1058,21 +1329,32 @@ addEventListener('pointerup', () => { drag = null; }); addEventListener('pointer
 stageEl.addEventListener('click', e => { if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
 
 // ================================================================ home UI
-let tab = 'race';
+let tab = 'top', raceStep = 'mode';
 const bar = v => `<span class="bar"><i style="width:${clamp(Math.round((v - .7) / .6 * 100), 8, 100)}%"></i></span>`;
 function renderPanel(){
   const el = $('#panel'); let h = '';
+  $('#home').classList.toggle('top', tab === 'top');
+  $('#go').hidden = !(tab === 'race' && raceStep === 'go' && sel.mode !== 'on');
+  document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.t === tab || (tab === 'paint' && b.dataset.t === 'kart')));
+  const modeName = sel.mode === 'vs' ? 'VSレース' : sel.mode === 'on' ? 'オンライン対戦' : 'タイムアタック';
+  $('#who').innerHTML = tab === 'top' ? `<b>${CH[sel.ch].n}</b>${KT[sel.kt].n}に乗っています` : `<b>${CH[sel.ch].n}</b>${KT[sel.kt].n}${tab === 'race' && raceStep === 'go' ? '　／　' + ST.name + '　／　' + modeName : ''}`;
+  if (tab === 'top') { el.innerHTML = ''; return; }
   if (tab === 'race') {
-    h = `<h2>レース<small>モードとステージを選ぶ</small></h2><div class="seg">
-      <button class="opt" data-mode="ta" aria-pressed="${sel.mode === 'ta'}" type="button"><b>タイムアタック</b><small>1人・アイテムなし・周回無制限</small></button>
-      <button class="opt" data-mode="vs" aria-pressed="${sel.mode === 'vs'}" type="button"><b>VSレース</b><small>CPU 11台と3周・アイテムあり</small></button></div>
-      <div class="scroll">` + STAGES.map((s, i) => `<button class="stg" type="button" data-stage="${i}" aria-pressed="${i === sel.stage}" style="--sw:${s.sw}"><canvas width="116" height="88" data-map="${i}"></canvas><span class="nm">${s.name}<span class="ft">${s.feat}</span></span><span class="bt">${fmt(best[s.id])}<i>ベストラップ</i></span></button>`).join('') + `<p class="note">黄色の点線が近道。タイムアタックの記録はこの端末に保存されます。</p></div>`;
+    const again = `<div class="chips"><button class="chip" type="button" data-act="rmode">← モードを選び直す</button></div>`;
+    if (raceStep === 'mode') h = `<h2>あそぶ<small>まずモードを選ぶ</small></h2><div class="scroll">
+      <button class="opt big" data-mode="ta" type="button"><b>タイムアタック</b><small>1人でじっくり走って最速ラップを狙う。アイテムなし。記録はランキングへ。</small></button>
+      <button class="opt big" data-mode="vs" type="button"><b>VSレース</b><small>CPU 11台と3周のレース。アイテムあり。</small></button>
+      <button class="opt big" data-mode="on" type="button"><b>オンライン対戦</b><small>ルームIDを共有して最大12人で対戦。空き枠はCPU。</small></button></div>`;
+    else if (sel.mode === 'on') h = `<h2>オンライン対戦<small>ルームIDを共有して集まる</small></h2><div class="scroll">${room.id ? '' : again}${roomHtml()}</div>`;
+    else h = `<h2>${modeName}<small>ステージを選んでスタート</small></h2>${again}<div class="scroll">` + STAGES.map((s, i) => `<button class="stg" type="button" data-stage="${i}" aria-pressed="${i === sel.stage}" style="--sw:${s.sw}"><canvas width="116" height="88" data-map="${i}"></canvas><span class="nm">${s.name}<span class="ft">${s.feat}</span></span><span class="bt">${fmt(best[s.id])}<i>ベストラップ</i></span></button>`).join('') + `<p class="note">黄色の点線が近道、水色がグライダー区間。</p></div>`;
   } else if (tab === 'char') {
     const grid = g => CH.map((c, i) => c.g === g ? `<button class="chr" type="button" data-ch="${i}" aria-pressed="${i === sel.ch}"><canvas width="92" height="92" data-face="${i}"></canvas>${c.n}</button>` : '').join('');
     h = `<h2>キャラクター<small>全30体・性能差なし</small></h2><div class="scroll"><div class="grp">かわいい系</div><div class="chars">${grid(0)}</div><div class="grp">かっこいい系</div><div class="chars">${grid(1)}</div></div>`;
   } else if (tab === 'kart') {
-    h = `<h2>マシン<small>タイプとカラー</small></h2><div class="scroll">` + KT.map((k, i) => `<button class="kt" type="button" data-kt="${i}" aria-pressed="${i === sel.kt}"><span><b>${k.n}</b><small>${k.d}</small></span><span class="bars"><span>最高速</span>${bar(k.top + (k.top - 1) * 3)}<span>加速</span>${bar(k.acc)}<span>ハンドリング</span>${bar(k.turn + (k.turn - 1))}<span>ミニターボ</span>${bar(k.mt)}</span></button>`).join('') +
-      `<div class="grp">ボディカラー</div><div class="sws">` + COLS.map((c, i) => `<button class="sw" type="button" data-col="${i}" aria-pressed="${i === sel.col}" aria-label="カラー${i + 1}" style="--c:${c}"></button>`).join('') + `</div></div>`;
+    h = `<h2>マシン<small>タイプ・カラー・グライダー</small></h2><div class="scroll">` + KT.map((k, i) => `<button class="kt" type="button" data-kt="${i}" aria-pressed="${i === sel.kt}"><span><b>${k.n}</b><small>${k.d}</small></span><span class="bars"><span>最高速</span>${bar(k.top + (k.top - 1) * 3)}<span>加速</span>${bar(k.acc)}<span>ハンドリング</span>${bar(k.turn + (k.turn - 1))}<span>ミニターボ</span>${bar(k.mt)}</span></button>`).join('') +
+      `<div class="grp">ボディカラー</div><div class="sws">` + COLS.map((c, i) => `<button class="sw" type="button" data-col="${i}" aria-pressed="${i === sel.col}" aria-label="カラー${i + 1}" style="--c:${c}"></button>`).join('') + `</div><div class="grp">グライダー（飛ぶ区間での性能）</div>` + GLD.map((g, i) => `<button class="kt" type="button" data-gl="${i}" aria-pressed="${i === sel.gl}"><span><b>${g.n}</b><small>${g.d}</small></span><span class="bars"><span>スピード</span>${bar(1 + (g.spd - 1) * 2.2)}<span>操作性</span>${bar(1 + (g.ctl - 1) * .6)}<span>高さ</span>${bar(1 + (g.arc / 7 - 1) * .7)}<span>着地ブースト</span>${bar(.72 + g.land * .4)}</span></button>`).join('') + `<button class="opt" type="button" data-act="paint"><b>ペイントする</b><small>車体に絵を描く・画像を貼る</small></button></div>`;
+  } else if (tab === 'paint') {
+    h = paintHtml();
   } else if (tab === 'item') {
     h = `<h2>アイテム図鑑<small>VSレースで光る箱から出現</small></h2><div class="scroll">` + Object.keys(ITEMS).map(id => `<div class="item"><canvas width="80" height="80" data-item="${id}"></canvas><div><b>${ITEMS[id].n}${ITEMS[id].low ? '<em>下位専用</em>' : ''}</b><p>${ITEMS[id].d}</p></div></div>`).join('') + `</div>`;
   } else if (tab === 'rank') {
@@ -1082,6 +1364,7 @@ function renderPanel(){
   } else {
     const tg = (key, t, s) => `<button class="tog" type="button" data-opt="${key}" aria-pressed="${!!opt[key]}"><span><b>${t}</b><small>${s}</small></span><span class="sw2"></span></button>`;
     h = `<h2>設定</h2><div class="scroll">${tg('lite', '軽量化モード', '解像度を下げ、影とエフェクトを省いて動作を軽くする')}${tg('bgm', 'BGM', 'レース中の音楽')}${tg('se', '効果音', 'エンジン音・アイテム・ドリフトの音')}
+      <button class="opt" type="button" data-act="layout"><b>ボタン配置を変える</b><small>DRIFT・BRAKE・ITEM の位置と大きさをドラッグで調整</small></button>
       <p class="note"><b>ハンドル</b>：画面のどこでも触って左右にスライド（触れた場所が中心）<br><b>ドリフト</b>：曲がりながら右下の DRIFT を長押し。青・黄・紫とたまり、離すとミニターボ<br><b>アクセル</b>は自動。キーボードは ←→ / Space / ↓ / E<br>端末を縦に持っていても、画面は横向きで表示されます。</p>
       <div class="box"><b>引き継ぎコード</b>${acct.code ? `<span class="code">${acct.code}</span><small>別の端末でこのコードを入力すると、ランキングの記録を引き継げます。他の人には見せないでください。</small><button class="mini" type="button" data-act="copy">コードをコピー</button>` : '<small>タイムアタックで最初の記録を送信すると発行されます。</small>'}
       <div class="field"><input id="rcode" maxlength="19" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off"><button type="button" data-act="restore">このコードで引き継ぐ</button></div><small id="rmsg">${esc(net.note)}</small></div></div>`;
@@ -1091,8 +1374,7 @@ function renderPanel(){
   el.querySelectorAll('[data-map]').forEach(c => { const st = STAGES[+c.dataset.map]; drawMap(c.getContext('2d'), TRACKS[st.id] || (TRACKS[st.id] = buildTrack(st)), 116, 88); });
   el.querySelectorAll('[data-face]').forEach(c => drawFace(c, CH[+c.dataset.face]));
   el.querySelectorAll('[data-item]').forEach(c => drawItemIcon(c, c.dataset.item));
-  document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.t === tab));
-  $('#who').innerHTML = `<b>${CH[sel.ch].n}</b>${KT[sel.kt].n}　／　${ST.name}　／　${sel.mode === 'vs' ? 'VSレース' : 'タイムアタック'}`;
+  if (tab === 'paint') peBind();
 }
 function renderRank(){
   const el = $('#rkList'); if (!el) return;
@@ -1102,17 +1384,120 @@ function renderRank(){
   el.innerHTML = net.rows.map((r, i) => `<div class="rk${r.id === acct.pid ? ' me' : ''}"><span class="r">${i + 1}</span><canvas width="68" height="68" data-face="${clamp(parseInt(String(r.icon).slice(3)) || 0, 0, CH.length - 1)}"></canvas><span class="nm2">${esc(r.name || 'PLAYER')}</span><span class="tm">${fmt(r.lapMs / 1000)}</span></div>`).join('');
   el.querySelectorAll('[data-face]').forEach(c => drawFace(c, CH[+c.dataset.face]));
 }
-$('#tabs').addEventListener('click', e => { const b = e.target.closest('.tab'); if (!b) return; tab = b.dataset.t; se(520, .05, 'square', .04); renderPanel(); });
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('.tab'); if (!b) return; tab = b.dataset.t; if (tab === 'race') raceStep = room.id ? 'go' : 'mode'; audioInit(); se(520, .05, 'square', .04); renderPanel(); });
 $('#panel').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return; const ds = b.dataset, keep = $('#panel .scroll') ? $('#panel .scroll').scrollTop : 0;
-  if (ds.act === 'name') { pname = $('#pname').value.trim().slice(0, 12); saveAcct(); syncProfile().then(() => loadTop(ST.id)); }
+  if (ds.act && ACT[ds.act]) { audioInit(); se(660, .06, 'square', .04); const sc0 = $('#panel .scroll'), k0 = sc0 ? sc0.scrollTop : 0; ACT[ds.act](b, ds); const sc1 = $('#panel .scroll'); if (sc1) sc1.scrollTop = k0; return; }
+  if (ds.act === 'name') { pname = $('#pname').value.trim().slice(0, 12); saveAcct(); syncProfile().then(() => { if (tab === 'rank') loadTop(ST.id); }); }
   else if (ds.act === 'copy') { try { navigator.clipboard.writeText(acct.code).then(() => { net.note = 'コピーしました'; renderPanel(); }, () => {}); } catch (x) {} return; }
   else if (ds.act === 'restore') { const v = $('#rcode').value; $('#rmsg').textContent = '確認中…'; restore(v).then(msg => { net.note = msg; renderPanel(); }); return; }
-  else if (ds.mode) sel.mode = ds.mode; else if (ds.stage) selectStage(+ds.stage); else if (ds.ch) { sel.ch = +ds.ch; syncProfile(); } else if (ds.kt) sel.kt = +ds.kt; else if (ds.col) sel.col = +ds.col; else if (ds.opt) opt[ds.opt] = !opt[ds.opt]; else return;
-  audioInit(); se(660, .06, 'square', .04); save(); renderPanel(); const sc = $('#panel .scroll'); if (sc) sc.scrollTop = keep;
+  else if (ds.mode) { if (room.id && ds.mode !== 'on') roomLeave(''); sel.mode = ds.mode; raceStep = 'go'; } else if (ds.stage) { if (sel.mode === 'on' && room.id) { if (!room.host) return; selectStage(+ds.stage); roomPut('/stageId', ST.id); } else selectStage(+ds.stage); } else if (ds.ch) { sel.ch = +ds.ch; syncProfile(); } else if (ds.kt) { sel.kt = +ds.kt; pe.undo = []; pe.msg = ''; loadPaintFor(); } else if (ds.col) sel.col = +ds.col; else if (ds.gl) sel.gl = +ds.gl; else if (ds.opt) opt[ds.opt] = !opt[ds.opt]; else return;
+  audioInit(); se(660, .06, 'square', .04); save(); roomSyncMe(); renderPanel(); const sc = $('#panel .scroll'); if (sc) sc.scrollTop = keep;
 });
 $('#go').addEventListener('click', startRace); $('#rAgain').addEventListener('click', startRace);
 $('#rMenu').addEventListener('click', toHome); $('#quit').addEventListener('click', toHome);
+
+// ================================================================ paint editor
+const PCOL = ['#ffffff','#111318','#ff3b1f','#ff8a1f','#ffd60a','#22c55e','#20c7c7','#2a7dff','#8b5cf6','#ff5ca8'];
+const pe = { col: '#ffffff', size: 14, erase: false, undo: [], stamp: null, last: null, down: false, msg: '' };
+function peRedraw(){
+  const c = $('#pcv'); if (!c) return; const x = c.getContext('2d'), kt = KT[sel.kt], L = kt.len, PX = z => (z / 3.6 + .5) * 512, PY = v => (v / 1.9 + .5) * 256;
+  x.clearRect(0, 0, 512, 256); x.fillStyle = '#15171c';
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) x.fillRect(PX(sz * .74 * L) - 20, PY(sx * .84) - 13, 40, 26);                      // タイヤ
+  x.fillStyle = COLS[sel.col];
+  x.fillRect(PX(-1.05 * L), PY(-.61), PX(1.05 * L) - PX(-1.05 * L), PY(.61) - PY(-.61));                                               // 車体
+  x.beginPath(); x.ellipse(PX(1.0 * L), PY(0), .62 / 3.6 * 512, .52 / 1.9 * 256, 0, 0, 7); x.fill();                                    // ノーズ
+  for (const s of [-1, 1]) x.fillRect(PX(-.12 - .525 * L), PY(s * .72 - .17), 1.05 * L / 3.6 * 512, .34 / 1.9 * 256);                   // サイドポッド
+  x.fillRect(PX(-1.1 * L - .2 * kt.wing), PY(-.78), .4 * kt.wing / 3.6 * 512, PY(.78) - PY(-.78));                                      // ウィング
+  x.drawImage(paintCv, 0, 0);
+  if (pe.stamp) { const s = pe.stamp, w = s.w, h = w * s.img.height / s.img.width; x.globalAlpha = .85; x.drawImage(s.img, s.x - w / 2, s.y - h / 2, w, h); x.globalAlpha = 1; x.strokeStyle = '#ffd60a'; x.lineWidth = 2; x.setLineDash([6, 5]); x.strokeRect(s.x - w / 2, s.y - h / 2, w, h); x.setLineDash([]); }
+}
+function peUndoPush(){ pe.undo.push(pctx.getImageData(0, 0, 512, 256)); if (pe.undo.length > 8) pe.undo.shift(); }
+function peLine(a, b){
+  pctx.globalCompositeOperation = pe.erase ? 'destination-out' : 'source-over'; pctx.strokeStyle = pe.col; pctx.lineWidth = pe.size; pctx.lineCap = 'round';
+  pctx.beginPath(); pctx.moveTo(a.x, a.y); pctx.lineTo(b.x + .01, b.y); pctx.stroke(); pctx.globalCompositeOperation = 'source-over'; hasPaint = true; uploadPaint(); peRedraw();
+}
+function peBind(){
+  const c = $('#pcv'); if (!c) return; const pos = e => ({ x: e.offsetX * 512 / c.clientWidth, y: e.offsetY * 256 / c.clientHeight });
+  c.addEventListener('pointerdown', e => { e.preventDefault(); try { c.setPointerCapture(e.pointerId); } catch (x) {} const p = pos(e); pe.down = true;
+    if (pe.stamp) { pe.stamp.x = p.x; pe.stamp.y = p.y; peRedraw(); return; } peUndoPush(); pe.last = p; peLine(p, p); });
+  c.addEventListener('pointermove', e => { if (!pe.down) return; const p = pos(e); if (pe.stamp) { pe.stamp.x = p.x; pe.stamp.y = p.y; peRedraw(); } else { peLine(pe.last, p); pe.last = p; } });
+  const up = () => { if (!pe.down) return; pe.down = false; if (!pe.stamp) savePaint(); };
+  c.addEventListener('pointerup', up); c.addEventListener('pointercancel', up);
+  const f = $('#pfile'); if (f) f.addEventListener('change', () => { const file = f.files && f.files[0]; if (!file) return; const im = new Image();
+    im.onload = () => { pe.stamp = { img: im, x: 256, y: 128, w: 160 }; renderPanel(); }; im.onerror = () => { net.note = '画像を読み込めませんでした'; }; im.src = URL.createObjectURL(file); });
+  const r = $('#psz'); if (r) r.addEventListener('input', () => { if (pe.stamp) { pe.stamp.w = +r.value; peRedraw(); } });
+  peRedraw();
+}
+function galHtml(chip){
+  return `<div class="grp">保存した絵（${gallery.length}/12）</div><div class="chips">${chip('gsave', 'いまの絵を保存する')}</div>` + (pe.msg ? `<p class="note">${esc(pe.msg)}</p>` : '') +
+    (gallery.length ? `<div class="gal">` + gallery.map((g, i) => `<div class="gitem"><img src="${g.d}" alt="" style="background:${COLS[sel.col]}"><b>${esc(g.n)}</b><button class="mini" type="button" data-act="gload" data-i="${i}">このマシンに読み込む</button><button class="mini" type="button" data-act="gdel" data-i="${i}">削除</button></div>`).join('') + `</div>`
+      : `<p class="note">保存しておくと、別のマシンに乗り換えたときも同じ絵を読み込めます。</p>`);
+}
+function paintHtml(){
+  const chip = (act, label, on, extra = '') => `<button class="chip" type="button" data-act="${act}" ${extra} aria-pressed="${!!on}">${label}</button>`;
+  return `<h2>ペイント<small>上から見たマシン（右が前）</small></h2><div class="pwrap"><canvas id="pcv" width="512" height="256"></canvas></div><div class="scroll">` +
+    (pe.stamp ? `<div class="field"><span>大きさ</span><input id="psz" type="range" min="30" max="520" value="${pe.stamp.w}"></div><p class="note">絵の上をドラッグして位置を決めます。</p><div class="chips">${chip('pok', 'この位置に貼る')}${chip('pno', 'やめる')}</div>`
+    : `<div class="sws">` + PCOL.map(c => `<button class="sw s" type="button" data-act="pcol" data-c="${c}" aria-pressed="${!pe.erase && pe.col === c}" aria-label="色 ${c}" style="--c:${c}"></button>`).join('') + `</div>
+      <div class="chips">${chip('psize', '細い', pe.size === 6, 'data-s="6"')}${chip('psize', 'ふつう', pe.size === 14, 'data-s="14"')}${chip('psize', '太い', pe.size === 30, 'data-s="30"')}${chip('perase', '消しゴム', pe.erase)}</div>
+      <div class="chips">${chip('pundo', '元に戻す')}${chip('pclear', '全部消す')}${chip('pimg', '画像を貼る（PNG/JPG）')}</div><input id="pfile" type="file" accept="image/png,image/jpeg" hidden>`) +
+    galHtml(chip) + `<div class="chips">${chip('pzin', 'マシンを拡大')}${chip('pzout', '縮小')}${chip('pback', 'マシン選択へ戻る')}</div><p class="note">左のマシンはドラッグで回せます。描いた絵はマシンのタイプごとに覚えています。</p></div>`;
+}
+
+// ================================================================ button layout editor
+const LBTN = ['bDrift', 'bBrake', 'bItem']; let ledSel = null, ledDrag = null;
+function applyLayout(){
+  const W = stageEl.clientWidth, H = stageEl.clientHeight, L = opt.layout;
+  for (const id of LBTN) { const el = $('#' + id), v = L && L[id]; el.style.cssText = v ? `left:${v.x * W - v.s / 2}px;top:${v.y * H - v.s / 2}px;right:auto;bottom:auto;width:${v.s}px;height:${v.s}px;font-size:${Math.max(9, v.s * .15)}px` : ''; }
+  const n = $('#iName'), v = L && L.bItem; n.style.cssText = v ? `left:${v.x * W - v.s / 2 - 150}px;top:${v.y * H - 8}px;right:auto;bottom:auto;width:140px` : '';
+}
+function ledCapture(){ const W = stageEl.clientWidth, H = stageEl.clientHeight; opt.layout = {}; for (const id of LBTN) { const el = $('#' + id); opt.layout[id] = { x: (el.offsetLeft + el.offsetWidth / 2) / W, y: (el.offsetTop + el.offsetHeight / 2) / H, s: el.offsetWidth }; } }
+function ledMark(){ for (const id of LBTN) $('#' + id).classList.toggle('sel', state === 'layout' && ledSel === id); }
+function ledOpen(){
+  state = 'layout'; $('#home').hidden = true; $('#hud').hidden = false; $('#bItem').hidden = false; $('#led').hidden = false; $('#hud').classList.add('editing'); $('#pos').style.display = 'none';
+  if (!opt.layout) ledCapture(); applyLayout(); ledSel = 'bDrift'; ledMark();
+}
+function ledClose(){ $('#led').hidden = true; $('#hud').classList.remove('editing'); ledSel = null; ledMark(); input.drift = input.brake = input.item = false; save(); tab = 'set'; toHome(); }
+$('#led').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; const a = b.dataset.led;
+  if (a === 'done') return ledClose();
+  if (a === 'reset') { opt.layout = null; applyLayout(); ledCapture(); applyLayout(); return; }
+  const v = opt.layout && opt.layout[ledSel]; if (v) { v.s = clamp(v.s + (a === 'up' ? 12 : -12), 48, 200); applyLayout(); } });
+stageEl.addEventListener('pointerdown', e => { if (state !== 'layout') return; const b = e.target.closest('.btn'); if (!b) return; const p = loc(e), v = opt.layout[b.id], W = stageEl.clientWidth, H = stageEl.clientHeight;
+  ledSel = b.id; ledMark(); ledDrag = { id: e.pointerId, dx: p.x - v.x * W, dy: p.y - v.y * H }; });
+addEventListener('pointermove', e => { if (!ledDrag || ledDrag.id !== e.pointerId || state !== 'layout') return; const p = loc(e), v = opt.layout[ledSel], W = stageEl.clientWidth, H = stageEl.clientHeight;
+  v.x = clamp((p.x - ledDrag.dx) / W, .04, .96); v.y = clamp((p.y - ledDrag.dy) / H, .08, .94); applyLayout(); });
+addEventListener('pointerup', () => { ledDrag = null; }); addEventListener('pointercancel', () => { ledDrag = null; });
+addEventListener('resize', () => applyLayout());
+
+// ホームのマシンをドラッグで回す
+let homeYaw = 0, homeZoom = 1, hr = null;
+stageEl.addEventListener('pointerdown', e => { if (state === 'home' && e.target.closest('.mid') && !e.target.closest('button')) hr = { id: e.pointerId, x: loc(e).x, yaw: homeYaw }; });
+addEventListener('pointermove', e => { if (hr && hr.id === e.pointerId) homeYaw = hr.yaw + (loc(e).x - hr.x) * .012; });
+addEventListener('pointerup', () => { hr = null; }); addEventListener('pointercancel', () => { hr = null; });
+
+// パネル内ボタンの追加アクション
+const ACT = {
+  paint(){ tab = 'paint'; renderPanel(); }, pback(){ tab = 'kart'; pe.stamp = null; homeZoom = 1; renderPanel(); },
+  pcol(b, ds){ pe.col = ds.c; pe.erase = false; renderPanel(); }, psize(b, ds){ pe.size = +ds.s; renderPanel(); }, perase(){ pe.erase = !pe.erase; renderPanel(); },
+  pundo(){ const im = pe.undo.pop(); if (im) { pctx.putImageData(im, 0, 0); uploadPaint(); savePaint(); peRedraw(); } },
+  pclear(){ peUndoPush(); pctx.clearRect(0, 0, 512, 256); hasPaint = false; uploadPaint(); savePaint(); peRedraw(); },
+  pimg(){ const f = $('#pfile'); if (f) f.click(); },
+  pok(){ const s = pe.stamp; if (!s) return; peUndoPush(); const w = s.w, h = w * s.img.height / s.img.width; pctx.drawImage(s.img, s.x - w / 2, s.y - h / 2, w, h); hasPaint = true; pe.stamp = null; uploadPaint(); savePaint(); renderPanel(); },
+  pno(){ pe.stamp = null; renderPanel(); },
+  pzin(){ homeZoom = clamp(homeZoom * .8, .45, 1.4); }, pzout(){ homeZoom = clamp(homeZoom * 1.25, .45, 1.4); },
+  layout(){ ledOpen(); },
+  gsave(){
+    if (!hasPaint) pe.msg = 'まだ何も描かれていません。';
+    else if (gallery.length >= 12) pe.msg = '保存できるのは12枚までです。いらない絵を削除してください。';
+    else { gallery.push({ n: 'デザイン ' + (gallery.reduce((mx, g) => Math.max(mx, parseInt(String(g.n).replace(/\D/g, '')) || 0), 0) + 1), d: paintCv.toDataURL('image/png') });
+      if (saveGallery()) pe.msg = '保存しました。'; else { gallery.pop(); pe.msg = '保存できませんでした（端末の保存容量がいっぱいです）。'; } }
+    renderPanel();
+  },
+  gload(b, ds){ const g = gallery[+ds.i]; if (!g) return; peUndoPush(); drawPaintUrl(g.d, () => { savePaint(); pe.msg = '「' + g.n + '」を' + KT[sel.kt].n + 'に読み込みました。'; if (tab === 'paint') renderPanel(); }); },
+  gdel(b, ds){ gallery.splice(+ds.i, 1); saveGallery(); pe.msg = '削除しました。'; renderPanel(); }, rmode(){ if (room.id) roomLeave(''); raceStep = 'mode'; renderPanel(); },
+  rcreate(){ roomCreate(); }, rjoin(){ roomJoin(($('#rid').value || '').toUpperCase().replace(/[^A-Z0-9]/g, '')); }, rstart(){ roomStart(); }, rleave(){ roomLeave(''); },
+  ridcopy(){ try { navigator.clipboard.writeText(room.id).then(() => { room.msg = 'ルームIDをコピーしました。'; renderPanel(); }, () => {}); } catch (x) {} },
+};
 
 // ================================================================ loop
 let lastT = 0, accu = 0;
@@ -1126,9 +1511,9 @@ function frame(t){
 function start(saved){
   if (saved && saved.stage >= 0 && saved.stage < STAGES.length) sel.stage = saved.stage;
   if (saved && saved.tab) tab = saved.tab;
-  selectStage(sel.stage); renderPanel(); requestAnimationFrame(frame);
+  selectStage(sel.stage); loadPaintFor(); applyLayout(); renderPanel(); requestAnimationFrame(frame);
 }
-window.__rm = { get state(){ return state; }, get me(){ return me; }, get karts(){ return karts; }, input, sel, step, selectStage, startRace, toHome, setTab(t){ tab = t; renderPanel(); } };
+window.__rm = { get state(){ return state; }, get me(){ return me; }, get karts(){ return karts; }, input, sel, step, selectStage, startRace, toHome, setTab(t, st){ tab = t; if (st) raceStep = st; renderPanel(); }, room, acct, roomCreate, roomJoin, roomStart, ledOpen, get online(){ return online; } };
 const hot = window.claude && window.claude.hot;
 if (hot && hot.snapshot) hot.snapshot(() => ({ stage: sel.stage, tab }));
 if (hot && hot.ready) hot.ready(start); else start((hot && hot.data) || {});
