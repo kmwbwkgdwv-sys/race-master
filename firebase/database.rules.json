@@ -1,0 +1,151 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "secrets": {
+      "$pid": {
+        ".write": "auth != null && !data.exists()",
+        ".validate": "newData.isString() && newData.val().length === 64"
+      }
+    },
+    "codes": {
+      "$hash": {
+        ".read": "auth != null",
+        ".write": "auth != null && newData.exists() && newData.child('uid').val() === auth.uid && (!data.exists() || newData.child('playerId').val() === data.child('playerId').val())",
+        ".validate": "$hash.length === 64 && newData.hasChildren(['playerId', 'uid'])",
+        "playerId": {
+          ".validate": "newData.isString() && newData.val().length === 32"
+        },
+        "uid": {
+          ".validate": "newData.isString()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "profiles": {
+      "$pid": {
+        ".read": true,
+        ".write": "auth != null && root.child('codes').child(root.child('secrets').child($pid).val()).child('uid').val() === auth.uid",
+        ".validate": "newData.hasChildren(['name', 'icon'])",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 12"
+        },
+        "icon": {
+          ".validate": "newData.isString() && newData.val().length <= 32"
+        },
+        "coins": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "parts": {
+          ".validate": "newData.isString() && newData.val().length <= 4000"
+        },
+        "updatedAt": {
+          ".validate": "newData.val() === now"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "icons": {
+      "$pid": {
+        ".read": true,
+        ".write": "auth != null && root.child('codes').child(root.child('secrets').child($pid).val()).child('uid').val() === auth.uid",
+        ".validate": "newData.isString() && newData.val().length <= 30000"
+      }
+    },
+    "rankings": {
+      "$stageId": {
+        ".read": true,
+        ".indexOn": [
+          "lapMs"
+        ],
+        "$pid": {
+          ".write": "auth != null && root.child('codes').child(root.child('secrets').child($pid).val()).child('uid').val() === auth.uid && newData.exists() && (!data.exists() || newData.child('lapMs').val() <= data.child('lapMs').val())",
+          ".validate": "newData.hasChildren(['name', 'icon', 'lapMs', 'achievedAt', 'mode'])",
+          "name": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 12"
+          },
+          "icon": {
+            ".validate": "newData.isString() && newData.val().length <= 32"
+          },
+          "lapMs": {
+            ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() <= 600000 && (($stageId === 'master_circuit' && newData.val() >= 25000) || ($stageId === 'neon_metropolis' && newData.val() >= 35000) || ($stageId === 'ancient_desert' && newData.val() >= 32000) || ($stageId === 'volcano_core' && newData.val() >= 34000) || ($stageId === 'cosmo_skyway' && newData.val() >= 38000))"
+          },
+          "achievedAt": {
+            ".validate": "newData.val() === now || newData.val() === data.val()"
+          },
+          "mode": {
+            ".validate": "newData.val() === 'time_attack' || newData.val() === 'vs'"
+          },
+          "shortcuts": {
+            ".validate": "newData.isString() && newData.val().length <= 200"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "rooms": {
+      "$roomId": {
+        ".read": "auth != null",
+        ".write": "auth != null && ((!data.exists() && newData.child('hostUid').val() === auth.uid) || data.child('hostUid').val() === auth.uid)",
+        ".validate": "$roomId.matches(/^[A-Z2-9]{6}$/) && newData.hasChildren(['hostUid', 'maxPlayers', 'createdAt'])",
+        "hostUid": {
+          ".validate": "newData.isString()"
+        },
+        "maxPlayers": {
+          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 12"
+        },
+        "createdAt": {
+          ".validate": "newData.val() <= now"
+        },
+        "stageId": {
+          ".validate": "newData.isString() && newData.val().length <= 32"
+        },
+        "players": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && data.parent().parent().child('hostUid').exists()",
+            ".validate": "newData.hasChildren(['name', 'joinedAt'])",
+            "name": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 16"
+            },
+            "ready": {
+              ".validate": "newData.isBoolean()"
+            },
+            "joinedAt": {
+              ".validate": "newData.val() <= now"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "start": {
+          ".validate": "newData.hasChildren(['stageId', 'aiCount', 'seed', 'nonce'])",
+          "stageId": {
+            ".validate": "newData.isString()"
+          },
+          "aiCount": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 11"
+          },
+          "seed": {
+            ".validate": "newData.isNumber()"
+          },
+          "nonce": {
+            ".validate": "newData.val() === now"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    }
+  }
+}
