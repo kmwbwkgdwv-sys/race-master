@@ -107,6 +107,12 @@
         "stageId": {
           ".validate": "newData.isString() && newData.val().length <= 32"
         },
+        "laps": {
+          ".validate": "newData.val() === 1 || newData.val() === 3 || newData.val() === 5"
+        },
+        "items": {
+          ".validate": "newData.val() === 0 || newData.val() === 1"
+        },
         "players": {
           "$uid": {
             ".write": "auth != null && auth.uid === $uid && data.parent().parent().child('hostUid').exists()",
@@ -162,6 +168,12 @@
           },
           "rnd": {
             ".validate": "newData.isNumber()"
+          },
+          "laps": {
+            ".validate": "newData.val() === 1 || newData.val() === 3 || newData.val() === 5"
+          },
+          "items": {
+            ".validate": "newData.val() === 0 || newData.val() === 1"
           },
           "$other": {
             ".validate": false
@@ -423,6 +435,9 @@
           "laps": {
             ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 9"
           },
+          "items": {
+            ".validate": "newData.val() === 0 || newData.val() === 1"
+          },
           "n": {
             ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 12"
           },
@@ -473,6 +488,67 @@
         },
         "$other": {
           ".validate": false
+        }
+      }
+    },
+    "rankings_v4": {
+      "$stageId": {
+        ".read": true,
+        ".indexOn": [
+          "lapMs",
+          "pid"
+        ],
+        "$rid": {
+          ".write": "auth != null && ((newData.exists() && root.child('codes').child(root.child('secrets').child(newData.child('pid').val()).val()).child('uid').val() === auth.uid && (!data.exists() || (data.child('pid').val() === newData.child('pid').val() && data.child('lapMs').val() === newData.child('lapMs').val()))) || (!newData.exists() && root.child('admins').child(auth.uid).val() === true))",
+          ".validate": "newData.hasChildren(['pid', 'name', 'icon', 'lapMs', 'achievedAt', 'mode'])",
+          "pid": {
+            ".validate": "newData.isString() && newData.val().length === 32"
+          },
+          "name": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 12"
+          },
+          "icon": {
+            ".validate": "newData.isString() && newData.val().length <= 32"
+          },
+          "lapMs": {
+            ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 40000 && newData.val() <= 900000 && ($stageId === 'master_circuit' || $stageId === 'neon_metropolis' || $stageId === 'ancient_desert' || $stageId === 'volcano_core' || $stageId === 'cosmo_skyway')"
+          },
+          "achievedAt": {
+            ".validate": "newData.val() === now || newData.val() === data.val()"
+          },
+          "mode": {
+            ".validate": "newData.val() === 'time_attack' || newData.val() === 'room'"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "replays_v4": {
+      "$stageId": {
+        "$rid": {
+          ".read": true,
+          ".write": "auth != null && ((newData.exists() && !data.exists() && ($stageId === 'master_circuit' || $stageId === 'neon_metropolis' || $stageId === 'ancient_desert' || $stageId === 'volcano_core' || $stageId === 'cosmo_skyway') && root.child('codes').child(root.child('secrets').child(root.child('rankings_v4').child($stageId).child($rid).child('pid').val()).val()).child('uid').val() === auth.uid) || (!newData.exists() && root.child('admins').child(auth.uid).val() === true))",
+          ".validate": "newData.hasChildren(['d', 'ms'])",
+          "d": {
+            ".validate": "newData.isString() && newData.val().length <= 120000"
+          },
+          "ms": {
+            ".validate": "newData.isNumber()"
+          },
+          "kt": {
+            ".validate": "newData.isNumber()"
+          },
+          "col": {
+            ".validate": "newData.isNumber()"
+          },
+          "ch": {
+            ".validate": "newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          }
         }
       }
     }
