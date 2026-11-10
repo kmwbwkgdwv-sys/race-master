@@ -1483,7 +1483,8 @@ function updateKart(k, inp, dt){
     k.gy = k.y; return;
   }
   const x0 = k.x, y0 = k.y, z0 = k.z;
-  const kt = k.kt, steer = inp.steer * (k.inv > 0 ? -1 : 1); k.st += (steer - k.st) * .2;
+  // ハンドルの曲がる量（カスタムのスライダー）は「指を少し動かしたときの効き方」だけを変える。いっぱいまで切ったときの曲がりはパーツ（とグライダー）の性能で決まるので、スライダーで性能差は消せない
+  const kt = k.kt, sraw = k.ai ? inp.steer : Math.sign(inp.steer) * Math.pow(Math.abs(inp.steer), Math.pow(opt.hdl, -1.7)), steer = sraw * (k.inv > 0 ? -1 : 1); k.st += (steer - k.st) * .2;
   if (!k.drift) { if (inp.drift && k.v > 9 && Math.abs(steer) > .2 && k.air < .6) { k.drift = true; k.dDir = Math.sign(steer); k.charge = 0; k.tier = 0; } }
   else if (k.v < 5) endDrift(k, false);
   else if (!inp.drift) endDrift(k, true);
@@ -1501,7 +1502,7 @@ function updateKart(k, inp, dt){
   if (k.v > max) k.v = Math.max(max, k.v - ACC * 1.5 * dt);
 
   // ハンドル：曲がりすぎないよう控えめ。スピードが出ているほど少し重くなる。空中ではあまり向きを変えられない
-  const turn = TURN * kt.turn * (k.glide ? k.gl.ctl * .85 : k.air > .6 ? Math.min(.9, .5 * kt.air) : 1) * (k.ai ? 1 : opt.hdl) * (1 - .1 * clamp((Math.abs(k.v) - 30) / 12, 0, 1));
+  const turn = TURN * kt.turn * (k.glide ? k.gl.ctl * .85 : k.air > .6 ? Math.min(.9, .5 * kt.air) : 1) * (1 - .1 * clamp((Math.abs(k.v) - 30) / 12, 0, 1));
   const want = k.drift ? k.dDir * turn * 1.3 * (.6 + .5 * steer * k.dDir) : steer * turn * clamp(Math.abs(k.v) / 6, 0, 1) * (k.v < 0 ? -1 : 1);
   k.yaw += (want - k.yaw) * Math.min(1, dt * 9); k.h += k.yaw * dt;
   const dir = k.h - (k.drift ? k.dDir * .22 : 0);
@@ -2110,7 +2111,7 @@ function renderPanel(){
   } else if (tab === 'kart') {
     const part = (label, key, arr) => `<div class="grp">${label}</div><div class="pgrid">` + arr.map((p, i) => `<button class="part" type="button" data-part="${key}" data-i="${i}" aria-pressed="${sel[key] === i}"><b>${p.n}</b><small>${p.d}</small></button>`).join('') + `</div>`;
     h = `<h2>カスタム<small>パーツ各10種・ハンドル・カラー・ペイント</small></h2><div class="scroll">${setsHtml()}
-      <div class="box"><b>ハンドルの曲がる量<span id="hdlV">${Math.round(opt.hdl * 100)}%</span></b><div class="field"><span>少なめ</span><input id="hdl" type="range" min="60" max="150" step="5" value="${Math.round(opt.hdl * 100)}" aria-label="ハンドルの曲がる量"><span>多め</span></div><small>ハンドルを同じだけ切ったときに、どれくらい曲がるかを変えます。曲がりすぎるなら少なめ、曲がりきれないなら多めに。性能はマシンの左に出ています（パーツを変えるとすぐ変わります）。</small></div>` +
+      <div class="box"><b>ハンドルの曲がる量<span id="hdlV">${Math.round(opt.hdl * 100)}%</span></b><div class="field"><span>少なめ</span><input id="hdl" type="range" min="60" max="150" step="5" value="${Math.round(opt.hdl * 100)}" aria-label="ハンドルの曲がる量"><span>多め</span></div><small>指を同じだけ動かしたときに、どれくらい曲がるかを変えます（曲がりすぎるなら少なめ、反応がにぶいなら多めに）。<b>いっぱいまで切ったときの曲がりは変わりません</b>。そこはパーツの「ハンドリング」とグライダーの「操作性」で決まるので、曲がりにくいパーツは説明どおり曲がりにくいままです。性能はマシンの左に出ています。</small></div>` +
       part('ボディ（10種）', 'kt', KT) + part('タイヤ（10種）', 'tire', TIRE) + part('ウィング（10種）', 'wing', WING) + part('エンジン（10種）', 'eng', ENG) +
       `<div class="grp">ボディカラー</div><div class="sws">` + COLS.map((c, i) => `<button class="sw" type="button" data-col="${i}" aria-pressed="${i === sel.col}" aria-label="カラー${i + 1}" style="--c:${c}"></button>`).join('') + `</div><div class="grp">グライダー（10種・飛ぶ区間での性能）</div>` +
       `<div class="pgrid">` + GLD.map((g, i) => `<button class="part" type="button" data-gl="${i}" aria-pressed="${i === sel.gl}"><b>${g.n}</b><small>${g.d}</small></button>`).join('') + `</div>` +
