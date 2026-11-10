@@ -72,7 +72,7 @@
             ".validate": "newData.isString() && newData.val().length <= 32"
           },
           "lapMs": {
-            ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() <= 600000 && (($stageId === 'master_circuit' && newData.val() >= 25000) || ($stageId === 'neon_metropolis' && newData.val() >= 35000) || ($stageId === 'ancient_desert' && newData.val() >= 32000) || ($stageId === 'volcano_core' && newData.val() >= 34000) || ($stageId === 'cosmo_skyway' && newData.val() >= 38000))"
+            ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 12000 && newData.val() <= 600000 && ($stageId === 'master_circuit' || $stageId === 'neon_metropolis' || $stageId === 'ancient_desert' || $stageId === 'volcano_core' || $stageId === 'cosmo_skyway')"
           },
           "achievedAt": {
             ".validate": "newData.val() === now || newData.val() === data.val()"
