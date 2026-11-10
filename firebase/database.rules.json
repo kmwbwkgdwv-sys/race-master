@@ -41,6 +41,9 @@
         "parts": {
           ".validate": "newData.isString() && newData.val().length <= 4000"
         },
+        "playSec": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
         "updatedAt": {
           ".validate": "newData.val() === now"
         },

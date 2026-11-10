@@ -1314,6 +1314,13 @@ async function ensurePlayer(){
   return tk;
 }
 const myName = () => (pname || 'PLAYER').slice(0, 12);
+// 総プレイ時間（レースを走っていた時間の合計）。端末に数えておき、レースが終わるたびにプロフィールへ送る。ランキングでは各プレイヤーの時間を読んで表示する
+const fmtPlay = sec => { const m = Math.floor((sec || 0) / 60), h = Math.floor(m / 60); return h ? h + '時間' + (m % 60) + '分' : m + '分'; };
+const playOf = {};
+function syncPlay(){ if (!acct.reg || !acct.prof || (acct.play || 0) - (acct.playSent || 0) < 20) return; const v = Math.floor(acct.play);
+  token().then(tk => jf(`${FB.db}/profiles/${acct.pid}.json?auth=${tk}`, { method: 'PATCH', body: JSON.stringify({ playSec: v }) })).then(() => { acct.playSent = v; playOf[acct.pid] = v; saveAcct(); }).catch(() => {}); }
+function loadPlay(rows){ const sid = net.stage; for (const pid of new Set(rows.map(r => r.pid).filter(Boolean))) { if (pid in playOf) continue; playOf[pid] = -1;
+  jf(`${FB.db}/profiles/${pid}/playSec.json`).then(v => { playOf[pid] = typeof v === 'number' ? v : 0; if (tab === 'rank' && state === 'home' && net.stage === sid) renderRank(); }).catch(() => { delete playOf[pid]; }); } }
 // ---- ランキング：1回の記録が1行。同じ人の記録が何件も載る（各ステージ上位10件を表示）
 const topCut = {};
 async function submitLap(stageId, sec, rp, pb, mode){
@@ -1329,7 +1336,7 @@ async function submitLap(stageId, sec, rp, pb, mode){
 const myRecs = stageId => jf(`${FB.db}/${RK}/${stageId}.json?orderBy=%22pid%22&equalTo=%22${acct.pid}%22`).then(o => o || {});
 // 名前・アイコンを変えたら、ランキングに載っている自分の記録もまとめて書き換える
 async function syncProfile(){
-  try { const tk = await ensurePlayer(); await put('profiles/' + acct.pid, { name: myName(), icon: 'ch:' + sel.ch, updatedAt: { '.sv': 'timestamp' } }, tk); acct.prof = 1; saveAcct();
+  try { const tk = await ensurePlayer(); await put('profiles/' + acct.pid, { name: myName(), icon: 'ch:' + sel.ch, playSec: Math.floor(acct.play || 0), updatedAt: { '.sv': 'timestamp' } }, tk); acct.prof = 1; acct.playSent = acct.play || 0; saveAcct();
     const u = {}; for (const s of STAGES) { const o = await myRecs(s.id).catch(() => ({})); for (const id in o) { u[`${RK}/${s.id}/${id}/name`] = myName(); u[`${RK}/${s.id}/${id}/icon`] = 'ch:' + sel.ch; } }
     if (Object.keys(u).length) await jf(`${FB.db}/.json?auth=${tk}`, { method: 'PATCH', body: JSON.stringify(u) }); } catch (e) {}
 }
@@ -1338,7 +1345,7 @@ async function loadTop(stageId){
     net.rows = Object.entries(o || {}).map(([id, v]) => ({ id, ...v })).filter(v => v.lapMs > 0).sort((a, b) => a.lapMs - b.lapMs || a.achievedAt - b.achievedAt).slice(0, 10); net.err = '';
     topCut[stageId] = { n: net.rows.length, ms: net.rows.length ? net.rows[net.rows.length - 1].lapMs : 0 }; }
   catch (e) { net.rows = null; net.err = 'ランキングに接続できませんでした。通信状態を確認してください（GitHub Pages などで公開したページで表示されます）。'; }
-  net.stage = stageId; if (tab === 'rank' && state === 'home') renderRank();
+  net.stage = stageId; if (net.rows) loadPlay(net.rows); if (tab === 'rank' && state === 'home') renderRank();
 }
 async function restore(input){
   const m = (input.toUpperCase().match(/[A-Z2-9]/g) || []); if (m.length !== 16) return 'コードは16文字です';
@@ -1346,12 +1353,12 @@ async function restore(input){
   try { const tk = await token(), h = await sha(code), o = await jf(`${FB.db}/codes/${h}.json?auth=${tk}`); if (!o || !o.playerId) return 'コードが見つかりません';
     await put(`codes/${h}/uid`, acct.uid, tk); acct.pid = o.playerId; acct.code = code; acct.reg = true; acct.sent = {};
     for (const s of STAGES) { const o = await myRecs(s.id).catch(() => ({})); let b = 0; for (const id in o) { const r = o[id]; if (r && r.lapMs > 0 && (!b || r.lapMs < b)) b = r.lapMs; if (r && r.name) pname = r.name; } if (b) best[s.id] = b / 1000; }
-    try { const pr = await jf(`${FB.db}/profiles/${acct.pid}.json`); if (pr && pr.name) { pname = String(pr.name).slice(0, 12); sel.ch = ci(parseInt(String(pr.icon).slice(3)) || 0, CH.length); acct.prof = 1; } } catch (e) {}
+    try { const pr = await jf(`${FB.db}/profiles/${acct.pid}.json`); if (pr && pr.playSec > (acct.play || 0)) acct.play = acct.playSent = pr.playSec; if (pr && pr.name) { pname = String(pr.name).slice(0, 12); sel.ch = ci(parseInt(String(pr.icon).slice(3)) || 0, CH.length); acct.prof = 1; } } catch (e) {}
     if (!pname) pname = 'PLAYER'; acct.onb = 1; saveAcct(); save(); return '引き継ぎが完了しました'; }
   catch (e) { return '接続できませんでした'; }
 }
 // プロフィール（管理者サイトの一覧に出る）。登録が済んでいなければここで登録もする
-async function putProfile(){ const tk = await ensurePlayer(); await put('profiles/' + acct.pid, { name: myName(), icon: 'ch:' + sel.ch, updatedAt: { '.sv': 'timestamp' } }, tk); acct.prof = 1; saveAcct(); }
+async function putProfile(){ const tk = await ensurePlayer(); await put('profiles/' + acct.pid, { name: myName(), icon: 'ch:' + sel.ch, playSec: Math.floor(acct.play || 0), updatedAt: { '.sv': 'timestamp' } }, tk); acct.prof = 1; acct.playSent = acct.play || 0; saveAcct(); }
 // 自分の絵にコードを発行する：/skins/{8文字のコード} に保存し、コードを知っている人が読み込める
 async function shareSkin(type, g){
   const tk = await ensurePlayer(); let err;
@@ -1422,7 +1429,7 @@ function startRace(o){
   $('#home').hidden = true; $('#result').hidden = true; $('#hud').hidden = false; $('#bItem').hidden = !(vsLike() && RC.items); $('#pos').style.display = vsLike() ? '' : 'none';
   input.steer = 0; input.drift = input.brake = input.item = input.back = false; say('3'); se(440, .12);
 }
-function toHome(){ rlTok++; $('#roul').hidden = true; $('#load').hidden = true; if (state === 'replay') tab = 'rank'; state = 'home'; karts = []; me = null; if (online || room.id) { tab = 'race'; raceStep = 'go'; } online = false; $('#led').hidden = true; $('#hud').classList.remove('editing'); $('#home').hidden = false; $('#result').hidden = true; $('#hud').hidden = true; renderPanel(); }
+function toHome(){ saveAcct(); syncPlay(); rlTok++; $('#roul').hidden = true; $('#load').hidden = true; if (state === 'replay') tab = 'rank'; state = 'home'; karts = []; me = null; if (online || room.id) { tab = 'race'; raceStep = 'go'; } online = false; $('#led').hidden = true; $('#hud').classList.remove('editing'); $('#home').hidden = false; $('#result').hidden = true; $('#hud').hidden = true; renderPanel(); }
 function say(t, small, dur = 1){ const m = $('#msg'); m.textContent = t; m.className = 'on' + (small ? ' small' : ''); msgT = dur; }
 const rankVal = k => k.fin ? 1e9 - k.finT : k.prog;
 function rankOf(k){ let r = 0; const v = rankVal(k); for (const o of karts) if (o !== k && rankVal(o) > v) r++; return r; }
@@ -1646,7 +1653,7 @@ function step(dt){
   if (endT > 0 && (endT -= dt) <= 0) showResult();
 }
 function showResult(){
-  state = 'result';
+  state = 'result'; saveAcct(); syncPlay();
   const order = [...karts].sort((a, b) => rankVal(b) - rankVal(a)), r = order.indexOf(me) + 1;
   $('#rTitle').textContent = r + '位でゴール';
   $('#rSub').textContent = ST.name + '　' + fmt(me.finT) + (me.laps.length ? '　（ラップ ' + me.laps.map(fmt).join(' / ') + '）' : '');
@@ -2126,7 +2133,7 @@ function renderPanel(){
     h = `<h2>アイテム図鑑<small>VS・オンラインで光る箱から出現</small></h2><div class="scroll">` + Object.keys(ITEMS).map(id => `<div class="item"><canvas width="96" height="96" data-item="${id}"></canvas><div><b>${ITEMS[id].n}${ITEMS[id].low ? '<em>下位専用</em>' : ''}</b><p>${ITEMS[id].d}</p></div></div>`).join('') +
       `<div class="grp">コースのしかけ</div><p class="note"><b>ジャンプ台</b>：ピンクの板に乗るとジャンプ＋ブースト。<br><b>着地ダッシュ</b>：大きく飛んでから道に着地すると、少しだけブースト。坂のてっぺんを勢いよく越えても浮く。<br><b>動く障害物</b>：道を左右に横切る。当たるとスピン。<br><b>グライダー</b>：左右に広く動ける。カーブの内側を飛ぶと少しだけ近道。外側のブーストリングはその近道ライン上にある。<br><b>ダッシュパネル</b>：黄色い板で加速（VS・オンラインでは数が少なめ）。<br><b>柵</b>：カーブの外側などにあり、落ちるのを防ぐ。ジャンプ中なら飛び越えられる。<br><b>道のとぎれ目</b>：青と白の発射台に乗ると、自動で向こう側まで飛ぶ。<br><b>傾いた道</b>：道が横に傾いている区間。低いほうへ少しずつ流される。<br><b>隠し近道</b>：各コースに3本。カーブの内側を少しだけ縮める細い道で、目印はない。切れ目があるものは踏み切り板から飛び越える。<br><b>落ちたとき</b>：すぐには救助されない。飛んだ先に道があればそのまま走れる。近くの道よりずっと下まで落ちるとドローンが来る。<br><b>コース外</b>：約3割の減速（道から遠いほど重くなる）。コース外に強いパーツでも減速は残る。木・岩・柱などのオブジェにぶつかると大きく減速する。溶岩の上は1秒ほどなら渡れる。<br><b>飛ばしすぎ</b>：一度にコースの7%より先へは進めない（進んだことにならない）。</p></div>`;
   } else if (tab === 'rank') {
-    h = `<h2>ランキング<small>タイムアタックと、アイテムなしのルーム戦の最速ラップ上位10件</small></h2>
+    h = `<h2>ランキング<small>最速ラップ上位10件。名前の下にその人の総プレイ時間</small></h2>
       <div class="chips">` + STAGES.map((s, i) => `<button class="chip" type="button" data-stage="${i}" aria-pressed="${i === sel.stage}">${i + 1}. ${s.name}</button>`).join('') + `</div><div class="scroll" id="rkList"></div>`;
   } else {
     const tg = (key, t, s) => `<button class="tog" type="button" data-opt="${key}" aria-pressed="${!!opt[key]}"><span><b>${t}</b><small>${s}</small></span><span class="sw2"></span></button>`;
@@ -2148,11 +2155,11 @@ function renderPanel(){
 }
 function renderRank(){
   const el = $('#rkList'); if (!el) return; const tip = `<p class="note">${rkMsg ? esc(rkMsg) : '名前を押すと、その記録の走り（リプレイ）を見られます。'}</p>`;
-  const mine = best[ST.id] && LS.get('rm_rep4_' + ST.id, null) ? `<button class="rk me" type="button" data-rep="local"><span class="r">▶</span><canvas width="68" height="68" data-face="${sel.ch}"></canvas><span class="nm2">${esc(myName())}<small>この端末の自己ベスト</small></span><span class="tm">${fmt(best[ST.id])}</span></button>` : '';
+  const mine = best[ST.id] && LS.get('rm_rep4_' + ST.id, null) ? `<button class="rk me" type="button" data-rep="local"><span class="r">▶</span><canvas width="68" height="68" data-face="${sel.ch}"></canvas><span class="nm2">${esc(myName())}<small>この端末の自己ベスト　総プレイ ${fmtPlay(acct.play)}</small></span><span class="tm">${fmt(best[ST.id])}</span></button>` : '';
   if (net.err) el.innerHTML = `<p class="note">${net.err}</p>` + (mine ? tip + mine : '');
   else if (!net.rows || net.stage !== ST.id) el.innerHTML = '<p class="note">読み込み中…</p>';
   else if (!net.rows.length) el.innerHTML = '<p class="note">まだ記録がありません。タイムアタックで最初の記録を出そう。</p>' + mine;
-  else el.innerHTML = tip + net.rows.slice(0, 10).map((r, i) => `<button class="rk${r.pid === acct.pid ? ' me' : ''}" type="button" data-rep="${esc(r.id)}" data-i="${i}"><span class="r">${i + 1}</span><canvas width="68" height="68" data-face="${clamp(parseInt(String(r.icon).slice(3)) || 0, 0, CH.length - 1)}"></canvas><span class="nm2">${esc(r.name || 'PLAYER')}<small>▶ リプレイ</small></span><span class="tm">${fmt(r.lapMs / 1000)}</span></button>`).join('');
+  else el.innerHTML = tip + net.rows.slice(0, 10).map((r, i) => `<button class="rk${r.pid === acct.pid ? ' me' : ''}" type="button" data-rep="${esc(r.id)}" data-i="${i}"><span class="r">${i + 1}</span><canvas width="68" height="68" data-face="${clamp(parseInt(String(r.icon).slice(3)) || 0, 0, CH.length - 1)}"></canvas><span class="nm2">${esc(r.name || 'PLAYER')}<small>▶ リプレイ　総プレイ ${r.pid === acct.pid ? fmtPlay(Math.max(acct.play || 0, playOf[r.pid] || 0)) : playOf[r.pid] >= 0 ? fmtPlay(playOf[r.pid]) : '…'}</small></span><span class="tm">${fmt(r.lapMs / 1000)}</span></button>`).join('');
   el.querySelectorAll('[data-face]').forEach(c => drawFace(c, CH[+c.dataset.face]));
 }
 function openReplay(ds){
@@ -2461,11 +2468,12 @@ function boot(){
 }
 
 // ================================================================ loop
-let lastT = 0, accu = 0;
+let lastT = 0, accu = 0, playSave = 0;
 function frame(t){
   const dt = Math.min(.1, (t - lastT) / 1000 || 0); lastT = t; accu += dt;
   if (portrait && !online) accu = 0;      // 縦向きのあいだは止めておく（オンライン対戦中は止められない）
   let n = 0; while (accu >= 1 / 60 && n++ < 6) { step(1 / 60); accu -= 1 / 60; }
+  if ((state === 'race' || state === 'count') && !portrait) { acct.play = (acct.play || 0) + dt; if ((playSave += dt) > 15) { playSave = 0; saveAcct(); } }      // 総プレイ時間
   render(dt); hud();
   if (state === 'home' && tab === 'rank' && time - net.poll > 6) { net.poll = time; loadTop(ST.id); }   // 開いている間は数秒おきに最新化
   requestAnimationFrame(frame);
