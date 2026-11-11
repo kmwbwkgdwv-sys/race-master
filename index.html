@@ -421,26 +421,27 @@ const shade = (h, k) => '#' + hex(h).map(v => Math.round(clamp(v * k, 0, 1) * 25
 //   うしろに ^高さ（その区間の終わりの高さ）、b数（その区間の横の傾き％。+ で右側が高い）を付けられる
 //   #G0〜#G1=グライダー区間 / #H=道のとぎれ目（発射台から飛びこえる） / #J=ジャンプ台 / #A1〜#B1=隠し近道1本目の入口と出口（scs の1つ目）
 // mode: open=コース外は地面（減速＋オブジェ） / wall=高架・ほぼ全体に柵 / lava=外は溶岩 / void=宇宙・カーブの外側だけ柵
+// trait: そのコースで強いマシンの傾向（画面に出す）。scrub=カーブでの失速の大きさ（1がふつう）、padGap=ダッシュパネルの間隔、padWide=道幅いっぱいのダッシュゾーン、xj=自動で置くジャンプ台の数、land=着地ダッシュの長さの倍率
 // scs: 隠し近道（小さい近道。目印なし）。c=ふくらみ、w=道幅、jump=途中の切れ目をジャンプで越える、lift=盛り上がり
 // nat: もともとの時間帯。alt: もう一方の時間帯の色（tint=地形 / dyn=マシン / skt=遠景 / em=光るもの）
 const STAGES = [
-  { id:'master_circuit', bright:1, tempo:.98, name:'マスター・サーキット', feat:'湖と丘の王道コース。丘のヘアピン、湖畔の大カーブ、森のくねくね道', sw:'#4cc46a', mode:'open', width:32, water:-2.6, fence:'none', autoBank:.05,
+  { id:'master_circuit', bright:1, tempo:.98, trait:'カーブが多い。ドリフトのブーストを使いこなすマシン向き', name:'マスター・サーキット', feat:'湖と丘の王道コース。丘のヘアピン、湖畔の大カーブ、森のくねくね道', sw:'#4cc46a', mode:'open', width:32, water:-2.6, fence:'none', autoBank:.05,
     nat:'day', skyT:[.25,.52,.9], sky:[.66,.84,.96], alt:{ skyT:[.01,.02,.09], sky:[.08,.12,.26], tint:[.36,.43,.68], dyn:[.62,.66,.84], skt:[.3,.34,.55], em:[1.15,1.1,.95], stars:1 },
     ground:[.3,.58,.28], road:[.27,.28,.32], fog:[170,900], root:110, scs:[{ c:.6 }, { c:1, jump:1 }, { c:1 }],
     course:'s220 r35:140 l70:140 r35:140 s50 #J s50 #A1 s40 l90:100^10 s40 #B1 s100^24 l90:60 s100^30 r180:45^34 s90 l90:70^40 S80^46 l90:80 s160^40 #J s140^22 #A2 l45:120 r90:90 l45:120^12 #B2 l80:170^8b14 r25:130 l125:125^4b16 s30 #G0 s260 #G1 s20 r180:70 s60 #A3 l50:70^8 r100:70 l50:70 #B3 s40^10 s130^14b20 s30 #J s30 l180:90^0 S131' },
-  { id:'neon_metropolis', tempo:.96, name:'ネオン・メトロポリス', feat:'ビルの谷間の高架ハイウェイ。らせんランプ、ビル越えのジャンプ、つづら折りの下り', sw:'#ff3db4', mode:'wall', width:32, fence:'most', autoBank:.08,
+  { id:'neon_metropolis', tempo:.96, scrub:.15, padGap:900, trait:'路面のグリップが高く、カーブでほとんど失速しない。ダッシュパネルも少ない。最高速の高いマシン向き', name:'ネオン・メトロポリス', feat:'ビルの谷間の高架ハイウェイ。らせんランプ、ビル越えのジャンプ、つづら折りの下り', sw:'#ff3db4', mode:'wall', width:32, fence:'most', autoBank:.08,
     nat:'night', skyT:[.02,.01,.08], sky:[.16,.05,.26], alt:{ skyT:[.2,.26,.6], sky:[.98,.62,.5], tint:[2.3,2,1.9], dyn:[1,1,1], skt:[1,.9,.85], em:[1,1,1] },
     ground:[.03,.03,.07], road:[.13,.13,.21], fog:[150,860], root:98, scs:[{ c:1 }, { c:1.1, jump:1 }, { c:.6 }],
     course:'s300 l90:80^6 S80^14 r360:64^36 s120^40 r90:70 s100 #G0 s300^24 #G1 s40 r90:80^22 s40 l30:90 r60:90 l30:90^17 #J s50^14 #A3 s30 r90:60 s30 #B3 s90^10 l180:45^8 s140 r180:45^4 s170^2 #H s110^0 l90:60 s80 r180:70^6 s80 l90:60 s120^8b-22 s100^0 #A1 l40:90 r80:90 l40:90 #B1 S50 #A2 r90:85 r90:85 #B2 s190' },
-  { id:'ancient_desert', bright:1, tempo:1.04, name:'古代の砂漠', feat:'砂丘と遺跡のコース。岩山のつづら折り、傾いた谷の壁、神殿ぬけのスラローム', sw:'#e0a44a', mode:'open', width:34, fence:'none', autoBank:.05, arch:150,
+  { id:'ancient_desert', bright:1, tempo:1.04, xj:9, land:1.8, padGap:480, trait:'ジャンプ台だらけで、着地ダッシュがふだんより長い。着地ダッシュの長いマシン向き', name:'古代の砂漠', feat:'砂丘と遺跡のコース。岩山のつづら折り、傾いた谷の壁、神殿ぬけのスラローム', sw:'#e0a44a', mode:'open', width:34, fence:'none', autoBank:.05, arch:150,
     nat:'day', skyT:[.5,.62,.8], sky:[.95,.8,.56], alt:{ skyT:[.02,.03,.12], sky:[.17,.15,.3], tint:[.4,.42,.66], dyn:[.64,.66,.84], skt:[.35,.36,.55], em:[1.1,1.05,.9], stars:1 },
     ground:[.84,.67,.4], road:[.5,.4,.3], fog:[120,700], root:104, scs:[{ c:1, jump:1 }, { c:1 }, { c:.7 }],
     course:'s260 l60:120^6 s90 #A1 s30^16 r120:70^22 s30 #B1 s90^14 l60:120^8 s100^6 l90:90^10 s60 r180:50^18 s80^24 l180:50^30 s130 #J s130^36 l90:90 s100 #J s40^28 r90:60 s60 l180:60^24 s60 r90:60 #A2 r50:60 l100:60 r50:60 #B2 s40^20 #A3 l90:80 r90:60 #B3 s120^26b25 s40 #G0 s300^10 #G1 s30 l90:100^6 S60 l90:100^0 S165' },
-  { id:'volcano_core', tempo:1.02, name:'ボルケーノ・コア', feat:'外は溶岩。火口をうずまきにのぼり、火口の上から飛びおりる', sw:'#ff5a1f', mode:'lava', width:32, fence:'corner', autoBank:.06, h0:4, arch:170,
+  { id:'volcano_core', tempo:1.02, scrub:3.2, padGap:520, trait:'すべりやすい火山灰の路面。カーブで大きく失速する。ハンドリングの高いマシン、ドリフトがすぐたまるマシン向き', name:'ボルケーノ・コア', feat:'外は溶岩。火口をうずまきにのぼり、火口の上から飛びおりる', sw:'#ff5a1f', mode:'lava', width:32, fence:'corner', autoBank:.06, h0:4, arch:170,
     nat:'night', skyT:[.03,.01,.02], sky:[.3,.07,.03], alt:{ skyT:[.36,.33,.36], sky:[.86,.56,.38], tint:[1.9,1.75,1.7], dyn:[1,1,1], skt:[1.6,1.4,1.3], em:[1,1,1] },
     ground:[1,.42,.06], road:[.21,.18,.18], fog:[150,860], root:92, scs:[{ c:1, jump:1 }, { c:.6 }, { c:1 }],
     course:'s200 #A1 r40:100 l80:100 r40:100 #B1 s50 #A2 s30 l90:90^8 s30 #B2 s60 #J S170^18 l180:180^30b6 l180:140^42b8 l180:100^52b10 l90:55^54 s20 #G0 s330^14 #G1 s40 r90:80^12 s120 #H s110^6 r90:80 s100^4 #A3 l60:70 r120:70 l60:70 #B3 s80 #H s40 s120^12b24 s100^4 S40 l35:110 r70:110 l35:110 s15 #J s20 r90:60 r90:60 s200' },
-  { id:'cosmo_skyway', bright:1, tempo:1.08, name:'コスモ・スカイウェイ', feat:'宇宙に浮かぶ立体交差コース。傾いた大カーブ、らせん下り、星あかりだけが目印の見えない道', sw:'#6fd3ff', mode:'void', width:36, fence:'corner', autoBank:.12,
+  { id:'cosmo_skyway', bright:1, tempo:1.08, padGap:400, padWide:1, trait:'道幅いっぱいのダッシュゾーンが多い。ダッシュパネルのブーストが長いマシン、ブースト中が速いマシン向き', name:'コスモ・スカイウェイ', feat:'宇宙に浮かぶ立体交差コース。傾いた大カーブ、らせん下り、星あかりだけが目印の見えない道', sw:'#6fd3ff', mode:'void', width:36, fence:'corner', autoBank:.12,
     nat:'night', skyT:[.0,.0,.03], sky:[.06,.03,.16], alt:{ skyT:[.08,.1,.36], sky:[.42,.3,.66], tint:[1.35,1.3,1.4], dyn:[1,1,1], skt:[1.2,1.2,1.3], em:[1,1,1] },
     ground:null, road:[.2,.22,.42], fog:[500,2800], root:123, scs:[{ c:1 }, { c:.6 }, { c:.8, jump:1 }],
     course:'s320 l45:150^4 s150 #J s150^12 r135:110^22b-16 s80^28 r135:110^32b-16 s140 s160^30b18 #A3 s20 l135:110^28b16 s20 #B3 s300^26 r360:70^6 s60^4 #A2 s30 r90:90 s30 #B2 s90 #H s100^8b-24 s40 #G0 s320^2 #G1 s40 r90:120^0 s20 #J S80 r90:95 s40 #A1 l30:150 r60:150 l30:150 #B1 S150' },
@@ -668,10 +669,11 @@ function buildTrack(st){
   for (const s of scs) for (const p of s.P) { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); z0 = Math.min(z0, p.z); z1 = Math.max(z1, p.z); }
   for (let i = 0; i < N; i++) pts[i].sf = free(i, 3, 30);      // sf = 救助されたときに戻ってよい場所（すぐ先に穴やグライダー区間がない）
   // ---- しかけの場所
-  const ramps = mk('J').filter(i => free(i, 4, 8)), launch = holes.map(hs => W(hs - 3)), busy = (c, d) => ramps.some(r => Math.abs(r - c) < d) || launch.some(r => Math.abs(r - c) < d + 6);
+  const ramps = mk('J').filter(i => free(i, 4, 8)); for (let q = 0; q < (st.xj || 0); q++) { let c = Math.round(N * (q + .5) / st.xj); for (let o = 0; o < 60; o++, c = W(c + 1)) if (c > 30 && c < N - 30 && free(c, 6, 12) && Math.abs(pts[c].curv) < .12 && Math.abs(pts[c].bk) < .08 && !ramps.some(r => Math.abs(r - c) < 40)) { ramps.push(c); break; } }      // ジャンプ台だらけのコース用：等間隔に追加
+  const launch = holes.map(hs => W(hs - 3)), busy = (c, d) => ramps.some(r => Math.abs(r - c) < d) || launch.some(r => Math.abs(r - c) < d + 6);
   const padL = []; { const gap = Math.round((st.padGap || 300) / seg); let n = 0;
     for (let i = Math.round(gap * .4); i < N - 14; i += gap) { let q = -1; for (let o = 0; o < gap * .7; o++) { const c = i + o; if (c >= N - 14) break; if (Math.abs(pts[c].curv) < .05 && Math.abs(pts[c].bk) < .06 && free(c, 14, 8) && !busy(c, 14)) { q = c; break; } }
-      if (q >= 0) padL.push({ idx: q, lat: [-1, 1, 0][n % 3] * st.width * .27, n: n++ }); } }
+      if (q >= 0) padL.push({ idx: q, lat: st.padWide ? 0 : [-1, 1, 0][n % 3] * st.width * .27, hw: st.padWide ? st.width / 2 - 1.5 : 3.6, n: n++ }); } }      // padWide のコースは道幅いっぱいのダッシュゾーン
   const slot = (f, b) => { let i = Math.round(N * f); for (let o = 0; o < 80; o++) { const c = W(i + o); if (free(c, b, b) && !busy(c, 10) && c > 20 && c < N - 20) return c; } return W(i); };
   const boxesAt = [0, 1, 2, 3, 4, 5, 6, 7].map(k => slot((k + .42) / 8, 10)), xs = mk('X');
   const obst = (xs.length ? xs : [.12, .3, .5, .69, .88].map(f => slot(f, 8))).map((idx, i) => ({ idx, amp: st.width / 2 - 3, sp: .7 + (i % 3) * .22, ph: i * 2.1 }));   // 道を横切る障害物
@@ -923,7 +925,7 @@ function buildWorld(st){
   for (let k = 0; k < 10; k++) for (let r = 0; r < 2; r++) { const p = P[r], q = P[r + 1], d0 = -h + k * st.width / 10, d1 = d0 + st.width / 10; m.flat(edge(p, d0, .05), edge(p, d1, .05), edge(q, d1, .05), edge(q, d0, .05), (k + r) & 1 ? [.05, .05, .05] : [1, 1, 1]); }
   { const p = P[1], yaw = Math.atan2(p.tx, p.tz), gc = hex(st.sw); for (const s of [-1, 1]) { const e = edge(p, s * (h + .9)); m.box(e[0], p.y + 3.6, e[2], .35, 3.6, .35, [.85, .85, .88], yaw); } m.box(p.x, p.y + 7.2, p.z, h + 1.6, .9, .3, gc, yaw); for (let k = 0; k < 12; k++) { const d = -h - .6 + (k + .5) * (st.width + 1.2) / 12; m.box(p.x + p.nx * d, p.y + 7.2 + ((k & 1) ? .3 : -.3), p.z + p.nz * d, (st.width + 1.2) / 24, .3, .34, (k & 1) ? [.05, .05, .05] : [1, 1, 1], yaw, true); } }
   // dash panels
-  for (const pd of PADS) for (let r = 0; r < 3; r++) { const p = P[(pd.idx + r) % N], q = P[(pd.idx + r + 1) % N]; m.flat(edge(p, pd.lat - 3.6, .06), edge(p, pd.lat + 3.6, .06), edge(q, pd.lat + 3.6, .06), edge(q, pd.lat - 3.6, .06), r & 1 ? [1, .5, .05] : [1, .92, .15]); }
+  for (const pd of PADS) for (let r = 0; r < 3; r++) { const p = P[(pd.idx + r) % N], q = P[(pd.idx + r + 1) % N]; m.flat(edge(p, pd.lat - pd.hw, .06), edge(p, pd.lat + pd.hw, .06), edge(q, pd.lat + pd.hw, .06), edge(q, pd.lat - pd.hw, .06), r & 1 ? [1, .5, .05] : [1, .92, .15]); }
   // glider launch panel + gate
   for (let r = 1; r <= 5; r++) { const p = P[(G0 - r + N) % N], q = P[(G0 - r + 1 + N) % N]; m.flat(edge(p, -h, .07), edge(p, h, .07), edge(q, h, .07), edge(q, -h, .07), r & 1 ? [.2, .75, 1] : [.88, .98, 1]); }
   { const p = P[(G0 - 1 + N) % N], yaw = Math.atan2(p.tx, p.tz), gc = [.2, .78, 1]; for (const s of [-1, 1]) { const e = edge(p, s * (h + .6)); m.box(e[0], p.y + 3.2, e[2], .25, 3.2, .25, gc, yaw, true); } m.box(p.x, p.y + 6.6, p.z, h + .9, .35, .25, gc, yaw, true); m.box(p.x, p.y + 7.6, p.z, 2.6, .12, .9, [1, 1, 1], yaw, true); }
@@ -1413,7 +1415,7 @@ const mode = () => sel.mode;
 function newKart(i, ai, name, chIdx, color, kt){
   return { ai, name, ch: CH[chIdx], color, kt, x: 0, y: 0, z: 0, h: 0, v: 0, yaw: 0, idx: 0, lat: 0, ty: 0, frac: 0, drift: false, dDir: 0, charge: 0, tier: 0,
     boost: 0, nitro: 0, slow: 1, slowT: 0, shield: 0, spin: 0, inv: 0, rev: 0, chips: 0, item: null, itemT: 0, lapNo: 0, sectors: 0, debt: false, lapStart: 0, last: 0,
-    safe: 0, rescue: 0, off: false, sc: null, glide: false, pitch: 0, fin: false, finT: 0, prog: 0, vmul: 1, skill: 1, aiLat: 0, aiPhase: i * 1.7, st: 0, rocket: 0, obCd: 0, air: 0, vy: 0, gy: 0, laps: [], airT: 0, fallT: 0, lavaT: 0, jumpT: 0, fenceCd: 0, cp: 0, skipT: 0, on: 1, lastOn: 1, offF: 1, scI: 0, scF: 0, roll: 0, bumpCd: 0 };
+    safe: 0, rescue: 0, off: false, sc: null, glide: false, pitch: 0, fin: false, finT: 0, prog: 0, vmul: 1, skill: 1, aiLat: 0, aiPhase: i * 1.7, st: 0, rocket: 0, obCd: 0, air: 0, vy: 0, gy: 0, laps: [], airT: 0, fallT: 0, lavaT: 0, jumpT: 0, fenceCd: 0, cp: 0, skipT: 0, on: 1, lastOn: 1, offF: 1, scI: 0, scF: 0, roll: 0, bumpCd: 0, padT: 0 };
 }
 function selectStage(i){
   sel.stage = i; ST = STAGES[i]; TR = TRACKS[ST.id] || (TRACKS[ST.id] = buildTrack(ST));
@@ -1422,7 +1424,7 @@ function selectStage(i){
 // 3Dのコースは走る直前に作る。tod = 'day' / 'night'
 function ensureWorld(tod, ta){
   if (!TR.ready) buildField(TR, ST);
-  PADS = padSet(ta); PADT = ta ? .9 : .75; const key = ST.id + (ta ? 't' : 'v') + (opt.lite ? 'l' : '');      // ダッシュパネルは VS・オンラインでは少なめ・短め
+  PADS = padSet(ta); PADT = ta ? 1.15 : 1; const key = ST.id + (ta ? 't' : 'v') + (opt.lite ? 'l' : '');      // ダッシュパネルは VS・オンラインでは少なめ・短め
   if (worldFor !== key) { buildWorld(ST); worldFor = key; }
   TOD = tod === 'night' ? 'night' : 'day'; PL = TOD === ST.nat ? { skyT: ST.skyT, sky: ST.sky, tint: W1, dyn: W1, skt: W1, em: W1, stars: 0 } : ST.alt; buildSky();
 }
@@ -1450,7 +1452,7 @@ function startRace(o){
     karts.push(k); if (en.me) me = k;
   });
   ghostLoad();
-  boxes = vsLike() && RC.items ? boxesAt.flatMap(idx => [-1.5, -.5, .5, 1.5].map(s => ({ idx, lat: s * ST.width * .2, t: 0 }))) : [];
+  boxes = vsLike() && RC.items ? boxesAt.flatMap(idx => [-1.5, -.5, .5, 1.5].map(s => ({ idx, lat: s * ST.width * .2, t: 0 }))).concat([-1.5, -.5, .5, 1.5].map(s => ({ idx: G0 + Math.floor((G1 - G0) * .54), lat: s * ST.width * .2, t: 0, air: true }))) : [];      // air = グライダーで飛ぶ高さに浮いている箱（飛んでいるあいだに取れる）
   raceT = 0; countT = 3.3; endT = 0; novaT = 0; dboost.t = 0; state = 'count'; cam.h = me.h; cam.ky = me.y; cam.g = 0; rec.a = []; rec.t = 0; rep = null; for (const r of TR.rings) r.t = 0;
   spec = null; $('#hud').classList.remove('rep', 'spec'); $('#quit').textContent = 'ホームへ'; $('#roul').hidden = true;
   $('#home').hidden = true; $('#result').hidden = true; $('#hud').hidden = false; $('#bItem').hidden = !(vsLike() && RC.items); $('#pos').style.display = vsLike() ? '' : 'none';
@@ -1465,7 +1467,7 @@ const byRank = r => karts.find(k => rankOf(k) === r);
 function hit(k, slow, dur, kind){
   if (k.rescue > 0 || k.rocket > 0) return;      // ロケットブースト中は無敵
   if (k.shield > 0) { k.shield = 0; if (k === me) { say('シールドで防いだ', true, .9); se(900, .2, 'triangle', .08, 1.6); } return; }
-  const tg = k.kt.tough; k.drift = false; k.charge = 0; k.tier = 0; k.boost = 0; k.nitro = 0; k.chips = 0; k.slow = slow; k.slowT = dur * tg;      // tough = 立ち直りの早さ（小さいほど早い）
+  const tg = k.kt.tough; k.drift = false; k.charge = 0; k.tier = 0; k.boost = 0; k.padT = 0; k.nitro = 0; k.chips = 0; k.slow = slow; k.slowT = dur * tg;      // tough = 立ち直りの早さ（小さいほど早い）
   if (kind === 'homing') k.inv = 1.5 * tg; else if (kind === 'nova') { k.rev = 1.1; if (k === me) novaT = 2.4; } else { k.v *= .35; k.spin = .7 * tg; }
   if (k === me) { say(kind === 'homing' ? 'ハンドル反転！' : kind === 'nova' ? 'まぶしい！' : kind === 'bump' ? 'ぶつかった！' : 'ヒット！', true, .9); se(200, .35, 'sawtooth', .09, .3); }
 }
@@ -1502,7 +1504,7 @@ function aiInput(k){
   if (k.item && !k.fin && !(k.item === 'shield' && k.shield > 0)) { k.itemT -= 1 / 60; if (k.itemT <= 0) useItem(k); }
   return { steer: clamp(diff * 2.6, -1, 1), drift: false, brake: false };
 }
-function bumped(k){ k.v *= .88; k.boost = Math.min(k.boost, .2); if (k === me) { se(170, .1, 'triangle', .07, .7); for (let i = 0; i < 4; i++) spark(k.x, k.y + .6, k.z, [1, .9, .6], 4, .25, .12); } }
+function bumped(k){ k.v *= .88; k.boost = Math.min(k.boost, .2); k.padT = Math.min(k.padT, .2); if (k === me) { se(170, .1, 'triangle', .07, .7); for (let i = 0; i < 4; i++) spark(k.x, k.y + .6, k.z, [1, .9, .6], 4, .25, .12); } }
 function endDrift(k, fire){
   // ドリフトを終えると、ドリフトしていた時間に応じてブーストする（どのモードでも同じ。0.5秒以上で発動、長いほど長く続く）
   if (fire && k.charge >= .5) { const sec = Math.min(3, .3 + k.charge * .55) * k.kt.mt * k.kt.bst; k.boost = Math.max(k.boost, sec); if (k === me) { dboost = { t: 1.3, sec }; se(300 + Math.min(3, k.charge) * 110, .35, 'sawtooth', .08, 2.2); } }
@@ -1531,8 +1533,8 @@ function updateKart(k, inp, dt){
 
   // コースの外は約3割の減速（offF）。道から遠く離れるほどさらに重くなる。コース外に強いパーツでも、減速は少し残る
   let max = MAXV * kt.top * k.vmul * (1 + .012 * k.chips) * (k.off && k.nitro <= 0 ? 1 - (1 - k.offF) * (1 - kt.offRes) : 1) * (k.slowT > 0 ? k.slow : 1) * (k.glide ? k.gl.spd * kt.gsp : 1), acc = ACC * kt.acc;
-  if (!k.glide && k.air < .6) { const cs = Math.min(1, Math.abs(k.yaw) / TURN); max *= 1 - BAL.scrub * cs * clamp(1 + (1 - kt.turn) * BAL.tk, .4, 1.9) * (k.drift ? BAL.drift : 1); }
-  if (k.boost > 0) { max *= 1.35 + kt.bsp; acc *= 3; }
+  if (!k.glide && k.air < .6) { const cs = Math.min(1, Math.abs(k.yaw) / TURN); max *= 1 - BAL.scrub * (ST.scrub || 1) * cs * clamp(1 + (1 - kt.turn) * BAL.tk, .4, 1.9) * (k.drift ? BAL.drift : 1); }
+  if (k.boost > 0) { max *= (k.padT > 0 ? 1.55 : 1.35) + kt.bsp; acc *= k.padT > 0 ? 5 : 3; }      // ダッシュパネルのブーストは、ふつうのブーストより速くて立ち上がりも鋭い
   if (k.rocket > 0) { max *= 1.3; acc *= 1.6; }
   if (k.rev > 0) k.v = Math.max(-9, k.v - 40 * dt);
   else if (k.boost > 0) k.v = Math.min(max, k.v + acc * dt);
@@ -1584,7 +1586,7 @@ function updateKart(k, inp, dt){
       const lo = lowNear(k.x, k.z); if (k.fallT > 2.8 || (lo === null ? k.fallT > 1 : k.y < lo - 9)) return startRescue(k); }
     else { k.fallT = 0; const ny = k.y + k.vy * dt - .5 * GRAV * dt * dt;
       if (ny <= gy + (k.air <= 0 && k.jumpT <= 0 ? .1 : 0)) {      // 接地（小さな段差には貼りつき、坂のてっぺんを勢いよく越えると浮く）
-        if (k.airT > .55 && on !== 3) { k.boost = Math.max(k.boost, .45 * kt.bst * kt.jump); if (k === me) { say('ナイス着地！', true, .7); se(620, .12, 'square', .06, 1.5); } }      // 大ジャンプの着地ダッシュ
+        if (k.airT > .55 && on !== 3) { k.boost = Math.max(k.boost, .45 * (ST.land || 1) * kt.bst * kt.jump); if (k === me) { say('ナイス着地！', true, .7); se(620, .12, 'square', .06, 1.5); } }      // 大ジャンプの着地ダッシュ
         else if (k.airT > .25 && k === me) se(140, .12, 'triangle', .07, .6);
         const up = gy - k.y; k.y = on === 3 && up > 1.2 ? k.y + up * .5 : gy; k.vy = on === 3 ? clamp((k.y - y0) / dt, -.5 * Math.abs(k.v), .5 * Math.abs(k.v)) : clamp(gsl * k.v, -40, 15); k.air = 0; k.airT = 0; }      // 上下の速さは路面の坂から決める
       else { k.y = ny; k.vy -= GRAV * dt; k.air = ny - gy; k.airT += dt; } }
@@ -1596,7 +1598,7 @@ function updateKart(k, inp, dt){
   if (road && p.bk) { const sl = p.bk * 5 * dt; k.x -= p.nx * sl; k.z -= p.nz * sl; }
   k.roll += ((on === 1 && k.air < 1 ? Math.atan(p.bk * (p.tx * Math.sin(k.h) + p.tz * Math.cos(k.h))) : 0) - k.roll) * .15;
 
-  for (const pd of PADS) { const dd = (k.idx - pd.idx + N) % N; if (dd < 3 && Math.abs(k.lat - pd.lat) < 4 && road) { if (k === me && k.boost <= 0) se(240, .3, 'sawtooth', .07, 3); k.boost = Math.max(k.boost, PADT * kt.bst * kt.pad); } }
+  for (const pd of PADS) { const dd = (k.idx - pd.idx + N) % N; if (dd < 3 && Math.abs(k.lat - pd.lat) < pd.hw + .4 && road) { if (k === me && k.padT <= 0) se(240, .3, 'sawtooth', .07, 3); const sec = PADT * kt.bst * kt.pad; k.boost = Math.max(k.boost, sec); k.padT = Math.max(k.padT, sec); k.v = Math.max(k.v, MAXV * kt.top * 1.2); } }
   // ---- コースのしかけ：ジャンプ台 / 隠し近道の踏み切り板 / 動く障害物 / グライダーのブーストリング
   if (road && Math.abs(k.v) > 12) for (const r of TR.ramps) { if ((k.idx - r + N) % N < 2 && a < half * .62) { k.vy = 10 + Math.max(0, p.sl * k.v); k.jumpT = .3; k.boost = Math.max(k.boost, .8 * kt.bst * kt.pad); if (k === me) se(330, .25, 'square', .06, 2); break; } }
   // 道のとぎれ目の発射台：乗れば必ず向こう側まで届く（遅くても自動で加速して飛ぶ）
@@ -1605,7 +1607,7 @@ function updateKart(k, inp, dt){
   if (k.obCd <= 0) for (const ob of TR.obst) { const dd = (k.idx - ob.idx + N) % N; if (dd > 3 && dd < N - 3) continue; const ol = Math.sin(raceT * ob.sp + ob.ph) * ob.amp, q = P[ob.idx];
     if ((k.x - q.x - q.nx * ol) ** 2 + (k.z - q.z - q.nz * ol) ** 2 < 8.5 && k.y - q.y < 1.6 && k.y - q.y > -2) { k.obCd = 1.4; if (k.rocket > 0) { for (let i = 0; i < 10; i++) spark(k.x, k.y + 1, k.z, [1, .8, .3], 8); if (k === me) se(180, .2, 'sawtooth', .08, .5); } else hit(k, .6, 1.1, 'bump'); } }
   if (k.glide) for (const r of TR.rings) if (prev < r.idx && k.idx >= r.idx && Math.abs(k.lat - r.lat) < 4.6 * (k.gl.rr || 1)) { k.boost = Math.max(k.boost, 1.3 * kt.bst * (k.gl.ring || 1)); if (k === me) { r.t = .6; se(880, .12, 'sine', .08, 1.5); se(1320, .2, 'sine', .07, 1, .08); } }
-  for (const key of ['boost', 'nitro', 'slowT', 'shield', 'spin', 'inv', 'rev', 'rocket', 'obCd', 'jumpT', 'fenceCd', 'bumpCd']) if (k[key] > 0) k[key] -= dt;
+  for (const key of ['boost', 'nitro', 'slowT', 'shield', 'spin', 'inv', 'rev', 'rocket', 'obCd', 'jumpT', 'fenceCd', 'bumpCd', 'padT']) if (k[key] > 0) k[key] -= dt;
 
   { const mv = Math.hypot(k.x - x0, k.z - z0), tp = mv > .03 ? clamp(Math.atan2(k.y - y0, mv), -.6, .6) * (k.v < 0 ? -1 : 1) : 0; k.pitch += (tp - k.pitch) * .2; }      // 坂に合わせて車体を傾ける
   // ---- 周回：cp = 順番どおりに進んだ位置。一度に飛ばせるのはコースの 7% まで。それ以上はなれた場所へ行っても進んだことにならない（むちゃな近道はできない）
@@ -1662,7 +1664,8 @@ function step(dt){
   for (const bx of boxes) {
     if (bx.t > 0) { bx.t -= dt; continue; }
     const p = P[bx.idx], x = p.x + p.nx * bx.lat, z = p.z + p.nz * bx.lat;
-    for (const k of karts) if (!k.remote && !k.item && k.rescue <= 0 && (k.x - x) ** 2 + (k.z - z) ** 2 < 5.3) { k.item = rollItem(k); k.itemT = 1.5 + Math.random() * 4; bx.t = 4; if (k === me) { se(700, .08); se(1050, .14, 'square', .06, 1, .08); } for (let i = 0; i < 8; i++) spark(x, p.y + 1.2, z, [1, 1, .6], 5); break; }
+    for (const k of karts) if (!k.remote && !k.item && k.rescue <= 0 && !!k.glide === !!bx.air && (k.x - x) ** 2 + (k.z - z) ** 2 < (bx.air ? 9 : 5.3)) {      // 空の箱はグライダー中だけ、地上の箱は走っているときだけ取れる（高さは問わない）
+      k.item = rollItem(k); k.itemT = 1.5 + Math.random() * 4; bx.t = 4; if (k === me) { se(700, .08); se(1050, .14, 'square', .06, 1, .08); } for (let i = 0; i < 8; i++) spark(x, bx.air ? k.y + .8 : p.y + 1.2, z, [1, 1, .6], 5); break; }
   }
   for (const o of shots) {
     o.life -= dt;
@@ -1896,7 +1899,7 @@ function drawRacer(k){
 }
 // アイテムボックス：虹色に光るクリスタルの箱の中に「？」
 function drawBox(bx){
-  const p = P[bx.idx], ph = bx.lat * .7 + bx.idx, x = p.x + p.nx * bx.lat, z = p.z + p.nz * bx.lat, y0 = p.y + p.bk * bx.lat, y = y0 + 1.45 + Math.sin(time * 3 + ph) * .18;
+  const p = P[bx.idx], ph = bx.lat * .7 + bx.idx, x = p.x + p.nx * bx.lat, z = p.z + p.nz * bx.lat, y0 = bx.air ? glideY(bx.idx, 0, me ? me.gl.arc : 12) - .6 : p.y + p.bk * bx.lat, y = y0 + 1.45 + Math.sin(time * 3 + ph) * .18;      // 空の箱は、自分のグライダーが飛ぶ高さに見える
   const hue = (time * .22 + ph * .13) % 1, c1 = hsv3(hue, .5, 1), c2 = hsv3((hue + .35) % 1, .65, 1);
   setT(x, y, z, cam.h); const W = [1, 1, 1];
   d('cube', 0, .42, 0, .56, .15, .14, W); d('cube', -.21, .31, 0, .15, .2, .14, W); d('cube', .21, .25, 0, .15, .36, .14, W); d('cube', .09, .04, 0, .36, .14, .14, W); d('cube', 0, -.13, 0, .15, .22, .14, W); d('cube', 0, -.42, 0, .17, .17, .14, W);
@@ -2181,7 +2184,7 @@ function renderPanel(){
     else if (sel.mode === 'on') h = `<h2>オンライン対戦<small>ルームIDを共有して集まる</small></h2><div class="scroll">${room.id ? '' : again}${roomHtml()}</div>`;
     else h = `<h2>${modeName}<small>コースと時間帯を選んでスタート</small></h2><div class="chips">${chip('rmode', '← モード')}<span class="lbl">時間帯</span><button class="chip" type="button" data-tod="day" aria-pressed="${sel.tod === 'day'}">昼</button><button class="chip" type="button" data-tod="night" aria-pressed="${sel.tod === 'night'}">夜</button>${sel.mode === 'vs' ? `<span class="lbl">周回</span>` + [1, 2, 3, 5].map(n => `<button class="chip" type="button" data-laps="${n}" aria-pressed="${sel.laps === n}">${n}周</button>`).join('') : `<span class="lbl">1位の残像</span><button class="chip" type="button" data-ghost="0" aria-pressed="${!sel.ghost}">なし</button><button class="chip" type="button" data-ghost="1" aria-pressed="${sel.ghost}">あり</button>`}</div>${sel.mode === 'ta' && sel.ghost ? `<p class="note"><b>残像あり</b>：ランキング1位の人の走りが、半透明のマシンとして一緒に走ります。これを追い抜けば1位。相手の使っている近道も見つけやすくなります。当たり判定はありません（まだ記録がないコースや通信できないときは、自分のベストの残像になります）。</p>` : ''}<div class="scroll">
       <button class="stg" type="button" data-stage="r" aria-pressed="${sel.rnd}" style="--sw:#ffd60a"><canvas width="192" height="120" data-thumb="r"></canvas><span class="nm">ランダム<span class="ft">ルーレットで決まる。どのコースになるかはお楽しみ</span></span><span class="bt"></span></button>` +
-      STAGES.map((s, i) => `<button class="stg" type="button" data-stage="${i}" aria-pressed="${!sel.rnd && i === sel.stage}" style="--sw:${s.sw}"><canvas width="192" height="120" data-thumb="${i}"></canvas><span class="nm">${s.name}<span class="ft">${s.feat}／1周 約${lapSec(i)}</span></span><span class="bt">${fmt(best[s.id])}<i>ベストラップ</i></span></button>`).join('') + `<p class="note">コース図の水色がグライダー区間です。どのコースにも、コース図に載っていない<b>小さな隠し近道</b>が3本あります。カーブの内側をほんの少し縮めるだけの細い道で、目印はありません。道のわきをよく見てさがしてみよう。</p></div>`;
+      STAGES.map((s, i) => `<button class="stg" type="button" data-stage="${i}" aria-pressed="${!sel.rnd && i === sel.stage}" style="--sw:${s.sw}"><canvas width="192" height="120" data-thumb="${i}"></canvas><span class="nm">${s.name}<span class="ft">${s.feat}／1周 約${lapSec(i)}<br><b>▶ ${s.trait}</b></span></span><span class="bt">${fmt(best[s.id])}<i>ベストラップ</i></span></button>`).join('') + `<p class="note">コース図の水色がグライダー区間です。どのコースにも、コース図に載っていない<b>小さな隠し近道</b>が3本あります。カーブの内側をほんの少し縮めるだけの細い道で、目印はありません。道のわきをよく見てさがしてみよう。</p></div>`;
   } else if (tab === 'char') {
     const grid = g => CH.map((c, i) => c.g === g ? `<button class="chr" type="button" data-ch="${i}" aria-pressed="${i === sel.ch}"><canvas width="92" height="92" data-face="${i}"></canvas>${c.n}</button>` : '').join('');
     h = `<h2>キャラ<small>全30体・性能差なし</small></h2><div class="scroll"><div class="box"><b>スキン</b><div class="chips">${chip('skoff', 'もとのキャラ', !sel.skin)}${chip('skon', '自分で描いたスキン', sel.skin)}</div><small>自分で絵を描いて、キャラの見た目として着せられます。</small><button class="opt pri" type="button" data-act="cpaint"><b>スキンを描く</b><small>${CH[sel.ch].n} の上に絵を描く・画像を貼る</small></button></div>
@@ -2198,7 +2201,7 @@ function renderPanel(){
     h = paintHtml();
   } else if (tab === 'item') {
     h = `<h2>アイテム図鑑<small>VS・オンラインで光る箱から出現</small></h2><div class="scroll">` + Object.keys(ITEMS).map(id => `<div class="item"><canvas width="96" height="96" data-item="${id}"></canvas><div><b>${ITEMS[id].n}${ITEMS[id].low ? '<em>下位専用</em>' : ''}</b><p>${ITEMS[id].d}</p></div></div>`).join('') +
-      `<div class="grp">コースのしかけ</div><p class="note"><b>ジャンプ台</b>：ピンクの板に乗るとジャンプ＋ブースト。<br><b>着地ダッシュ</b>：大きく飛んでから道に着地すると、少しだけブースト。坂のてっぺんを勢いよく越えても浮く。<br><b>動く障害物</b>：道を左右に横切る。当たるとスピン。<br><b>体当たり</b>：マシン同士がぶつかると、ぶつけられた側が少し減速する。<br><b>グライダー</b>：左右に広く動ける。カーブの内側を飛ぶと少しだけ近道。外側のブーストリングはその近道ライン上にある。<br><b>ダッシュパネル</b>：黄色い板で加速（VS・オンラインでは数が少なめ）。<br><b>柵</b>：カーブの外側などにあり、落ちるのを防ぐ。ジャンプ中なら飛び越えられる。<br><b>道のとぎれ目</b>：青と白の発射台に乗ると、自動で向こう側まで飛ぶ。<br><b>傾いた道</b>：道が横に傾いている区間。低いほうへ少しずつ流される。<br><b>隠し近道</b>：各コースに3本。カーブの内側を少しだけ縮める細い道で、目印はない。切れ目があるものは踏み切り板から飛び越える。<br><b>落ちたとき</b>：すぐには救助されない。飛んだ先に道があればそのまま走れる。近くの道よりずっと下まで落ちるとドローンが来る。<br><b>コース外</b>：約3割の減速（道から遠いほど重くなる）。コース外に強いパーツでも減速は残る。木・岩・柱などのオブジェにぶつかると大きく減速する。溶岩の上は1秒ほどなら渡れる。<br><b>飛ばしすぎ</b>：一度にコースの7%より先へは進めない（進んだことにならない）。</p></div>`;
+      `<div class="grp">コースのしかけ</div><p class="note"><b>ジャンプ台</b>：ピンクの板に乗るとジャンプ＋ブースト。<br><b>着地ダッシュ</b>：大きく飛んでから道に着地すると、少しだけブースト。坂のてっぺんを勢いよく越えても浮く。<br><b>動く障害物</b>：道を左右に横切る。当たるとスピン。<br><b>体当たり</b>：マシン同士がぶつかると、ぶつけられた側が少し減速する。<br><b>グライダー</b>：左右に広く動ける。カーブの内側を飛ぶと少しだけ近道。外側のブーストリングはその近道ライン上にある。<br><b>空のアイテムボックス</b>：グライダー区間のまん中に浮いている。飛んでいるあいだに取れる。<br><b>ダッシュパネル</b>：黄色い板で加速（VS・オンラインでは数が少なめ）。<br><b>柵</b>：カーブの外側などにあり、落ちるのを防ぐ。ジャンプ中なら飛び越えられる。<br><b>道のとぎれ目</b>：青と白の発射台に乗ると、自動で向こう側まで飛ぶ。<br><b>傾いた道</b>：道が横に傾いている区間。低いほうへ少しずつ流される。<br><b>隠し近道</b>：各コースに3本。カーブの内側を少しだけ縮める細い道で、目印はない。切れ目があるものは踏み切り板から飛び越える。<br><b>落ちたとき</b>：すぐには救助されない。飛んだ先に道があればそのまま走れる。近くの道よりずっと下まで落ちるとドローンが来る。<br><b>コース外</b>：約3割の減速（道から遠いほど重くなる）。コース外に強いパーツでも減速は残る。木・岩・柱などのオブジェにぶつかると大きく減速する。溶岩の上は1秒ほどなら渡れる。<br><b>飛ばしすぎ</b>：一度にコースの7%より先へは進めない（進んだことにならない）。</p></div>`;
   } else if (tab === 'rank') {
     h = `<h2>ランキング<small>最速ラップ上位10件。名前の下にその人の総プレイ時間</small></h2>
       <div class="chips">` + STAGES.map((s, i) => `<button class="chip" type="button" data-stage="${i}" aria-pressed="${i === sel.stage}">${i + 1}. ${s.name}</button>`).join('') + `</div><div class="scroll" id="rkList"></div>`;
@@ -2580,7 +2583,7 @@ function boot(){
 // ================================================================ 更新のお知らせ
 // 公開しているページ（index.html）が新しくなっていたら、試合のあとに「ゲームの更新があります」を出して読み込み直してもらう。
 // BUILD は公開するたびに変える番号。番号を変え忘れても、ページの中身が起動時と変わっていれば気づく
-const BUILD = '2026-11-11-14'; let updBase = null, updReady = false;
+const BUILD = '2026-11-11-17'; let updBase = null, updReady = false;
 async function updCheck(show){
   if (/^https?:$/.test(location.protocol) && !updReady) { try { const t = await (await fetch(location.pathname + '?upd=' + Date.now(), { cache: 'no-store' })).text(); let h = t.length; for (let i = 0; i < t.length; i += 7) h = (h * 31 + t.charCodeAt(i)) | 0;
     const m = /const BUILD = '([^']+)'/.exec(t); if (m && m[1] !== BUILD) updReady = true; else if (updBase === null) updBase = h; else if (h !== updBase) updReady = true; } catch (e) {} }
