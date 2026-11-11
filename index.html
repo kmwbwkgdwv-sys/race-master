@@ -198,6 +198,8 @@ button.rk:active{background:rgba(255,214,10,.16)}
 .btn.sel{outline:3px dashed var(--volt);outline-offset:4px}
 
 .tab.back{margin-top:8px;font-size:12px;color:var(--dim)}
+#chatL{height:96px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;padding:6px 8px;background:rgba(9,11,17,.5);border:1px solid var(--line);border-radius:4px;font-size:12.5px;line-height:1.45;-webkit-user-select:text;user-select:text;touch-action:pan-y}
+#chatL p{word-break:break-all}#chatL b{color:var(--volt);margin-right:8px;font-weight:900}#chatL p.me b{color:#8fe9ff}#chatL p.none{color:var(--dim)}
 .backb{align-self:flex-start;flex:none;padding:8px 16px;border:2px solid var(--volt);border-radius:99px;font-weight:900;font-size:13px;background:rgba(255,214,10,.14);color:var(--volt)}
 .backb:active{background:rgba(255,214,10,.3)}
 .opt.big{padding:14px 16px}.opt.big b{font-family:var(--display);font-weight:400;font-size:18px;margin-bottom:3px}.opt.big small{font-size:12px;line-height:1.6;display:block}
@@ -249,6 +251,10 @@ button.rk:active{background:rgba(255,214,10,.16)}
 @keyframes ipulse{50%{box-shadow:0 0 0 3px rgba(255,74,38,.9),0 0 10px rgba(255,214,10,.4)}}
 #bBack{right:150px;bottom:104px;width:64px;height:64px;font-size:11px}
 #hud.rep .btn,#hud.rep #iName,#hud.rep #pos{display:none}
+#specB{display:none;position:absolute;left:50%;bottom:14px;transform:translateX(-50%);align-items:center;gap:10px;padding:8px 12px;background:var(--glass);border:1px solid var(--line);border-radius:8px;pointer-events:auto;max-width:94%}
+#hud.spec #specB{display:flex}#hud.spec #dg{display:none}
+#specB b{font-size:14px;font-weight:900;color:var(--volt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#specB button{padding:8px 12px;border:2px solid var(--line);border-radius:4px;font-weight:900;font-size:12.5px;white-space:nowrap}
 #rush.rk{background:repeating-conic-gradient(from 0deg,rgba(255,120,90,.3) 0deg 1.6deg,transparent 1.6deg 7deg)}
 #iName{position:absolute;right:118px;bottom:182px;font-size:12px;font-weight:900;text-shadow:0 2px 0 #000;text-align:right}
 
@@ -320,6 +326,7 @@ button.rk:active{background:rgba(255,214,10,.16)}
     <button id="bBack" class="btn" type="button" aria-label="押している間うしろを見る">うしろ</button>
     <button id="bBrake" class="btn" type="button">BRAKE</button>
     <button id="bDrift" class="btn" type="button">DRIFT</button>
+    <div id="specB"><b id="specN"></b><button type="button" data-sp="-1">◀ 前の人</button><button type="button" data-sp="1">次の人 ▶</button></div>
     <div id="dg"><span><i id="dgF"></i></span><b id="dgT"></b></div>
     <div id="nova"></div>
   </div>
@@ -370,7 +377,7 @@ button.rk:active{background:rgba(255,214,10,.16)}
       <h2 id="rTitle"></h2>
       <div id="rSub" class="num"></div>
       <ol id="rList"></ol>
-      <div class="row"><button class="pri" id="rAgain" type="button">もう一度走る</button><button id="rMenu" type="button">ホームへ</button></div>
+      <div class="row"><button class="pri" id="rWatch" type="button" hidden>観戦する</button><button class="pri" id="rAgain" type="button">もう一度走る</button><button id="rMenu" type="button">ホームへ</button></div>
     </div>
   </div>
 
@@ -1435,11 +1442,11 @@ function startRace(o){
   ghostLoad();
   boxes = vsLike() && RC.items ? boxesAt.flatMap(idx => [-1.5, -.5, .5, 1.5].map(s => ({ idx, lat: s * ST.width * .2, t: 0 }))) : [];
   raceT = 0; countT = 3.3; endT = 0; novaT = 0; dboost.t = 0; state = 'count'; cam.h = me.h; cam.ky = me.y; cam.g = 0; rec.a = []; rec.t = 0; rep = null; for (const r of TR.rings) r.t = 0;
-  $('#hud').classList.remove('rep'); $('#quit').textContent = 'ホームへ'; $('#roul').hidden = true;
+  spec = null; $('#hud').classList.remove('rep', 'spec'); $('#quit').textContent = 'ホームへ'; $('#roul').hidden = true;
   $('#home').hidden = true; $('#result').hidden = true; $('#hud').hidden = false; $('#bItem').hidden = !(vsLike() && RC.items); $('#pos').style.display = vsLike() ? '' : 'none';
   input.steer = 0; input.drift = input.brake = input.item = input.back = false; say('3'); se(440, .12);
 }
-function toHome(){ ghost = null; ghostTok++; const after = state !== 'home'; saveAcct(); syncPlay(); navStack.length = 0; rlTok++; $('#roul').hidden = true; $('#load').hidden = true; if (state === 'replay') tab = 'rank'; state = 'home'; karts = []; me = null; if (online || room.id) { tab = 'race'; raceStep = 'go'; } online = false; $('#led').hidden = true; $('#hud').classList.remove('editing'); $('#home').hidden = false; $('#result').hidden = true; $('#hud').hidden = true; renderPanel(); if (after) updCheck(true); }
+function toHome(){ spec = null; $('#hud').classList.remove('spec'); ghost = null; ghostTok++; const after = state !== 'home'; saveAcct(); syncPlay(); navStack.length = 0; rlTok++; $('#roul').hidden = true; $('#load').hidden = true; if (state === 'replay') tab = 'rank'; state = 'home'; karts = []; me = null; if (online || room.id) { tab = 'race'; raceStep = 'go'; } online = false; $('#led').hidden = true; $('#hud').classList.remove('editing'); $('#home').hidden = false; $('#result').hidden = true; $('#hud').hidden = true; renderPanel(); if (after) updCheck(true); }
 function say(t, small, dur = 1){ const m = $('#msg'); m.textContent = t; m.className = 'on' + (small ? ' small' : ''); msgT = dur; }
 const rankVal = k => k.fin ? 1e9 - k.finT : k.prog;
 function rankOf(k){ let r = 0; const v = rankVal(k); for (const o of karts) if (o !== k && rankVal(o) > v) r++; return r; }
@@ -1626,7 +1633,7 @@ function step(dt){
   if (state === 'count') { const before = Math.ceil(countT); countT -= dt; const now = Math.ceil(countT); if (now !== before && now > 0 && now < 4) { say(String(now)); se(440, .12); }
     if (countT <= 0) { state = 'race'; say('GO!', false, .8); se(880, .5); } return; }
   if (state === 'replay') return repStep(dt);
-  if (state !== 'race') return;
+  if (state !== 'race' && !(state === 'result' && online && me)) return;      // オンラインでは結果画面のあいだもレースを動かし続ける（ホストが動かすCPUが止まらない・観戦に行ける）
   raceT += dt; if (novaT > 0) novaT -= dt; if (dboost.t > 0) dboost.t -= dt; for (const r of TR.rings) if (r.t > 0) r.t -= dt;
   if (input.item) { input.item = false; useItem(me); }
   for (const k of karts) { if (k.remote) updateRemote(k, dt); else updateKart(k, k.ai || k.fin ? aiInput(k) : input, dt); }
@@ -1666,15 +1673,24 @@ function step(dt){
     for (let i = n0; i < parts.length; i++) { parts[i].vx += s * k.v * .82; parts[i].vz += c * k.v * .82; } }   // 火花は車体についてくる
   if (ST.id === 'volcano_core' && me && Math.random() < .6) spark(me.x + (Math.random() - .5) * 60, 0, me.z + (Math.random() - .5) * 60, [1, .5, .1], 2, 2.2, .22);
   if (endT > 0 && (endT -= dt) <= 0) showResult();
+  if (spec) { if (spec.fin || !karts.includes(spec)) { if ((specT += dt) > 2.2) specNext(1, true); } else specT = 0; }
 }
+// ---- 観戦：自分がゴールしたあと、まだ走っている人のうしろにカメラをつける
+let spec = null, specT = 0;
+const specList = () => { const run = karts.filter(k => k !== me && !k.fin); return run.filter(k => !k.ai).concat(run.filter(k => k.ai)); };      // 人を先に、CPUをあとに
+function specStart(){ const l = specList(); if (!l.length || !me) return; spec = l[0]; specT = 0; state = 'race'; cam.h = spec.h; cam.ky = spec.y; cam.g = 0;
+  $('#result').hidden = true; $('#hud').hidden = false; $('#hud').classList.add('rep', 'spec'); $('#quit').textContent = '結果にもどる'; specShow(); }
+function specNext(d, auto){ const l = specList(); if (!l.length) { if (auto) { say('全員ゴール！', true, 1.4); specEnd(); } return; } const i = l.indexOf(spec); spec = l[((i < 0 ? 0 : i + d) % l.length + l.length) % l.length]; specT = 0; cam.h = spec.h; cam.ky = spec.y; specShow(); }
+function specShow(){ $('#specN').textContent = '観戦中：' + (spec.ai ? spec.name + '（CPU）' : spec.name); }
+function specEnd(){ if (!spec) return; spec = null; $('#hud').classList.remove('rep', 'spec'); showResult(); }
 function showResult(){
-  state = 'result'; saveAcct(); syncPlay(); updCheck(true);
+  state = 'result'; $('#quit').textContent = 'ホームへ'; saveAcct(); syncPlay(); updCheck(true);
   const order = [...karts].sort((a, b) => rankVal(b) - rankVal(a)), r = order.indexOf(me) + 1;
   $('#rTitle').textContent = r + '位でゴール';
   $('#rSub').textContent = ST.name + '　' + fmt(me.finT) + (me.laps.length ? '　（ラップ ' + me.laps.map(fmt).join(' / ') + '）' : '');
-  if (vsLike() && me.fin) postMatch(r);
+  if (vsLike() && me.fin && !me.posted) { me.posted = 1; postMatch(r); }
   $('#rList').innerHTML = order.map((k, i) => `<li class="${k === me ? 'me' : ''}"><span>${i + 1}. ${k.name}</span><span class="num">${k.fin ? fmt(k.finT) : '走行中'}</span></li>`).join('');
-  $('#rAgain').hidden = online; $('#rMenu').textContent = online ? 'ロビーへ戻る' : 'ホームへ';
+  $('#rWatch').hidden = !(vsLike() && me.fin && specList().length); $('#rAgain').hidden = online; $('#rMenu').textContent = online ? 'ロビーへ戻る' : 'ホームへ';
   $('#hud').hidden = true; $('#result').hidden = false;
 }
 
@@ -1747,6 +1763,7 @@ function roomChanged(path){
   if (room.first) { room.first = false; for (const id in (d.ev || {})) room.seen[id] = 1; room.startSeen = d.start ? d.start.nonce : 0; }
   if (d.start && d.start.nonce && d.start.nonce !== room.startSeen) { room.startSeen = d.start.nonce; room.seen = {}; return onlineStart(d.start); }
   const top = path.split('/')[1] || '';
+  if (top === 'chat') { if (state === 'home' && tab === 'race') chatDraw(); return; }
   if (top === 'players' || top === '') paintFetch();
   if (online && (top === 'pos' || top === '')) netPos();
   if (top === 'ev' || top === '') netEv();
@@ -1755,6 +1772,12 @@ function roomChanged(path){
     if (tab === 'race' && sel.mode === 'on') { const a = document.activeElement; if (!a || a.tagName !== 'INPUT') renderPanel(); }
   }
 }
+// ---- ルームのチャット：/rooms/{id}/chat/{自動ID} = { from, name, text, at }。ルームにいる人だけが書ける。新しい40件を表示
+const chatRows = () => Object.entries((room.data || {}).chat || {}).filter(e => e[1] && typeof e[1].text === 'string').sort((a, b) => (a[0] < b[0] ? -1 : 1)).slice(-40);
+const chatHtml = () => chatRows().map(([id, m]) => `<p class="${m.from === acct.uid ? 'me' : ''}"><b>${esc(String(m.name || 'PLAYER').slice(0, 16))}</b>${esc(String(m.text).slice(0, 80))}</p>`).join('') || '<p class="none">まだメッセージはありません。</p>';
+function chatDraw(){ const el = $('#chatL'); if (!el) return; el.innerHTML = chatHtml(); el.scrollTop = el.scrollHeight; }
+function chatSend(){ const f = $('#chatIn'); if (!f || !room.id) return; const text = f.value.trim().slice(0, 80); if (!text) return; f.value = '';
+  token().then(tk => jf(roomUrl('/chat', tk), { method: 'POST', body: JSON.stringify({ from: acct.uid, name: myName(), text, at: SV }) })).catch(() => { room.msg = 'メッセージを送れませんでした。通信状態と Firebase のルールを確認してください。'; if (state === 'home') renderPanel(); }); }
 function roomLeave(msg, gone){
   const id = room.id; if (!id) return; if (room.es) room.es.close(); room.es = null;
   if (!gone) { const host = room.host; token().then(tk => jf(`${FB.db}/rooms/${id}${host ? '' : '/players/' + acct.uid}.json?auth=${tk}`, { method: 'DELETE' })).catch(() => {}); }
@@ -1814,7 +1837,7 @@ function useItem(k){
 function netTick(){
   if (!room.id || room.first) return; const now = Date.now();
   if (pvT && now > pvT) { pvT = 0; paintSend(); }
-  if (online && (state === 'race' || state === 'count') && now - room.sent > 150) { room.sent = now; netSend(); }
+  if (online && (state === 'race' || state === 'count' || (state === 'result' && me)) && now - room.sent > 150) { room.sent = now; netSend(); }
   if (now - room.hb > 4000) { room.hb = now; roomPut(`/players/${acct.uid}/t`, SV);
     const d = room.data || {}, sn = now + room.off; if (!isFinite(room.off)) return;
     for (const [id, p] of Object.entries(d.players || {})) { if (id === acct.uid || !p || typeof p.t !== 'number') continue; const stale = sn - p.t;
@@ -1841,7 +1864,7 @@ document.addEventListener('fullscreenchange', () => setTimeout(layout, 60));
 const loc = e => ({ x: e.clientX, y: e.clientY });
 function resize(){ const dpr = opt.lite ? 1 : Math.min(2, window.devicePixelRatio || 1), w = Math.round(cv.clientWidth * dpr), h = Math.round(cv.clientHeight * dpr); if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; } gl.viewport(0, 0, w, h); return w / Math.max(1, h); }
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const FP = () => opt.view === 'fp' && state !== 'replay';      // 一人称（運転席）の視点か
+const FP = () => opt.view === 'fp' && state !== 'replay' && !spec;      // 一人称（運転席）の視点か
 const inMenu = () => state === 'home' || state === 'layout' || state === 'roul';
 const PV = () => tab === 'char' || tab === 'kart' || tab === 'paint' || tab === 'cpaint';      // マシンのプレビューを出すタブ
 
@@ -1908,7 +1931,7 @@ function render(dt){
     else if (tab === 'paint') { eye = [0, 5 + 2.6 * hz, -5.4 * hz]; tgt = [1.7 * (asp > 1.5 ? 1 : .3), .4, 0]; }
     else if (tab === 'kart') { eye = [0, 3.3 * hz, -10.8 * hz]; tgt = [2.5 * (asp > 1.5 ? 1 : .3), 3.9, 0]; }      // カスタム：上に性能表を出すので、マシンは下のほうに映す
     else { eye = [0, 3.1 * hz, -8.2 * hz]; tgt = [1.9 * (asp > 1.5 ? 1 : .3), 1.1, 0]; }
-  } else { const k = me, back = input.back && state !== 'replay' ? -1 : 1, fp = FP(); cam.h += wrapA(k.h - cam.h) * Math.min(1, dt * (fp ? 16 : 5.5)); cam.ky += (k.y - cam.ky) * Math.min(1, dt * (fp ? 18 : 6)); cam.g += ((k.glide ? 1 : 0) - cam.g) * Math.min(1, dt * 2.6); cam.roll += ((k.roll || 0) * (fp ? 1 : .55) * back - cam.roll) * Math.min(1, dt * (fp ? 8 : 4));
+  } else { const k = spec || me, back = input.back && state !== 'replay' && !spec ? -1 : 1, fp = FP(); cam.h += wrapA(k.h - cam.h) * Math.min(1, dt * (fp ? 16 : 5.5)); cam.ky += (k.y - cam.ky) * Math.min(1, dt * (fp ? 18 : 6)); cam.g += ((k.glide ? 1 : 0) - cam.g) * Math.min(1, dt * 2.6); cam.roll += ((k.roll || 0) * (fp ? 1 : .55) * back - cam.roll) * Math.min(1, dt * (fp ? 8 : 4));
     const s = Math.sin(cam.h) * back, c = Math.cos(cam.h) * back, g = cam.g; if (k.boost > 0) fov += k.rocket > 0 ? .22 : .13;
     // グライダー中はカメラを引いて高く上げ、着地する先の道が見えるようにする
     eye = [k.x - s * (7.8 + 5 * g), cam.ky + 3.6 + 5.4 * g, k.z - c * (7.8 + 5 * g)]; tgt = [k.x + s * (6 + 16 * g), cam.ky + 1.2 - 3.4 * g, k.z + c * (6 + 16 * g)];
@@ -1959,11 +1982,12 @@ function buildSky(){
 const mapCtx = $('#map').getContext('2d'); let lastItem = '';
 function hud(){
   if (inMenu() || state === 'result') return;
-  const k = me, vs = vsLike(), rp = state === 'replay';
+  const k = spec || me, vs = vsLike(), rp = state === 'replay';
   $('#lap').textContent = rp ? 'REPLAY　' + rep.name : vs ? 'LAP ' + clamp(k.lapNo, 1, RC.laps) + '/' + RC.laps : 'LAP ' + Math.max(1, k.lapNo);
   $('#time').textContent = rp ? fmt(Math.max(.0001, Math.min(rep.t, rep.ms / 1000))) : state === 'count' ? '0:00.000' : fmt(Math.max(.0001, vs ? raceT : raceT - k.lapStart));
   $('#best').textContent = rp ? 'RECORD ' + fmt(rep.ms / 1000) : vs && !RC.full ? '' : 'BEST ' + fmt(best[ST.id]) + (vs && k.lapNo >= 1 && !k.fin ? '　LAP ' + fmt(Math.max(.0001, raceT - k.lapStart)) : '');
   $('#chips').textContent = k.rocket > 0 ? 'ROCKET ' + k.rocket.toFixed(1) : k.chips ? 'CHIP ×' + k.chips : '';
+  if (spec) $('#best').textContent = (rankOf(k) + 1) + '位 / ' + karts.length + '台';
   if (vs && !rp) $('#pos').innerHTML = (rankOf(k) + 1) + '<small>/' + karts.length + '</small>';
   $('#spd').textContent = Math.round(Math.abs(k.v) * 6) + ' km/h';
   $('#bDrift').className = 'btn' + (input.drift ? ' down' : '') + (k.drift && k.tier ? ' t' + k.tier : '');
@@ -2053,7 +2077,7 @@ addEventListener('keyup', e => { keys[e.code] = false; keySteer(); if (e.code ==
 addEventListener('contextmenu', e => e.preventDefault());
 // パネルのスクロール（画面を回転していても指の動きに合わせる）。動かしたときはタップ扱いにしない
 let drag = null, moved = false;
-stageEl.addEventListener('pointerdown', e => { const sc = e.target.closest('.scroll'); moved = false; if (sc) drag = { el: sc, y: loc(e).y, top: sc.scrollTop, id: e.pointerId }; });
+stageEl.addEventListener('pointerdown', e => { const sc = e.target.closest('.scroll'); moved = false; if (sc) drag = { el: sc, y: loc(e).y, top: sc.scrollTop, el0: sc.scrollTop, id: e.pointerId }; });
 stageEl.addEventListener('pointermove', e => { if (!drag || drag.id !== e.pointerId) return; const dy = loc(e).y - drag.y; if (Math.abs(dy) > 8) moved = true; if (moved) drag.el.scrollTop = drag.top - dy; });
 addEventListener('pointerup', () => { drag = null; }); addEventListener('pointercancel', () => { drag = null; });
 stageEl.addEventListener('click', e => { if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
@@ -2116,13 +2140,16 @@ function roomHtml(){
       : `<div class="grp">コース：${d.stageId === 'random' ? 'ランダム（ルーレット）' : ST.name}</div><div class="grp">ルール：${[1, 2, 3, 5].includes(d.laps) ? d.laps : 3}周・アイテム${d.items === 0 ? 'なし（1周の自己ベストがランキングに載る）' : 'あり'}</div>`) +
     ps.map(([id, p]) => `<div class="rk"><span class="r"></span><canvas width="68" height="68" data-face="${chOf(p)}"></canvas><span class="nm2">${esc(p.name || 'PLAYER')}${id === d.hostUid ? '<span class="tag">ホスト</span>' : ''}${id === acct.uid ? '<span class="tag">あなた</span>' : ''}</span><span class="tm"></span></div>`).join('') +
     `<p class="note">参加 ${ps.length} 人。残り ${12 - ps.length} 枠はCPUが走ります。${esc(room.msg)}</p>` +
+    `<div class="box"><b>チャット</b><div id="chatL">${chatHtml()}</div><div class="field"><input id="chatIn" maxlength="80" placeholder="メッセージ（80文字まで）" autocomplete="off" enterkeyhint="send"><button type="button" data-act="chat">送る</button></div></div>` +
     (room.host ? `<button class="opt pri" type="button" data-act="rstart"><b>レース開始</b><small>全員の画面で同時に始まります</small></button>` : `<p class="note">ホストがレースを始めるのを待っています。</p>`) +
     `<p class="note">あなたのペイントとスキンは、同じルームの相手の画面にも表示されます。</p><div class="grp">ルームにいたまま変更できます</div><div class="chips">${chip('gotab', 'キャラを変える', false, 'data-to="char"')}${chip('gotab', 'カスタムを変える', false, 'data-to="kart"')}</div>` +
     (sets.length ? `<div class="chips"><span class="lbl">マイセット</span>` + sets.map((s, i) => chip('sload', esc(s.n), false, `data-i="${i}"`)).join('') + `</div>` : '') + (setMsg ? `<p class="note">${esc(setMsg)}</p>` : '') +
     `<button class="mini" type="button" data-act="rleave">ルームを出る</button>`;
 }
+let panelKey = '';
 function renderPanel(){
   const el = $('#panel'), home = $('#home'); let h = '';
+  const oldSc = el.querySelector('.scroll'), keepTop = oldSc ? oldSc.scrollTop : 0, pkey = tab + '/' + (tab === 'race' ? raceStep + sel.mode : '');      // 同じ画面を描き直すときは、スクロールの位置をそのままにする（ルームの情報が届くたびに上へ戻らないように）
   home.classList.toggle('top', tab === 'top'); home.classList.toggle('pv', PV());
   const card = (tab === 'race' && raceStep === 'go') || tab === 'rank';
   $('#scard').hidden = !card; $('#go').hidden = !(tab === 'race' && raceStep === 'go' && sel.mode !== 'on');
@@ -2177,11 +2204,13 @@ function renderPanel(){
   if (tab === 'race') raceOpen = raceStep === 'go';
   { const n = navTarget(); if (n) h = `<button class="backb" type="button" data-act="navback">← ${n.n}にもどる</button>` + h; }
   el.innerHTML = h;
+  { const sc = el.querySelector('.scroll'); if (sc && pkey === panelKey) { sc.scrollTop = keepTop; if (drag) drag.el = sc; } panelKey = pkey; }
   if (tab === 'rank') { if (net.stage !== ST.id) { net.rows = null; net.err = ''; } renderRank(); net.poll = time; loadTop(ST.id); }
   el.querySelectorAll('[data-thumb]').forEach(c => c.getContext('2d').drawImage(c.dataset.thumb === 'r' ? rndThumb() : stageThumb(+c.dataset.thumb, sel.tod), 0, 0, c.width, c.height));
   el.querySelectorAll('[data-face]').forEach(c => drawFace(c, CH[+c.dataset.face]));
   el.querySelectorAll('[data-item]').forEach(c => drawItemIcon(c, c.dataset.item));
   if (tab === 'paint' || tab === 'cpaint') peBind();
+  { const cl = $('#chatL'); if (cl) cl.scrollTop = cl.scrollHeight; }
 }
 function renderRank(){
   const el = $('#rkList'); if (!el) return; const tip = `<p class="note">${rkMsg ? esc(rkMsg) : '名前を押すと、その記録の走り（リプレイ）を見られます。'}</p>`;
@@ -2218,7 +2247,8 @@ $('#panel').addEventListener('click', e => {
   audioInit(); se(660, .06, 'square', .04); save(); roomSyncMe(); renderPanel(); const sc = $('#panel .scroll'); if (sc) sc.scrollTop = keep;
 });
 $('#go').addEventListener('click', goRace); $('#rAgain').addEventListener('click', () => startRace());
-$('#rMenu').addEventListener('click', toHome); $('#quit').addEventListener('click', toHome);
+$('#rMenu').addEventListener('click', toHome); $('#quit').addEventListener('click', () => { if (spec) specEnd(); else toHome(); });
+$('#rWatch').addEventListener('click', specStart); $('#specB').addEventListener('click', e => { const b = e.target.closest('[data-sp]'); if (b && spec) specNext(+b.dataset.sp); });
 
 // ================================================================ paint editor（車体ペイント / キャラスキン 共通）
 const PCOL = ['#ffffff','#111318','#ff3b1f','#ff8a1f','#ffd60a','#22c55e','#20c7c7','#2a7dff','#8b5cf6','#ff5ca8','#f2c79c','#7a4a2a'];
@@ -2397,9 +2427,11 @@ const ACT = {
   copy(){ try { navigator.clipboard.writeText(acct.code).then(() => { net.note = 'コピーしました'; renderPanel(); }, () => {}); } catch (x) {} },
   restore(){ const v = $('#rcode').value; $('#rmsg').textContent = '確認中…'; restore(v).then(msg => { net.note = msg; renderPanel(); }); },
   rmode(){ if (room.id) roomLeave(''); raceOpen = false; raceStep = 'mode'; renderPanel(); },
+  chat(){ chatSend(); const f = $('#chatIn'); if (f) { try { f.focus(); } catch (x) {} } },
   rcreate(){ roomCreate(); }, rjoin(){ roomJoin(($('#rid').value || '').toUpperCase().replace(/[^A-Z0-9]/g, '')); }, rstart(){ roomStart(); }, rleave(){ roomLeave(''); },
   ridcopy(){ try { navigator.clipboard.writeText(room.id).then(() => { room.msg = 'ルームIDをコピーしました。'; renderPanel(); }, () => {}); } catch (x) {} },
 };
+$('#panel').addEventListener('keydown', e => { if (e.target.id === 'chatIn' && e.key === 'Enter' && !e.isComposing) { e.preventDefault(); chatSend(); } });
 $('#panel').addEventListener('input', e => { if (e.target.id === 'pcpick') { pe.col = e.target.value; pe.erase = false; }
   if (e.target.id === 'hdl') { opt.hdl = clamp(+e.target.value / 100, .6, 1.5); $('#hdlV').textContent = Math.round(opt.hdl * 100) + '%'; $('#stat').innerHTML = statHtml(myKt()); save(); } });
 
@@ -2536,7 +2568,7 @@ function boot(){
 // ================================================================ 更新のお知らせ
 // 公開しているページ（index.html）が新しくなっていたら、試合のあとに「ゲームの更新があります」を出して読み込み直してもらう。
 // BUILD は公開するたびに変える番号。番号を変え忘れても、ページの中身が起動時と変わっていれば気づく
-const BUILD = '2026-11-11-09'; let updBase = null, updReady = false;
+const BUILD = '2026-11-11-11'; let updBase = null, updReady = false;
 async function updCheck(show){
   if (/^https?:$/.test(location.protocol) && !updReady) { try { const t = await (await fetch(location.pathname + '?upd=' + Date.now(), { cache: 'no-store' })).text(); let h = t.length; for (let i = 0; i < t.length; i += 7) h = (h * 31 + t.charCodeAt(i)) | 0;
     const m = /const BUILD = '([^']+)'/.exec(t); if (m && m[1] !== BUILD) updReady = true; else if (updBase === null) updBase = h; else if (h !== updBase) updReady = true; } catch (e) {} }
@@ -2560,7 +2592,7 @@ function start(saved){
   if (saved && saved.tab) tab = saved.tab;
   updCheck(false); layout(); selectStage(sel.stage); loadTex(carT); loadTex(chT); applyLayout(); boot(); renderPanel(); requestAnimationFrame(frame);
 }
-window.__rm = { BAL, get ghost(){ return ghost; }, get P(){ return P; }, get ST(){ return ST; }, updateKart, TH, surfUnder, opt, STAGES, get state(){ return state; }, get me(){ return me; }, get karts(){ return karts; }, input, sel, step, selectStage, startRace, toHome, goRace, roulette, startReplay, rec, LS, ACT, onb, ensureWorld, get rep(){ return rep; }, get boxes(){ return boxes; }, rpaint, paintFetch, paintSend, get TR(){ return TR; }, get tab(){ return tab; }, carT, chT, setTab(t, st){ tab = t; if (st) raceStep = st; if (t === 'paint') pe.t = 'car'; if (t === 'cpaint') pe.t = 'ch'; renderPanel(); }, room, acct, roomCreate, roomJoin, roomStart, ledOpen, get online(){ return online; } };
+window.__rm = { BAL, get spec(){ return spec; }, specStart, specNext, get ghost(){ return ghost; }, get P(){ return P; }, get ST(){ return ST; }, updateKart, TH, surfUnder, opt, STAGES, get state(){ return state; }, get me(){ return me; }, get karts(){ return karts; }, input, sel, step, selectStage, startRace, toHome, goRace, roulette, startReplay, rec, LS, ACT, onb, ensureWorld, get rep(){ return rep; }, get boxes(){ return boxes; }, rpaint, paintFetch, paintSend, get TR(){ return TR; }, get tab(){ return tab; }, carT, chT, setTab(t, st){ tab = t; if (st) raceStep = st; if (t === 'paint') pe.t = 'car'; if (t === 'cpaint') pe.t = 'ch'; renderPanel(); }, room, acct, roomCreate, roomJoin, roomStart, ledOpen, get online(){ return online; } };
 const hot = window.claude && window.claude.hot;
 if (hot && hot.snapshot) hot.snapshot(() => ({ stage: sel.stage, tab }));
 if (hot && hot.ready) hot.ready(start); else start((hot && hot.data) || {});

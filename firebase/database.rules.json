@@ -194,6 +194,27 @@
             ".validate": "newData.hasChildren(['k', 'from']) && newData.child('from').val() === auth.uid"
           }
         },
+        "chat": {
+          "$m": {
+            ".write": "auth != null && !data.exists() && data.parent().parent().child('players').child(auth.uid).exists()",
+            ".validate": "newData.hasChildren(['from', 'name', 'text', 'at']) && newData.child('from').val() === auth.uid",
+            "from": {
+              ".validate": "newData.isString()"
+            },
+            "name": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 16"
+            },
+            "text": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"
+            },
+            "at": {
+              ".validate": "newData.val() === now"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
         "$other": {
           ".validate": false
         }
