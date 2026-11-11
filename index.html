@@ -185,9 +185,9 @@ button.rk:active{background:rgba(255,214,10,.16)}
 
 .seg3{grid-template-columns:1fr 1fr 1fr}
 .opt.pri{background:var(--hot);border-color:var(--hot);color:#fff}.opt.pri small{color:rgba(255,255,255,.85)}
-.pwrap{flex:none;border:2px solid var(--line);border-radius:4px;overflow:hidden;background:repeating-conic-gradient(#2a2d36 0 25%,#21242c 0 50%) 0 0/20px 20px}
+.pwrap{flex:none;aspect-ratio:2/1;border:2px solid var(--line);border-radius:4px;overflow:hidden;background:repeating-conic-gradient(#2a2d36 0 25%,#21242c 0 50%) 0 0/20px 20px}
 #pcv{display:block;width:100%;touch-action:none;cursor:crosshair}
-.pwrap.ch{width:min(100%,236px);align-self:center}
+.pwrap.ch{width:min(100%,236px);aspect-ratio:1/1;align-self:center}
 .sw.s{width:28px;height:28px}
 .field span{font-size:12px;font-weight:900;white-space:nowrap}.field input[type=range]{padding:0;accent-color:var(--hot)}
 .tag{font-size:10px;padding:1px 7px;border-radius:99px;border:1px solid var(--volt);color:var(--volt);margin-left:6px;font-weight:900}
@@ -198,6 +198,8 @@ button.rk:active{background:rgba(255,214,10,.16)}
 .btn.sel{outline:3px dashed var(--volt);outline-offset:4px}
 
 .tab.back{margin-top:8px;font-size:12px;color:var(--dim)}
+.backb{align-self:flex-start;flex:none;padding:8px 16px;border:2px solid var(--volt);border-radius:99px;font-weight:900;font-size:13px;background:rgba(255,214,10,.14);color:var(--volt)}
+.backb:active{background:rgba(255,214,10,.3)}
 .opt.big{padding:14px 16px}.opt.big b{font-family:var(--display);font-weight:400;font-size:18px;margin-bottom:3px}.opt.big small{font-size:12px;line-height:1.6;display:block}
 
 .gal{display:flex;flex-direction:column;gap:6px}
@@ -269,6 +271,10 @@ button.rk:active{background:rgba(255,214,10,.16)}
 #turn b{font-family:var(--display);font-weight:400;font-size:22px;color:var(--volt);line-height:1.4}
 #turn small{font-size:13px;line-height:1.8;color:var(--dim);max-width:30em}
 #turn button{margin-top:6px;padding:11px 18px;border:2px solid var(--line);border-radius:4px;font-weight:900;font-size:13px;background:var(--glass)}
+#upd{position:absolute;inset:0;z-index:12;display:grid;place-items:center;padding:16px;background:rgba(9,11,17,.9)}
+#upd .ub{width:min(440px,100%);display:flex;flex-direction:column;gap:12px;padding:20px 22px;background:var(--glass);border:2px solid var(--volt);border-radius:10px;text-align:center}
+#upd b{font-family:var(--display);font-weight:400;font-size:clamp(18px,3.6vw,26px);color:var(--volt)}#upd p{font-size:13px;line-height:1.7;color:var(--dim)}
+#upd button{align-self:center;padding:12px 34px;border-radius:4px;font-family:var(--display);font-size:18px;background:var(--hot);color:#fff}
 #load{position:absolute;inset:0;z-index:9;display:grid;place-items:center;background:rgba(9,11,17,.86);font-family:var(--display);font-size:clamp(18px,4vw,30px);color:var(--volt)}
 /* ---------- カスタム画面：性能をマシンの横に出しっぱなしにする ---------- */
 #stat{position:absolute;left:4px;top:10px;width:min(calc(100% - 8px),236px);display:flex;flex-direction:column;gap:5px;padding:8px 10px;background:rgba(9,11,17,.74);border:1px solid var(--line);border-radius:6px;pointer-events:none}
@@ -369,6 +375,7 @@ button.rk:active{background:rgba(255,214,10,.16)}
   </div>
 
   <div id="load" hidden>コースを準備中…</div>
+  <div id="upd" hidden><div class="ub"><b>ゲームの更新があります</b><p>新しいバージョンが公開されました。ボタンを押して読み込み直してください（記録やカスタムは消えません）。</p><button id="updGo" type="button">更新する</button></div></div>
   <div id="onb" hidden><div class="ob"><div class="logo">race-<span>master</span></div><div id="onbBody"></div></div></div>
   <div id="err">この端末またはブラウザでは WebGL が使えないため、ゲームを表示できません。別のブラウザで開いてみてください。</div>
 </div>
@@ -1429,7 +1436,7 @@ function startRace(o){
   $('#home').hidden = true; $('#result').hidden = true; $('#hud').hidden = false; $('#bItem').hidden = !(vsLike() && RC.items); $('#pos').style.display = vsLike() ? '' : 'none';
   input.steer = 0; input.drift = input.brake = input.item = input.back = false; say('3'); se(440, .12);
 }
-function toHome(){ saveAcct(); syncPlay(); rlTok++; $('#roul').hidden = true; $('#load').hidden = true; if (state === 'replay') tab = 'rank'; state = 'home'; karts = []; me = null; if (online || room.id) { tab = 'race'; raceStep = 'go'; } online = false; $('#led').hidden = true; $('#hud').classList.remove('editing'); $('#home').hidden = false; $('#result').hidden = true; $('#hud').hidden = true; renderPanel(); }
+function toHome(){ const after = state !== 'home'; saveAcct(); syncPlay(); navStack.length = 0; rlTok++; $('#roul').hidden = true; $('#load').hidden = true; if (state === 'replay') tab = 'rank'; state = 'home'; karts = []; me = null; if (online || room.id) { tab = 'race'; raceStep = 'go'; } online = false; $('#led').hidden = true; $('#hud').classList.remove('editing'); $('#home').hidden = false; $('#result').hidden = true; $('#hud').hidden = true; renderPanel(); if (after) updCheck(true); }
 function say(t, small, dur = 1){ const m = $('#msg'); m.textContent = t; m.className = 'on' + (small ? ' small' : ''); msgT = dur; }
 const rankVal = k => k.fin ? 1e9 - k.finT : k.prog;
 function rankOf(k){ let r = 0; const v = rankVal(k); for (const o of karts) if (o !== k && rankVal(o) > v) r++; return r; }
@@ -1653,7 +1660,7 @@ function step(dt){
   if (endT > 0 && (endT -= dt) <= 0) showResult();
 }
 function showResult(){
-  state = 'result'; saveAcct(); syncPlay();
+  state = 'result'; saveAcct(); syncPlay(); updCheck(true);
   const order = [...karts].sort((a, b) => rankVal(b) - rankVal(a)), r = order.indexOf(me) + 1;
   $('#rTitle').textContent = r + '位でゴール';
   $('#rSub').textContent = ST.name + '　' + fmt(me.finT) + (me.laps.length ? '　（ラップ ' + me.laps.map(fmt).join(' / ') + '）' : '');
@@ -2042,6 +2049,10 @@ stageEl.addEventListener('click', e => { if (moved) { e.stopPropagation(); e.pre
 
 // ================================================================ home UI
 let tab = 'top', raceStep = 'mode', setMsg = '', rkMsg = '', setEdit = -1;
+// もどるボタン：別の画面へ移るたびに、いままでいた画面を覚えておく（ルーム → カスタム → 「← ルームにもどる」で一発でもどれる）
+const navStack = [], TABN = { race: '試合', char: 'キャラ', kart: 'カスタム', rank: 'ランキング', item: 'アイテム図鑑', set: '設定', paint: 'ペイント', cpaint: 'スキン' };
+function navPush(to){ if (tab === 'top' || tab === to) return; const top = navStack[navStack.length - 1]; if (!top || top.tab !== tab) navStack.push({ tab, step: raceStep }); if (navStack.length > 8) navStack.shift(); }
+const navName = n => n.tab === 'race' && room.id ? 'ルーム' : n.tab === 'race' && n.step === 'go' ? (sel.mode === 'vs' ? 'VSレース' : sel.mode === 'on' ? 'オンライン対戦' : 'タイムアタック') : TABN[n.tab] || '前の画面';
 const imp = { car: null, ch: null };
 const bar = (v, base) => `<span class="bar${base === undefined || Math.abs(v - base) < .004 ? '' : v > base ? ' up' : ' dn'}"><i style="width:${clamp(Math.round((v - .7) / .6 * 100), 8, 100)}%"></i></span>`;
 // カスタム画面でマシンの横に出しっぱなしにする性能表（緑=標準より高い / 赤=低い）
@@ -2146,6 +2157,7 @@ function renderPanel(){
       <div class="box"><b>引き継ぎコード</b>${acct.code ? `<span class="code">${acct.code}</span><small>別の端末でこのコードを入力すると、記録を引き継げます。他の人には見せないでください。${acct.reg ? '' : '（まだサーバーと同期できていません。接続できたときに自動で同期します）'}</small><button class="mini" type="button" data-act="copy">コードをコピー</button>` : ''}
       <div class="field"><input id="rcode" maxlength="19" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off"><button type="button" data-act="restore">このコードで引き継ぐ</button></div><small id="rmsg">${esc(net.note)}</small></div></div>`;
   }
+  { const n = navStack[navStack.length - 1]; if (n && n.tab !== tab) h = `<button class="backb" type="button" data-act="navback">← ${navName(n)}にもどる</button>` + h; }
   el.innerHTML = h;
   if (tab === 'rank') { if (net.stage !== ST.id) { net.rows = null; net.err = ''; } renderRank(); net.poll = time; loadTop(ST.id); }
   el.querySelectorAll('[data-thumb]').forEach(c => c.getContext('2d').drawImage(c.dataset.thumb === 'r' ? rndThumb() : stageThumb(+c.dataset.thumb, sel.tod), 0, 0, c.width, c.height));
@@ -2169,7 +2181,7 @@ function openReplay(ds){
   jf(`${FB.db}/${RP}/${sid}/${row.id}.json`).then(rp => { rkMsg = ''; if (state !== 'home' || tab !== 'rank' || ST.id !== sid) return; if (!rp || !rp.d || !startReplay(rp, row.name || 'PLAYER')) { rkMsg = 'この記録にはリプレイがありません。'; renderRank(); } })
     .catch(() => { rkMsg = 'リプレイを読み込めませんでした。通信状態を確認してください。'; renderRank(); });
 }
-$('#home').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (!b) return; tab = b.dataset.t; if (tab === 'race') raceStep = room.id ? 'go' : 'mode'; pe.msg = setMsg = rkMsg = ''; audioInit(); se(520, .05, 'square', .04); renderPanel(); });
+$('#home').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (!b) return; if (b.dataset.t === 'top') navStack.length = 0; else navPush(b.dataset.t); tab = b.dataset.t; if (tab === 'race') raceStep = room.id ? 'go' : 'mode'; pe.msg = setMsg = rkMsg = ''; audioInit(); se(520, .05, 'square', .04); renderPanel(); });
 $('#panel').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return; const ds = b.dataset, keep = $('#panel .scroll') ? $('#panel .scroll').scrollTop : 0;
   if (ds.rep) { audioInit(); return openReplay(ds); }
@@ -2191,7 +2203,7 @@ $('#rMenu').addEventListener('click', toHome); $('#quit').addEventListener('clic
 
 // ================================================================ paint editor（車体ペイント / キャラスキン 共通）
 const PCOL = ['#ffffff','#111318','#ff3b1f','#ff8a1f','#ffd60a','#22c55e','#20c7c7','#2a7dff','#8b5cf6','#ff5ca8','#f2c79c','#7a4a2a'];
-const pe = { t: 'car', col: '#ffffff', size: 14, erase: false, undo: [], stamp: null, last: null, down: false, msg: '' };
+const pe = { t: 'car', col: '#ffffff', size: 14, erase: false, undo: [], stamp: null, last: null, down: false, msg: '', zoom: 1, sx: .5, sy: .5, pan: false };      // zoom = 絵の拡大率、sx/sy = 見ている場所（0〜1）、pan = 手のひら（動かす）モード
 const PO = () => pe.t === 'car' ? carT : chT;
 function peRedraw(){
   const c = $('#pcv'); if (!c) return; const o = PO(), x = c.getContext('2d'); x.clearRect(0, 0, o.W, o.H);
@@ -2220,11 +2232,25 @@ function peLine(a, b){
 }
 function peBind(){
   const c = $('#pcv'); if (!c) return; const o = PO(), pos = e => ({ x: e.offsetX * o.W / c.clientWidth, y: e.offsetY * o.H / c.clientHeight });
-  c.addEventListener('pointerdown', e => { e.preventDefault(); try { c.setPointerCapture(e.pointerId); } catch (x) {} const p = pos(e); pe.down = true;
+  // 指1本：描く（手のひらモードなら動かす） / 指2本：つまんで拡大・縮小、そのまま動かす。マウスはホイールで拡大・縮小
+  const wrap = c.parentElement, pts = new Map(); let g2 = null, pan = null;
+  const setScroll = (l, t) => { wrap.scrollLeft = l; wrap.scrollTop = t; const mx = c.clientWidth - wrap.clientWidth, my = c.clientHeight - wrap.clientHeight; pe.sx = mx > 0 ? wrap.scrollLeft / mx : .5; pe.sy = my > 0 ? wrap.scrollTop / my : .5; };
+  const zoomAt = (z, cx, cy) => { const r = wrap.getBoundingClientRect(), fx = (wrap.scrollLeft + cx - r.left) / c.clientWidth, fy = (wrap.scrollTop + cy - r.top) / c.clientHeight; pe.zoom = clamp(z, 1, 6); c.style.width = pe.zoom * 100 + '%'; setScroll(fx * c.clientWidth - (cx - r.left), fy * c.clientHeight - (cy - r.top)); const zv = $('#pzv'); if (zv) zv.textContent = Math.round(pe.zoom * 100) + '%'; };
+  c.addEventListener('pointerdown', e => { e.preventDefault(); try { c.setPointerCapture(e.pointerId); } catch (x) {} pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pts.size === 2) { if (pe.down && !pe.stamp) { const im = pe.undo.pop(); if (im) { o.ctx.putImageData(im, 0, 0); upTex(o); peRedraw(); } } pe.down = false; pan = null;      // 2本目の指がついたら、描きかけの線は取り消す
+      const [a, b] = [...pts.values()]; g2 = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, z: pe.zoom, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 }; return; }
+    if (pts.size > 2) return;
+    if (pe.pan && !pe.stamp) { pan = { x: e.clientX, y: e.clientY, l: wrap.scrollLeft, t: wrap.scrollTop }; return; }
+    const p = pos(e); pe.down = true;
     if (pe.stamp) { pe.stamp.x = p.x; pe.stamp.y = p.y; peRedraw(); return; } peUndoPush(); pe.last = p; peLine(p, p); });
-  c.addEventListener('pointermove', e => { if (!pe.down) return; const p = pos(e); if (pe.stamp) { pe.stamp.x = p.x; pe.stamp.y = p.y; peRedraw(); } else { peLine(pe.last, p); pe.last = p; } });
-  const up = () => { if (!pe.down) return; pe.down = false; if (!pe.stamp) saveTex(o); };
+  c.addEventListener('pointermove', e => { if (pts.has(e.pointerId)) pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (g2 && pts.size >= 2) { const [a, b] = [...pts.values()], mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2; setScroll(wrap.scrollLeft - (mx - g2.mx), wrap.scrollTop - (my - g2.my)); g2.mx = mx; g2.my = my; zoomAt(g2.z * Math.hypot(a.x - b.x, a.y - b.y) / g2.d, mx, my); return; }
+    if (pan) { setScroll(pan.l - (e.clientX - pan.x), pan.t - (e.clientY - pan.y)); return; }
+    if (!pe.down) return; const p = pos(e); if (pe.stamp) { pe.stamp.x = p.x; pe.stamp.y = p.y; peRedraw(); } else { peLine(pe.last, p); pe.last = p; } });
+  const up = e => { pts.delete(e.pointerId); if (pts.size < 2) g2 = null; pan = null; if (!pe.down) return; pe.down = false; if (!pe.stamp) saveTex(o); };
   c.addEventListener('pointerup', up); c.addEventListener('pointercancel', up);
+  c.addEventListener('wheel', e => { e.preventDefault(); zoomAt(pe.zoom * (e.deltaY < 0 ? 1.2 : 1 / 1.2), e.clientX, e.clientY); }, { passive: false });
+  c.style.width = pe.zoom * 100 + '%'; c.style.cursor = pe.pan ? 'grab' : 'crosshair'; setScroll(pe.sx * (c.clientWidth - wrap.clientWidth), pe.sy * (c.clientHeight - wrap.clientHeight));
   const f = $('#pfile'); if (f) f.addEventListener('change', () => { const file = f.files && f.files[0]; if (!file) return; const im = new Image();
     im.onload = () => { pe.stamp = { img: im, x: o.W / 2, y: o.H / 2, w: o.W * .32 }; renderPanel(); }; im.onerror = () => { pe.msg = '画像を読み込めませんでした。'; renderPanel(); }; im.src = URL.createObjectURL(file); });
   const r = $('#psz'); if (r) r.addEventListener('input', () => { if (pe.stamp) { pe.stamp.w = +r.value; peRedraw(); } });
@@ -2232,13 +2258,13 @@ function peBind(){
 }
 function paintHtml(){
   const car = pe.t === 'car', o = PO();
-  return `<h2>${car ? 'ペイント' : 'スキンを描く'}<small>${car ? '上から見たマシン（右が前）' : '正面から見た ' + CH[sel.ch].n}</small></h2><div class="pwrap ${pe.t}"><canvas id="pcv" width="${o.W}" height="${o.H}"></canvas></div><div class="scroll">` +
+  return `<h2>${car ? 'ペイント' : 'スキンを描く'}<small>${car ? '上から見たマシン（右が前）' : '正面から見た ' + CH[sel.ch].n}</small></h2><div class="pwrap ${pe.t}"><canvas id="pcv" width="${o.W}" height="${o.H}"></canvas></div><div class="chips"><span class="lbl">絵の拡大</span>${chip('pzm', '−', false, 'data-d="-1" aria-label="絵を縮小"')}<span class="lbl" id="pzv">${Math.round(pe.zoom * 100)}%</span>${chip('pzm', '＋', false, 'data-d="1" aria-label="絵を拡大"')}${chip('pzm', '全体', false, 'data-d="0"')}${chip('ppan', '手のひら（動かす）', pe.pan)}</div><div class="scroll">` +
     (pe.stamp ? `<div class="field"><span>大きさ</span><input id="psz" type="range" min="${o.W * .06}" max="${o.W}" value="${pe.stamp.w}"></div><p class="note">絵の上をドラッグして位置を決めます。</p><div class="chips">${chip('pok', 'この位置に貼る')}${chip('pno', 'やめる')}</div>`
     : `<div class="sws">` + PCOL.map(c => `<button class="sw s" type="button" data-act="pcol" data-c="${c}" aria-pressed="${!pe.erase && pe.col === c}" aria-label="色 ${c}" style="--c:${c}"></button>`).join('') + `<label class="sw s pick" aria-label="好きな色"><input id="pcpick" type="color" value="${pe.col}"></label></div>
       <div class="chips">${chip('psize', '細い', pe.size === 6, 'data-s="6"')}${chip('psize', 'ふつう', pe.size === 14, 'data-s="14"')}${chip('psize', '太い', pe.size === 30, 'data-s="30"')}${chip('perase', '消しゴム', pe.erase)}</div>
       <div class="chips">${chip('pundo', '元に戻す')}${chip('pclear', '全部消す')}${chip('pimg', '画像を貼る（PNG/JPG）')}</div><input id="pfile" type="file" accept="image/png,image/jpeg" hidden>`) +
     (car ? '' : `<div class="chips">${chip('skon', 'このスキンを着る', sel.skin)}${chip('skoff', '着ない', !sel.skin)}${chip('phide', 'もとの顔パーツを隠す', sel.hide)}</div>`) +
-    galHtml(pe.t) + `<div class="chips">${chip('pzin', '拡大')}${chip('pzout', '縮小')}${chip('pback', car ? 'カスタムへ戻る' : 'キャラへ戻る')}</div><p class="note">左の${car ? 'マシン' : 'キャラ'}はドラッグで回せます。${car ? '描いた絵はボディの種類ごとに覚えています。' : '耳や頭の飾りは立体のまま付きます。'}</p></div>`;
+    galHtml(pe.t) + `<div class="chips">${chip('pzin', (car ? 'マシン' : 'キャラ') + 'を拡大')}${chip('pzout', (car ? 'マシン' : 'キャラ') + 'を縮小')}${chip('pback', car ? 'カスタムへ戻る' : 'キャラへ戻る')}</div><p class="note"><b>絵の拡大・縮小</b>：＋／− のボタン、または指2本でつまむ（パソコンはホイール）。拡大中は指2本か「手のひら」で見る場所を動かせます。<br>左の${car ? 'マシン' : 'キャラ'}はドラッグで回せます。${car ? '描いた絵はボディの種類ごとに覚えています。' : '耳や頭の飾りは立体のまま付きます。'}</p></div>`;
 }
 
 // ================================================================ item icons
@@ -2297,14 +2323,17 @@ addEventListener('pointerup', () => { hr = null; }); addEventListener('pointerca
 // パネル内ボタンの追加アクション
 const PKEY = /^data:image\/(png|webp|jpeg);base64,[A-Za-z0-9+/=]+$/;
 const ACT = {
-  paint(){ tab = 'paint'; pe.t = 'car'; pe.undo = []; pe.stamp = null; pe.msg = ''; renderPanel(); }, cpaint(){ tab = 'cpaint'; pe.t = 'ch'; pe.undo = []; pe.stamp = null; pe.msg = ''; homeYaw = 0; renderPanel(); },
-  pback(){ tab = pe.t === 'car' ? 'kart' : 'char'; pe.stamp = null; homeZoom = 1; homeYaw = 0; renderPanel(); }, gotab(b, ds){ tab = ds.to; renderPanel(); },
+  paint(){ navPush('paint'); pe.zoom = 1; pe.pan = false; pe.sx = pe.sy = .5; tab = 'paint'; pe.t = 'car'; pe.undo = []; pe.stamp = null; pe.msg = ''; renderPanel(); }, cpaint(){ navPush('cpaint'); pe.zoom = 1; pe.pan = false; pe.sx = pe.sy = .5; tab = 'cpaint'; pe.t = 'ch'; pe.undo = []; pe.stamp = null; pe.msg = ''; homeYaw = 0; renderPanel(); },
+  pback(){ const t = pe.t === 'car' ? 'kart' : 'char'; if (navStack.length && navStack[navStack.length - 1].tab === t) navStack.pop(); tab = t; pe.stamp = null; homeZoom = 1; homeYaw = 0; renderPanel(); }, gotab(b, ds){ navPush(ds.to); tab = ds.to; renderPanel(); },
+  navback(){ const n = navStack.pop(); if (!n) return; tab = n.tab; raceStep = n.tab === 'race' && room.id ? 'go' : n.step; pe.stamp = null; pe.msg = setMsg = rkMsg = ''; setEdit = -1; homeZoom = 1; homeYaw = 0; if (tab === 'paint') pe.t = 'car'; if (tab === 'cpaint') pe.t = 'ch'; renderPanel(); },
   pcol(b, ds){ pe.col = ds.c; pe.erase = false; renderPanel(); }, psize(b, ds){ pe.size = +ds.s; renderPanel(); }, perase(){ pe.erase = !pe.erase; renderPanel(); },
   pundo(){ const im = pe.undo.pop(), o = PO(); if (im) { o.ctx.putImageData(im, 0, 0); upTex(o); saveTex(o); peRedraw(); } },
   pclear(){ const o = PO(); peUndoPush(); clearTex(o); saveTex(o); peRedraw(); },
   pimg(){ const f = $('#pfile'); if (f) f.click(); },
   pok(){ const s = pe.stamp, o = PO(); if (!s) return; peUndoPush(); const w = s.w, h = w * s.img.height / s.img.width; o.ctx.drawImage(s.img, s.x - w / 2, s.y - h / 2, w, h); pe.stamp = null; peTouched(); saveTex(o); renderPanel(); },
   pno(){ pe.stamp = null; renderPanel(); },
+  pzm(b, ds){ const d = +ds.d; pe.zoom = d ? clamp(Math.round(pe.zoom * (d > 0 ? 1.5 : 1 / 1.5) * 100) / 100, 1, 6) : 1; if (pe.zoom < 1.05) { pe.zoom = 1; pe.pan = false; } renderPanel(); },
+  ppan(){ pe.pan = !pe.pan; if (pe.pan && pe.zoom === 1) pe.zoom = 2; renderPanel(); },
   pzin(){ homeZoom = clamp(homeZoom * .8, .45, 1.4); }, pzout(){ homeZoom = clamp(homeZoom * 1.25, .45, 1.4); },
   phide(){ sel.hide = !sel.hide; save(); paintDirty(); renderPanel(); },
   skon(){ if (!chT.has) pe.msg = 'まだスキンが描かれていません。「スキンを描く」で描くか、保存したスキンを選んでください。'; else { sel.skin = true; pe.msg = ''; } save(); paintDirty(); renderPanel(); },
@@ -2467,6 +2496,17 @@ function boot(){
   if (!acct.onb) onbShow('name'); else if (!acct.reg || !acct.prof) putProfile().catch(() => {});      // 前回オフラインだった分をここで同期
 }
 
+// ================================================================ 更新のお知らせ
+// 公開しているページ（index.html）が新しくなっていたら、試合のあとに「ゲームの更新があります」を出して読み込み直してもらう。
+// BUILD は公開するたびに変える番号。番号を変え忘れても、ページの中身が起動時と変わっていれば気づく
+const BUILD = '2026-11-11-06'; let updBase = null, updReady = false;
+async function updCheck(show){
+  if (/^https?:$/.test(location.protocol) && !updReady) { try { const t = await (await fetch(location.pathname + '?upd=' + Date.now(), { cache: 'no-store' })).text(); let h = t.length; for (let i = 0; i < t.length; i += 7) h = (h * 31 + t.charCodeAt(i)) | 0;
+    const m = /const BUILD = '([^']+)'/.exec(t); if (m && m[1] !== BUILD) updReady = true; else if (updBase === null) updBase = h; else if (h !== updBase) updReady = true; } catch (e) {} }
+  if (updReady && show && (state === 'home' || state === 'result')) $('#upd').hidden = false;
+}
+$('#updGo').addEventListener('click', () => { saveAcct(); save(); location.replace(location.pathname + '?v=' + Date.now()); });
+
 // ================================================================ loop
 let lastT = 0, accu = 0, playSave = 0;
 function frame(t){
@@ -2481,7 +2521,7 @@ function frame(t){
 function start(saved){
   if (saved && saved.stage >= 0 && saved.stage < STAGES.length) sel.stage = saved.stage;
   if (saved && saved.tab) tab = saved.tab;
-  layout(); selectStage(sel.stage); loadTex(carT); loadTex(chT); applyLayout(); boot(); renderPanel(); requestAnimationFrame(frame);
+  updCheck(false); layout(); selectStage(sel.stage); loadTex(carT); loadTex(chT); applyLayout(); boot(); renderPanel(); requestAnimationFrame(frame);
 }
 window.__rm = { BAL, get P(){ return P; }, get ST(){ return ST; }, updateKart, TH, surfUnder, opt, STAGES, get state(){ return state; }, get me(){ return me; }, get karts(){ return karts; }, input, sel, step, selectStage, startRace, toHome, goRace, roulette, startReplay, rec, LS, ACT, onb, ensureWorld, get rep(){ return rep; }, get boxes(){ return boxes; }, rpaint, paintFetch, paintSend, get TR(){ return TR; }, get tab(){ return tab; }, carT, chT, setTab(t, st){ tab = t; if (st) raceStep = st; if (t === 'paint') pe.t = 'car'; if (t === 'cpaint') pe.t = 'ch'; renderPanel(); }, room, acct, roomCreate, roomJoin, roomStart, ledOpen, get online(){ return online; } };
 const hot = window.claude && window.claude.hot;
