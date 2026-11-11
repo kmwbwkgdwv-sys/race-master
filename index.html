@@ -533,7 +533,7 @@ const ITEMS = {
   trap:{ n:'重力トラップ', c:'#b05cff', d:'コース上に置く罠。踏んだ相手を2秒間スローにする。' },
   nova:{ n:'フォトン・ノヴァ', c:'#ffffff', low:1, d:'1位の画面を光で隠し、強制的にバックさせる。' },
   nitro:{ n:'ニトロ・カプセル', c:'#ff8a1f', d:'3秒間の猛加速。悪路や溶岩の上でも減速しない。' },
-  shield:{ n:'シールド・ジェネレーター', c:'#4dffd9', d:'相手の攻撃を1回だけ完全に防ぐバリア。バリアが出ている間は重ねて使えない。' },
+  shield:{ n:'シールド・ジェネレーター', c:'#4dffd9', d:'使ってから15秒間だけ働くバリア。そのあいだ、相手の攻撃を1回だけ完全に防ぐ（防ぐか15秒たつと消える）。バリアが出ている間は重ねて使えない。' },
   chip:{ n:'エナジー・チップ', c:'#7dff5c', d:'使うたびに最高速度が少し上がる。最大10枚。攻撃を受けると全部失う。' },
   warp:{ n:'ワープ・ドライブ', c:'#ff5c9d', low:1, d:'3つ上の順位の相手のすぐ後ろへ瞬間移動する。' },
   rocket:{ n:'ロケットブースト', c:'#ff3b6b', low:1, d:'巨大ブースターを背負って10秒間の超加速。その間は攻撃も障害物も効かない無敵状態。' },
@@ -545,9 +545,9 @@ const MAXV = 30, ACC = 16, TURN = 1.24;
 const LS = { get(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
   raw(k){ try { return localStorage.getItem(k); } catch (e) { return null; } }, setRaw(k, v){ try { localStorage.setItem(k, v); return true; } catch (e) { return false; } } };
 const ci = (v, n) => clamp(v | 0, 0, n - 1);
-let best = LS.get('rm_best4', {}) || {}, opt = Object.assign({ lite:false, bgm:true, se:true, fs:true, sens:1, mix:true, view:'tp' }, LS.get('rm_opt', {})), sel = Object.assign({ ch:0, kt:0, tire:0, wing:0, eng:0, col:0, gl:0, stage:0, mode:'ta', tod:'day', rnd:false, skin:false, hide:true, laps:3, items:true }, LS.get('rm_sel', {}));
+let best = LS.get('rm_best4', {}) || {}, opt = Object.assign({ lite:false, bgm:true, se:true, fs:true, sens:1, mix:true, view:'tp' }, LS.get('rm_opt', {})), sel = Object.assign({ ch:0, kt:0, tire:0, wing:0, eng:0, col:0, gl:0, stage:0, mode:'ta', tod:'day', rnd:false, skin:false, hide:true, laps:3, items:true, ghost:false }, LS.get('rm_sel', {}));
 sel.ch = ci(sel.ch, CH.length); sel.kt = ci(sel.kt, KT.length); sel.tire = ci(sel.tire, TIRE.length); sel.wing = ci(sel.wing, WING.length); sel.eng = ci(sel.eng, ENG.length); sel.gl = ci(sel.gl, GLD.length); sel.col = ci(sel.col, COLS.length); sel.stage = ci(sel.stage, STAGES.length); opt.sens = ci(opt.sens, 3); opt.view = opt.view === 'fp' ? 'fp' : 'tp'; opt.mix = opt.mix !== false; if (typeof opt.hdl !== 'number') opt.hdl = [.85, 1, 1.2][opt.sens]; opt.hdl = clamp(Math.round(opt.hdl * 20) / 20, .6, 1.5);      // hdl = ハンドルの曲がる量（カスタム画面で変える）
-sel.tod = sel.tod === 'night' ? 'night' : 'day'; sel.rnd = !!sel.rnd; sel.skin = !!sel.skin; if (!['ta', 'vs', 'on'].includes(sel.mode)) sel.mode = 'ta'; if (![1, 3, 5].includes(sel.laps)) sel.laps = 3; sel.items = sel.items !== false;
+sel.tod = sel.tod === 'night' ? 'night' : 'day'; sel.rnd = !!sel.rnd; sel.skin = !!sel.skin; if (!['ta', 'vs', 'on'].includes(sel.mode)) sel.mode = 'ta'; if (![1, 3, 5].includes(sel.laps)) sel.laps = 3; sel.items = sel.items !== false; sel.ghost = !!sel.ghost;
 const save = () => { LS.set('rm_best4', best); LS.set('rm_opt', opt); LS.set('rm_sel', sel); };
 // パーツの組み合わせから性能を作る
 function mkKt(o){
@@ -1066,7 +1066,9 @@ let T = { x: 0, y: 0, z: 0, c: 1, s: 0, cp: 1, sp: 0, cr: 1, sr: 0 };
 const setT = (x, y, z, h, pitch = 0, roll = 0) => { T = { x, y, z, c: Math.cos(h), s: Math.sin(h), cp: Math.cos(pitch), sp: Math.sin(pitch), cr: Math.cos(roll), sr: Math.sin(roll) }; };      // roll = 横の傾き（+ で右側が上がる）
 // 現在の基準 T のローカル座標 (ox,oy,oz) に、大きさ (sx,sy,sz) の形を置く
 // tex = 貼るテクスチャ（なければ 0）。proj 0=上から（車体） 1=正面から（キャラ）
+let GA = 1;      // 残像を描くあいだだけ下げる（全体を半透明にする）
 function d(shape, ox, oy, oz, sx, sy, sz, col, a = 1, add = 0, tex = 0, proj = 0){
+  if (GA < 1) { a *= GA; if (add) a *= .5; }
   const c = T.c, s = T.s, cp = T.cp, sp = T.sp, cr = T.cr, sr = T.sr, ux = -s * sp, uz = -c * sp, fx = s * cp, fz = c * cp;      // 傾ける前：右=(c,0,-s) 上=(ux,cp,uz) 前=(fx,sp,fz)
   const rx = c * cr + ux * sr, ry = cp * sr, rz = -s * cr + uz * sr, vx = ux * cr - c * sr, vy = cp * cr, vz = uz * cr + s * sr;
   const e = [rx * sx, ry * sx, rz * sx, 0, vx * sy, vy * sy, vz * sy, 0, fx * sz, sp * sz, fz * sz, 0, T.x + rx * ox + vx * oy + fx * oz, T.y + ry * ox + vy * oy + sp * oz, T.z + rz * ox + vz * oy + fz * oz, 1, col[0], col[1], col[2], a, tex, 0, 0, 0, 0, proj];
@@ -1394,7 +1396,7 @@ const mode = () => sel.mode;
 function newKart(i, ai, name, chIdx, color, kt){
   return { ai, name, ch: CH[chIdx], color, kt, x: 0, y: 0, z: 0, h: 0, v: 0, yaw: 0, idx: 0, lat: 0, ty: 0, frac: 0, drift: false, dDir: 0, charge: 0, tier: 0,
     boost: 0, nitro: 0, slow: 1, slowT: 0, shield: 0, spin: 0, inv: 0, rev: 0, chips: 0, item: null, itemT: 0, lapNo: 0, sectors: 0, debt: false, lapStart: 0, last: 0,
-    safe: 0, rescue: 0, off: false, sc: null, glide: false, pitch: 0, fin: false, finT: 0, prog: 0, vmul: 1, skill: 1, aiLat: 0, aiPhase: i * 1.7, st: 0, rocket: 0, obCd: 0, air: 0, vy: 0, gy: 0, laps: [], airT: 0, fallT: 0, lavaT: 0, jumpT: 0, fenceCd: 0, cp: 0, skipT: 0, on: 1, lastOn: 1, offF: 1, scI: 0, scF: 0, roll: 0 };
+    safe: 0, rescue: 0, off: false, sc: null, glide: false, pitch: 0, fin: false, finT: 0, prog: 0, vmul: 1, skill: 1, aiLat: 0, aiPhase: i * 1.7, st: 0, rocket: 0, obCd: 0, air: 0, vy: 0, gy: 0, laps: [], airT: 0, fallT: 0, lavaT: 0, jumpT: 0, fenceCd: 0, cp: 0, skipT: 0, on: 1, lastOn: 1, offF: 1, scI: 0, scF: 0, roll: 0, bumpCd: 0 };
 }
 function selectStage(i){
   sel.stage = i; ST = STAGES[i]; TR = TRACKS[ST.id] || (TRACKS[ST.id] = buildTrack(ST));
@@ -1430,13 +1432,14 @@ function startRace(o){
     k.x = p.x + p.nx * lat; k.z = p.z + p.nz * lat; k.y = k.gy = p.y; k.h = Math.atan2(p.tx, p.tz); k.idx = idx; k.safe = idx; k.cp = idx; k.skill = .86 + .12 * (1 - (i % 12) / 11); k.aiLat = lat;
     karts.push(k); if (en.me) me = k;
   });
+  ghostLoad();
   boxes = vsLike() && RC.items ? boxesAt.flatMap(idx => [-1.5, -.5, .5, 1.5].map(s => ({ idx, lat: s * ST.width * .2, t: 0 }))) : [];
   raceT = 0; countT = 3.3; endT = 0; novaT = 0; dboost.t = 0; state = 'count'; cam.h = me.h; cam.ky = me.y; cam.g = 0; rec.a = []; rec.t = 0; rep = null; for (const r of TR.rings) r.t = 0;
   $('#hud').classList.remove('rep'); $('#quit').textContent = 'ホームへ'; $('#roul').hidden = true;
   $('#home').hidden = true; $('#result').hidden = true; $('#hud').hidden = false; $('#bItem').hidden = !(vsLike() && RC.items); $('#pos').style.display = vsLike() ? '' : 'none';
   input.steer = 0; input.drift = input.brake = input.item = input.back = false; say('3'); se(440, .12);
 }
-function toHome(){ const after = state !== 'home'; saveAcct(); syncPlay(); navStack.length = 0; rlTok++; $('#roul').hidden = true; $('#load').hidden = true; if (state === 'replay') tab = 'rank'; state = 'home'; karts = []; me = null; if (online || room.id) { tab = 'race'; raceStep = 'go'; } online = false; $('#led').hidden = true; $('#hud').classList.remove('editing'); $('#home').hidden = false; $('#result').hidden = true; $('#hud').hidden = true; renderPanel(); if (after) updCheck(true); }
+function toHome(){ ghost = null; ghostTok++; const after = state !== 'home'; saveAcct(); syncPlay(); navStack.length = 0; rlTok++; $('#roul').hidden = true; $('#load').hidden = true; if (state === 'replay') tab = 'rank'; state = 'home'; karts = []; me = null; if (online || room.id) { tab = 'race'; raceStep = 'go'; } online = false; $('#led').hidden = true; $('#hud').classList.remove('editing'); $('#home').hidden = false; $('#result').hidden = true; $('#hud').hidden = true; renderPanel(); if (after) updCheck(true); }
 function say(t, small, dur = 1){ const m = $('#msg'); m.textContent = t; m.className = 'on' + (small ? ' small' : ''); msgT = dur; }
 const rankVal = k => k.fin ? 1e9 - k.finT : k.prog;
 function rankOf(k){ let r = 0; const v = rankVal(k); for (const o of karts) if (o !== k && rankVal(o) > v) r++; return r; }
@@ -1455,7 +1458,7 @@ function useItem0(k){
   k.item = null;
   if (it === 'rocket') { k.rocket = 10; k.nitro = 10; k.boost = Math.max(k.boost, 10); k.slowT = 0; k.inv = 0; k.rev = 0; k.spin = 0; if (mine) { say('ロケットブースト！', true, 1.2); se(110, 1.4, 'sawtooth', .1, 7); se(880, .3, 'square', .05, 2); } }
   else if (it === 'nitro') { k.boost = Math.max(k.boost, 3); k.nitro = 3; if (mine) se(160, .7, 'sawtooth', .09, 4); }
-  else if (it === 'shield') { k.shield = 9; if (mine) se(660, .25, 'triangle', .08, 1.5); }
+  else if (it === 'shield') { k.shield = 15; if (mine) se(660, .25, 'triangle', .08, 1.5); }
   else if (it === 'chip') { k.chips = Math.min(10, k.chips + 1); if (mine) se(880, .1, 'square', .06, 1.5); }
   else if (it === 'orb') { shots.push({ kind: 'orb', x: k.x + sx * 2.5, z: k.z + sz * 2.5, h: sh, idx: k.idx, ty: k.y, y: k.y, life: 3, owner: k }); if (mine) { se(900, .25, 'square', .06, .3); if (back) say('うしろへ発射！', true, .7); } }
   else if (it === 'homing') { const r = rankOf(k), t = back ? byRank(r + 1) || null : r > 0 ? byRank(r - 1) : null; shots.push({ kind: 'homing', x: k.x + sx * 2.5, z: k.z + sz * 2.5, h: sh, idx: k.idx, ty: k.y, y: k.y, life: back ? 4 : 7, owner: k, target: t }); if (mine) { se(500, .3, 'sawtooth', .06, 2.4); if (back) say('うしろへ発射！', true, .7); } }      // 後ろ向きなら、すぐ後ろの相手を追いかける
@@ -1482,6 +1485,7 @@ function aiInput(k){
   if (k.item && !k.fin && !(k.item === 'shield' && k.shield > 0)) { k.itemT -= 1 / 60; if (k.itemT <= 0) useItem(k); }
   return { steer: clamp(diff * 2.6, -1, 1), drift: false, brake: false };
 }
+function bumped(k){ k.v *= .88; k.boost = Math.min(k.boost, .2); if (k === me) { se(170, .1, 'triangle', .07, .7); for (let i = 0; i < 4; i++) spark(k.x, k.y + .6, k.z, [1, .9, .6], 4, .25, .12); } }
 function endDrift(k, fire){
   // ドリフトを終えると、ドリフトしていた時間に応じてブーストする（どのモードでも同じ。0.5秒以上で発動、長いほど長く続く）
   if (fire && k.charge >= .5) { const sec = Math.min(3, .3 + k.charge * .55) * k.kt.mt * k.kt.bst; k.boost = Math.max(k.boost, sec); if (k === me) { dboost = { t: 1.3, sec }; se(300 + Math.min(3, k.charge) * 110, .35, 'sawtooth', .08, 2.2); } }
@@ -1584,7 +1588,7 @@ function updateKart(k, inp, dt){
   if (k.obCd <= 0) for (const ob of TR.obst) { const dd = (k.idx - ob.idx + N) % N; if (dd > 3 && dd < N - 3) continue; const ol = Math.sin(raceT * ob.sp + ob.ph) * ob.amp, q = P[ob.idx];
     if ((k.x - q.x - q.nx * ol) ** 2 + (k.z - q.z - q.nz * ol) ** 2 < 8.5 && k.y - q.y < 1.6 && k.y - q.y > -2) { k.obCd = 1.4; if (k.rocket > 0) { for (let i = 0; i < 10; i++) spark(k.x, k.y + 1, k.z, [1, .8, .3], 8); if (k === me) se(180, .2, 'sawtooth', .08, .5); } else hit(k, .6, 1.1, 'bump'); } }
   if (k.glide) for (const r of TR.rings) if (prev < r.idx && k.idx >= r.idx && Math.abs(k.lat - r.lat) < 4.6 * (k.gl.rr || 1)) { k.boost = Math.max(k.boost, 1.3 * kt.bst * (k.gl.ring || 1)); if (k === me) { r.t = .6; se(880, .12, 'sine', .08, 1.5); se(1320, .2, 'sine', .07, 1, .08); } }
-  for (const key of ['boost', 'nitro', 'slowT', 'shield', 'spin', 'inv', 'rev', 'rocket', 'obCd', 'jumpT', 'fenceCd']) if (k[key] > 0) k[key] -= dt;
+  for (const key of ['boost', 'nitro', 'slowT', 'shield', 'spin', 'inv', 'rev', 'rocket', 'obCd', 'jumpT', 'fenceCd', 'bumpCd']) if (k[key] > 0) k[key] -= dt;
 
   { const mv = Math.hypot(k.x - x0, k.z - z0), tp = mv > .03 ? clamp(Math.atan2(k.y - y0, mv), -.6, .6) * (k.v < 0 ? -1 : 1) : 0; k.pitch += (tp - k.pitch) * .2; }      // 坂に合わせて車体を傾ける
   // ---- 周回：cp = 順番どおりに進んだ位置。一度に飛ばせるのはコースの 7% まで。それ以上はなれた場所へ行っても進んだことにならない（むちゃな近道はできない）
@@ -1626,12 +1630,16 @@ function step(dt){
   raceT += dt; if (novaT > 0) novaT -= dt; if (dboost.t > 0) dboost.t -= dt; for (const r of TR.rings) if (r.t > 0) r.t -= dt;
   if (input.item) { input.item = false; useItem(me); }
   for (const k of karts) { if (k.remote) updateRemote(k, dt); else updateKart(k, k.ai || k.fin ? aiInput(k) : input, dt); }
+  ghostStep();
   // リプレイ用に自分の走りを 0.1 秒ごとに記録（タイムアタックと、アイテムなしのルーム戦。位置はコースの中心からのずれで記録）
   if (RC.full && me.lapNo >= 1 && (rec.t += dt) >= .1) { rec.t -= .1; if (rec.a.length < 20000) rec.a.push(Math.round((me.x - bounds.cx) * 20), Math.round((me.z - bounds.cz) * 20), Math.round(me.y * 20), Math.round(wrapA(me.h) * 1000), (me.tier & 3) | (me.drift ? 4 : 0) | (me.dDir > 0 ? 8 : 0) | (me.boost > 0 ? 16 : 0) | (me.glide ? 32 : 0)); }
   for (let i = 0; i < karts.length; i++) for (let j = i + 1; j < karts.length; j++) {
     const a = karts[i], b = karts[j]; if (a.rescue > 0 || b.rescue > 0 || Math.abs(a.y - b.y) > 2) continue;
     const dx = b.x - a.x, dz = b.z - a.z, dd = Math.hypot(dx, dz);
     if (dd < 1.9 && dd > .001) { const p = (1.9 - dd) / 2 / dd; if (!a.remote) { a.x -= dx * p; a.z -= dz * p; } if (!b.remote) { b.x += dx * p; b.z += dz * p; }
+      // ぶつけられた側が少し減速する（相手に向かって速く動いていたほうが「ぶつけた側」）
+      { const nx = dx / dd, nz = dz / dd, pa = a.v * (Math.sin(a.h) * nx + Math.cos(a.h) * nz), pb = -b.v * (Math.sin(b.h) * nx + Math.cos(b.h) * nz), vic = pa > pb + 1.5 ? b : pb > pa + 1.5 ? a : null, hitter = vic === a ? b : a;
+        if (vic && vic.bumpCd <= 0 && vic.rocket <= 0 && vic.rescue <= 0 && !hitter.remote) { vic.bumpCd = .9; if (online && vic.remote) evSend({ k: 'bump', to: vic.id }); else bumped(vic); } }
       if (a.rocket > 0 && !a.remote && b.rocket <= 0 && b.spin <= 0) strike(b, .6, 1, 'bump'); else if (b.rocket > 0 && !b.remote && a.rocket <= 0 && a.spin <= 0) strike(a, .6, 1, 'bump'); }      // ロケット中は体当たりで弾き飛ばす
   }
   for (const bx of boxes) {
@@ -1794,6 +1802,7 @@ function netEv(){
   const ev = (room.data || {}).ev || {};
   for (const id in ev) { if (room.seen[id]) continue; room.seen[id] = 1; const e = ev[id]; if (!e || !online || state !== 'race') continue;
     if (e.k === 'hit') { const k = karts.find(q => q.id === e.to && !q.remote); if (k) hit(k, +e.s || .5, +e.d || 1.5, e.kind); }
+    else if (e.k === 'bump') { const k = karts.find(q => q.id === e.to && !q.remote); if (k && k.rocket <= 0) bumped(k); }
     else if (e.k === 'shot' && e.from !== acct.uid && ITEMS[e.kind]) { const o = { kind: e.kind, x: +e.x, z: +e.z, h: +e.h, idx: 0, ty: 0, y: 0, life: e.kind === 'homing' ? 7 : 3, owner: null, cos: true, target: karts.find(q => q.id === e.to) || null }; locate(o, true); o.y = o.ty; shots.push(o); }
     else if (e.k === 'trap') traps.push({ id, x: +e.x, z: +e.z, y: +e.y || 0, life: 28, arm: .6 });
     else if (e.k === 'trapDel') traps = traps.filter(t => t.id !== e.id); }
@@ -1842,7 +1851,7 @@ function drawRacer(k){
   drawKart(k.kt, k.color, k.st, ct || 0, night); drawChar(k.ch, k.st, sk || 0, k.mine ? sel.hide : rp && rp.hide);
   if (k.glide) drawGlider(k.gl, k.ch.suit);
   if (k.rocket > 0) drawRocket(k.kt);
-  if (!opt.lite && k.rescue <= 0 && !k.glide && k.gy != null && k.y - k.gy < 40) { const sh = 1 / (1 + Math.max(0, k.y - k.gy) * .08); setT(k.x, k.gy, k.z, h, 0); d('disc', 0, .07, 0, 2.3 * sh, 1, 3.2 * sh, [0, 0, 0], .32 * sh); setT(k.x, k.y, k.z, h, k.pitch, k.roll); }
+  if (!opt.lite && k.rescue <= 0 && !k.glide && k.gy != null && !k.ghost && k.y - k.gy < 40) { const sh = 1 / (1 + Math.max(0, k.y - k.gy) * .08); setT(k.x, k.gy, k.z, h, 0); d('disc', 0, .07, 0, 2.3 * sh, 1, 3.2 * sh, [0, 0, 0], .32 * sh); setT(k.x, k.y, k.z, h, k.pitch, k.roll); }
   if (k.shield > 0) { d('sph', 0, .9, 0, 3.3, 2.6, 3.9, [.3, 1, .9], .2 + .06 * Math.sin(time * 9), 1); for (let i = 0; i < 6; i++) { const a = time * 2 + i * 1.047; d('cube', Math.cos(a) * 1.6, .9 + Math.sin(time * 3 + i) * .5, Math.sin(a) * 1.9, .14, .14, .14, [.6, 1, .95], 1, 1); } }
   if (k.rocket > 0) d('sph', 0, 1, 0, 3.6, 3, 4.6, [1, .5, .3], .12 + .05 * Math.sin(time * 14), 1);
   if (k.inv > 0) for (let i = 0; i < 3; i++) { const a = time * 7 + i * 2.1; d('sph', Math.cos(a) * .7, 2.6, -.2 + Math.sin(a) * .7, .2, .2, .2, [1, .9, .2], 1, 1); }
@@ -1927,6 +1936,7 @@ function render(dt){
   gl.uniform3f(U.uTint, pl.em[0], pl.em[1], pl.em[2]); drawChunks(worldG, eye, vfx, vfz, vfar);
   DYN = pl.dyn;
   for (const k of karts) if (!(k === me && FP())) drawRacer(k); else if (k.shield > 0) { setT(k.x, k.y, k.z, k.h); d('sph', 0, 1.2, 4, 5, 3.4, .3, [.3, 1, .9], .14, 1); }      // 一人称では自分のマシンは描かない
+  if (ghost && ghost.on && state !== 'replay') { GA = .42; drawRacer(ghost.k); GA = 1; }      // 残像（半透明・当たり判定なし）
   for (const bx of boxes) if (bx.t <= 0) drawBox(bx);
   drawGimmicks();
   for (const o of shots) drawShot(o);
@@ -1964,7 +1974,8 @@ function hud(){
   if ((k.item || '') !== lastItem) { lastItem = k.item || ''; const ic = $('#iIcon'); if (k.item) drawItemIcon(ic, k.item); else ic.getContext('2d').clearRect(0, 0, ic.width, ic.height); $('#bItem').classList.toggle('has', !!k.item); $('#iName').textContent = k.item ? ITEMS[k.item].n : ''; }
   $('#rush').classList.toggle('on', k.boost > 0 && !opt.lite); $('#rush').classList.toggle('rk', k.rocket > 0);
   $('#nova').style.opacity = novaT > 0 ? Math.min(1, novaT * 1.2) : 0;
-  drawMap(mapCtx, TR, 320, 320, karts);
+  if (ghost && !rp) { const gt = k.lapNo >= 1 && ghost.on ? '' : ''; $('#chips').textContent = '残像：' + ghost.tag + ' ' + ghost.name + '　' + fmt(ghost.ms / 1000) + gt; }
+  drawMap(mapCtx, TR, 320, 320, ghost && ghost.on && !rp ? karts.concat(ghost.k) : karts);
 }
 
 // ---------------------------------------------------------------- 2D drawings (icons / maps)
@@ -1975,7 +1986,7 @@ function drawMap(ctx, tr, w, h, dots){
   ctx.lineWidth = Math.max(2.8, w / 44); ctx.strokeStyle = 'rgba(9,11,17,.75)'; ctx.stroke(); ctx.lineWidth = Math.max(1.3, w / 84); ctx.strokeStyle = 'rgba(246,242,232,.92)'; ctx.stroke();
   ctx.beginPath(); for (let i = tr.G0; i <= tr.G1; i++) ctx.lineTo(X(pts[i % pts.length].x), Z(pts[i % pts.length].z)); ctx.lineWidth = Math.max(1.3, w / 84); ctx.strokeStyle = '#3cc8ff'; ctx.stroke();
   ctx.fillStyle = '#ff4a26'; ctx.fillRect(X(pts[0].x) - 3, Z(pts[0].z) - 3, 6, 6);
-  if (dots) for (const o of dots) { ctx.fillStyle = o === me ? '#ff4a26' : '#ffd60a'; ctx.beginPath(); ctx.arc(X(o.x), Z(o.z), (o === me ? 7 : 4.2) * w / 192, 0, 7); ctx.fill(); if (o === me) { ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); } }
+  if (dots) for (const o of dots) { ctx.fillStyle = o === me ? '#ff4a26' : o.ghost ? '#8fe9ff' : '#ffd60a'; ctx.beginPath(); ctx.arc(X(o.x), Z(o.z), (o === me ? 7 : 4.2) * w / 192, 0, 7); ctx.fill(); if (o === me) { ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); } }
 }
 function drawFace(cvs, ch){
   const c = cvs.getContext('2d'), S = cvs.width, u = S / 100, H = ch.h; c.clearRect(0, 0, S, S); c.save(); c.scale(u, u);
@@ -2049,10 +2060,16 @@ stageEl.addEventListener('click', e => { if (moved) { e.stopPropagation(); e.pre
 
 // ================================================================ home UI
 let tab = 'top', raceStep = 'mode', setMsg = '', rkMsg = '', setEdit = -1;
-// もどるボタン：別の画面へ移るたびに、いままでいた画面を覚えておく（ルーム → カスタム → 「← ルームにもどる」で一発でもどれる）
-const navStack = [], TABN = { race: '試合', char: 'キャラ', kart: 'カスタム', rank: 'ランキング', item: 'アイテム図鑑', set: '設定', paint: 'ペイント', cpaint: 'スキン' };
-function navPush(to){ if (tab === 'top' || tab === to) return; const top = navStack[navStack.length - 1]; if (!top || top.tab !== tab) navStack.push({ tab, step: raceStep }); if (navStack.length > 8) navStack.shift(); }
-const navName = n => n.tab === 'race' && room.id ? 'ルーム' : n.tab === 'race' && n.step === 'go' ? (sel.mode === 'vs' ? 'VSレース' : sel.mode === 'on' ? 'オンライン対戦' : 'タイムアタック') : TABN[n.tab] || '前の画面';
+// もどるボタン：行き先は決まっている。ルームに参加中ならルームへ、試合の準備中（コース選びなど）ならその画面へ、ペイント中ならカスタム／キャラへ。どれでもなければ出さない
+let raceOpen = false;      // 試合の準備画面（モードを選んだあと）を開いたままか
+const navStack = [], navPush = () => {};
+function navTarget(){
+  if (tab === 'paint') return { tab: 'kart', n: 'カスタム' }; if (tab === 'cpaint') return { tab: 'char', n: 'キャラ' };
+  if (tab === 'race' || tab === 'top') return null;
+  if (room.id) return { tab: 'race', n: 'ルーム' };
+  if (raceOpen) return { tab: 'race', n: sel.mode === 'vs' ? 'VSレース' : sel.mode === 'on' ? 'オンライン対戦' : 'タイムアタック' };
+  return null;
+}
 const imp = { car: null, ch: null };
 const bar = (v, base) => `<span class="bar${base === undefined || Math.abs(v - base) < .004 ? '' : v > base ? ' up' : ' dn'}"><i style="width:${clamp(Math.round((v - .7) / .6 * 100), 8, 100)}%"></i></span>`;
 // カスタム画面でマシンの横に出しっぱなしにする性能表（緑=標準より高い / 赤=低い）
@@ -2119,11 +2136,11 @@ function renderPanel(){
   if (tab === 'race') {
     const again = `<div class="chips">${chip('rmode', '← モードを選び直す')}</div>`;
     if (raceStep === 'mode') h = `<h2>試合<small>まずモードを選ぶ</small></h2><div class="scroll">
-      <button class="opt big" data-mode="ta" type="button"><b>タイムアタック</b><small>1人でじっくり走って最速ラップを狙う。アイテムなし。ダッシュパネルは全部出る。記録とリプレイはランキングへ。</small></button>
+      <button class="opt big" data-mode="ta" type="button"><b>タイムアタック</b><small>1人でじっくり走って最速ラップを狙う。アイテムなし。ダッシュパネルは全部出る。記録とリプレイはランキングへ。1位の人の残像と一緒に走ることもできる。</small></button>
       <button class="opt big" data-mode="vs" type="button"><b>VSレース</b><small>CPU 11台とのレース。1周・3周・5周から選べる。アイテムあり。ダッシュパネルは少なめ。</small></button>
       <button class="opt big" data-mode="on" type="button"><b>オンライン対戦</b><small>ルームIDを共有して最大12人で対戦。空き枠はCPU。周回数（1・3・5周）とアイテムのあり/なしを選べる。</small></button></div>`;
     else if (sel.mode === 'on') h = `<h2>オンライン対戦<small>ルームIDを共有して集まる</small></h2><div class="scroll">${room.id ? '' : again}${roomHtml()}</div>`;
-    else h = `<h2>${modeName}<small>コースと時間帯を選んでスタート</small></h2><div class="chips">${chip('rmode', '← モード')}<span class="lbl">時間帯</span><button class="chip" type="button" data-tod="day" aria-pressed="${sel.tod === 'day'}">昼</button><button class="chip" type="button" data-tod="night" aria-pressed="${sel.tod === 'night'}">夜</button>${sel.mode === 'vs' ? `<span class="lbl">周回</span>` + [1, 3, 5].map(n => `<button class="chip" type="button" data-laps="${n}" aria-pressed="${sel.laps === n}">${n}周</button>`).join('') : ''}</div><div class="scroll">
+    else h = `<h2>${modeName}<small>コースと時間帯を選んでスタート</small></h2><div class="chips">${chip('rmode', '← モード')}<span class="lbl">時間帯</span><button class="chip" type="button" data-tod="day" aria-pressed="${sel.tod === 'day'}">昼</button><button class="chip" type="button" data-tod="night" aria-pressed="${sel.tod === 'night'}">夜</button>${sel.mode === 'vs' ? `<span class="lbl">周回</span>` + [1, 3, 5].map(n => `<button class="chip" type="button" data-laps="${n}" aria-pressed="${sel.laps === n}">${n}周</button>`).join('') : `<span class="lbl">1位の残像</span><button class="chip" type="button" data-ghost="0" aria-pressed="${!sel.ghost}">なし</button><button class="chip" type="button" data-ghost="1" aria-pressed="${sel.ghost}">あり</button>`}</div>${sel.mode === 'ta' && sel.ghost ? `<p class="note"><b>残像あり</b>：ランキング1位の人の走りが、半透明のマシンとして一緒に走ります。これを追い抜けば1位。相手の使っている近道も見つけやすくなります。当たり判定はありません（まだ記録がないコースや通信できないときは、自分のベストの残像になります）。</p>` : ''}<div class="scroll">
       <button class="stg" type="button" data-stage="r" aria-pressed="${sel.rnd}" style="--sw:#ffd60a"><canvas width="192" height="120" data-thumb="r"></canvas><span class="nm">ランダム<span class="ft">ルーレットで決まる。どのコースになるかはお楽しみ</span></span><span class="bt"></span></button>` +
       STAGES.map((s, i) => `<button class="stg" type="button" data-stage="${i}" aria-pressed="${!sel.rnd && i === sel.stage}" style="--sw:${s.sw}"><canvas width="192" height="120" data-thumb="${i}"></canvas><span class="nm">${s.name}<span class="ft">${s.feat}／1周 約${lapSec(i)}</span></span><span class="bt">${fmt(best[s.id])}<i>ベストラップ</i></span></button>`).join('') + `<p class="note">コース図の水色がグライダー区間です。どのコースにも、コース図に載っていない<b>小さな隠し近道</b>が3本あります。カーブの内側をほんの少し縮めるだけの細い道で、目印はありません。道のわきをよく見てさがしてみよう。</p></div>`;
   } else if (tab === 'char') {
@@ -2142,7 +2159,7 @@ function renderPanel(){
     h = paintHtml();
   } else if (tab === 'item') {
     h = `<h2>アイテム図鑑<small>VS・オンラインで光る箱から出現</small></h2><div class="scroll">` + Object.keys(ITEMS).map(id => `<div class="item"><canvas width="96" height="96" data-item="${id}"></canvas><div><b>${ITEMS[id].n}${ITEMS[id].low ? '<em>下位専用</em>' : ''}</b><p>${ITEMS[id].d}</p></div></div>`).join('') +
-      `<div class="grp">コースのしかけ</div><p class="note"><b>ジャンプ台</b>：ピンクの板に乗るとジャンプ＋ブースト。<br><b>着地ダッシュ</b>：大きく飛んでから道に着地すると、少しだけブースト。坂のてっぺんを勢いよく越えても浮く。<br><b>動く障害物</b>：道を左右に横切る。当たるとスピン。<br><b>グライダー</b>：左右に広く動ける。カーブの内側を飛ぶと少しだけ近道。外側のブーストリングはその近道ライン上にある。<br><b>ダッシュパネル</b>：黄色い板で加速（VS・オンラインでは数が少なめ）。<br><b>柵</b>：カーブの外側などにあり、落ちるのを防ぐ。ジャンプ中なら飛び越えられる。<br><b>道のとぎれ目</b>：青と白の発射台に乗ると、自動で向こう側まで飛ぶ。<br><b>傾いた道</b>：道が横に傾いている区間。低いほうへ少しずつ流される。<br><b>隠し近道</b>：各コースに3本。カーブの内側を少しだけ縮める細い道で、目印はない。切れ目があるものは踏み切り板から飛び越える。<br><b>落ちたとき</b>：すぐには救助されない。飛んだ先に道があればそのまま走れる。近くの道よりずっと下まで落ちるとドローンが来る。<br><b>コース外</b>：約3割の減速（道から遠いほど重くなる）。コース外に強いパーツでも減速は残る。木・岩・柱などのオブジェにぶつかると大きく減速する。溶岩の上は1秒ほどなら渡れる。<br><b>飛ばしすぎ</b>：一度にコースの7%より先へは進めない（進んだことにならない）。</p></div>`;
+      `<div class="grp">コースのしかけ</div><p class="note"><b>ジャンプ台</b>：ピンクの板に乗るとジャンプ＋ブースト。<br><b>着地ダッシュ</b>：大きく飛んでから道に着地すると、少しだけブースト。坂のてっぺんを勢いよく越えても浮く。<br><b>動く障害物</b>：道を左右に横切る。当たるとスピン。<br><b>体当たり</b>：マシン同士がぶつかると、ぶつけられた側が少し減速する。<br><b>グライダー</b>：左右に広く動ける。カーブの内側を飛ぶと少しだけ近道。外側のブーストリングはその近道ライン上にある。<br><b>ダッシュパネル</b>：黄色い板で加速（VS・オンラインでは数が少なめ）。<br><b>柵</b>：カーブの外側などにあり、落ちるのを防ぐ。ジャンプ中なら飛び越えられる。<br><b>道のとぎれ目</b>：青と白の発射台に乗ると、自動で向こう側まで飛ぶ。<br><b>傾いた道</b>：道が横に傾いている区間。低いほうへ少しずつ流される。<br><b>隠し近道</b>：各コースに3本。カーブの内側を少しだけ縮める細い道で、目印はない。切れ目があるものは踏み切り板から飛び越える。<br><b>落ちたとき</b>：すぐには救助されない。飛んだ先に道があればそのまま走れる。近くの道よりずっと下まで落ちるとドローンが来る。<br><b>コース外</b>：約3割の減速（道から遠いほど重くなる）。コース外に強いパーツでも減速は残る。木・岩・柱などのオブジェにぶつかると大きく減速する。溶岩の上は1秒ほどなら渡れる。<br><b>飛ばしすぎ</b>：一度にコースの7%より先へは進めない（進んだことにならない）。</p></div>`;
   } else if (tab === 'rank') {
     h = `<h2>ランキング<small>最速ラップ上位10件。名前の下にその人の総プレイ時間</small></h2>
       <div class="chips">` + STAGES.map((s, i) => `<button class="chip" type="button" data-stage="${i}" aria-pressed="${i === sel.stage}">${i + 1}. ${s.name}</button>`).join('') + `</div><div class="scroll" id="rkList"></div>`;
@@ -2157,7 +2174,8 @@ function renderPanel(){
       <div class="box"><b>引き継ぎコード</b>${acct.code ? `<span class="code">${acct.code}</span><small>別の端末でこのコードを入力すると、記録を引き継げます。他の人には見せないでください。${acct.reg ? '' : '（まだサーバーと同期できていません。接続できたときに自動で同期します）'}</small><button class="mini" type="button" data-act="copy">コードをコピー</button>` : ''}
       <div class="field"><input id="rcode" maxlength="19" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off"><button type="button" data-act="restore">このコードで引き継ぐ</button></div><small id="rmsg">${esc(net.note)}</small></div></div>`;
   }
-  { const n = navStack[navStack.length - 1]; if (n && n.tab !== tab) h = `<button class="backb" type="button" data-act="navback">← ${navName(n)}にもどる</button>` + h; }
+  if (tab === 'race') raceOpen = raceStep === 'go';
+  { const n = navTarget(); if (n) h = `<button class="backb" type="button" data-act="navback">← ${n.n}にもどる</button>` + h; }
   el.innerHTML = h;
   if (tab === 'rank') { if (net.stage !== ST.id) { net.rows = null; net.err = ''; } renderRank(); net.poll = time; loadTop(ST.id); }
   el.querySelectorAll('[data-thumb]').forEach(c => c.getContext('2d').drawImage(c.dataset.thumb === 'r' ? rndThumb() : stageThumb(+c.dataset.thumb, sel.tod), 0, 0, c.width, c.height));
@@ -2181,7 +2199,7 @@ function openReplay(ds){
   jf(`${FB.db}/${RP}/${sid}/${row.id}.json`).then(rp => { rkMsg = ''; if (state !== 'home' || tab !== 'rank' || ST.id !== sid) return; if (!rp || !rp.d || !startReplay(rp, row.name || 'PLAYER')) { rkMsg = 'この記録にはリプレイがありません。'; renderRank(); } })
     .catch(() => { rkMsg = 'リプレイを読み込めませんでした。通信状態を確認してください。'; renderRank(); });
 }
-$('#home').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (!b) return; if (b.dataset.t === 'top') navStack.length = 0; else navPush(b.dataset.t); tab = b.dataset.t; if (tab === 'race') raceStep = room.id ? 'go' : 'mode'; pe.msg = setMsg = rkMsg = ''; audioInit(); se(520, .05, 'square', .04); renderPanel(); });
+$('#home').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (!b) return; if (b.dataset.t === 'top') raceOpen = false; tab = b.dataset.t; if (tab === 'race') raceStep = room.id || raceOpen ? 'go' : 'mode'; pe.msg = setMsg = rkMsg = ''; audioInit(); se(520, .05, 'square', .04); renderPanel(); });
 $('#panel').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return; const ds = b.dataset, keep = $('#panel .scroll') ? $('#panel .scroll').scrollTop : 0;
   if (ds.rep) { audioInit(); return openReplay(ds); }
@@ -2192,6 +2210,7 @@ $('#panel').addEventListener('click', e => {
     if (host) roomPut('/stageId', sel.rnd ? 'random' : ST.id); }
   else if (ds.laps || ds.items) { const host = sel.mode === 'on' && room.id && tab === 'race'; if (host && !room.host) return;      // 周回数・アイテムのあり/なし（ルーム戦ではホストが決める）
     if (ds.laps) { sel.laps = [1, 3, 5].includes(+ds.laps) ? +ds.laps : 3; if (host) roomPut('/laps', sel.laps); } else { sel.items = ds.items === '1'; if (host) roomPut('/items', sel.items ? 1 : 0); } }
+  else if (ds.ghost) { sel.ghost = ds.ghost === '1'; }
   else if (ds.tod) { sel.tod = ds.tod === 'night' ? 'night' : 'day'; }
   else if (ds.ch) { sel.ch = +ds.ch; syncProfile(); }
   else if (ds.part) { sel[ds.part] = ci(+ds.i, 10); if (ds.part === 'kt') { pe.undo = []; loadTex(carT); } }
@@ -2324,8 +2343,8 @@ addEventListener('pointerup', () => { hr = null; }); addEventListener('pointerca
 const PKEY = /^data:image\/(png|webp|jpeg);base64,[A-Za-z0-9+/=]+$/;
 const ACT = {
   paint(){ navPush('paint'); pe.zoom = 1; pe.pan = false; pe.sx = pe.sy = .5; tab = 'paint'; pe.t = 'car'; pe.undo = []; pe.stamp = null; pe.msg = ''; renderPanel(); }, cpaint(){ navPush('cpaint'); pe.zoom = 1; pe.pan = false; pe.sx = pe.sy = .5; tab = 'cpaint'; pe.t = 'ch'; pe.undo = []; pe.stamp = null; pe.msg = ''; homeYaw = 0; renderPanel(); },
-  pback(){ const t = pe.t === 'car' ? 'kart' : 'char'; if (navStack.length && navStack[navStack.length - 1].tab === t) navStack.pop(); tab = t; pe.stamp = null; homeZoom = 1; homeYaw = 0; renderPanel(); }, gotab(b, ds){ navPush(ds.to); tab = ds.to; renderPanel(); },
-  navback(){ const n = navStack.pop(); if (!n) return; tab = n.tab; raceStep = n.tab === 'race' && room.id ? 'go' : n.step; pe.stamp = null; pe.msg = setMsg = rkMsg = ''; setEdit = -1; homeZoom = 1; homeYaw = 0; if (tab === 'paint') pe.t = 'car'; if (tab === 'cpaint') pe.t = 'ch'; renderPanel(); },
+  pback(){ tab = pe.t === 'car' ? 'kart' : 'char'; pe.stamp = null; homeZoom = 1; homeYaw = 0; renderPanel(); }, gotab(b, ds){ navPush(ds.to); tab = ds.to; renderPanel(); },
+  navback(){ const n = navTarget(); if (!n) return; tab = n.tab; if (tab === 'race') raceStep = 'go'; pe.stamp = null; pe.msg = setMsg = rkMsg = ''; setEdit = -1; homeZoom = 1; homeYaw = 0; renderPanel(); },
   pcol(b, ds){ pe.col = ds.c; pe.erase = false; renderPanel(); }, psize(b, ds){ pe.size = +ds.s; renderPanel(); }, perase(){ pe.erase = !pe.erase; renderPanel(); },
   pundo(){ const im = pe.undo.pop(), o = PO(); if (im) { o.ctx.putImageData(im, 0, 0); upTex(o); saveTex(o); peRedraw(); } },
   pclear(){ const o = PO(); peUndoPush(); clearTex(o); saveTex(o); peRedraw(); },
@@ -2377,7 +2396,7 @@ const ACT = {
   name(){ const v = $('#pname').value.trim().slice(0, 12); if (!v) { net.note = '名前を1文字以上入力してください。'; return renderPanel(); } pname = v; saveAcct(); net.note = '名前を保存しました。'; roomSyncMe(); syncProfile().then(() => { if (tab === 'rank') loadTop(ST.id); }); renderPanel(); },
   copy(){ try { navigator.clipboard.writeText(acct.code).then(() => { net.note = 'コピーしました'; renderPanel(); }, () => {}); } catch (x) {} },
   restore(){ const v = $('#rcode').value; $('#rmsg').textContent = '確認中…'; restore(v).then(msg => { net.note = msg; renderPanel(); }); },
-  rmode(){ if (room.id) roomLeave(''); raceStep = 'mode'; renderPanel(); },
+  rmode(){ if (room.id) roomLeave(''); raceOpen = false; raceStep = 'mode'; renderPanel(); },
   rcreate(){ roomCreate(); }, rjoin(){ roomJoin(($('#rid').value || '').toUpperCase().replace(/[^A-Z0-9]/g, '')); }, rstart(){ roomStart(); }, rleave(){ roomLeave(''); },
   ridcopy(){ try { navigator.clipboard.writeText(room.id).then(() => { room.msg = 'ルームIDをコピーしました。'; renderPanel(); }, () => {}); } catch (x) {} },
 };
@@ -2387,6 +2406,24 @@ $('#panel').addEventListener('input', e => { if (e.target.id === 'pcpick') { pe.
 // ================================================================ replay（タイムアタックのベストラップの走りを 0.1 秒ごとに記録）
 const repEnc = a => { const b = new Uint8Array(new Int16Array(a).buffer); let s = ''; for (let i = 0; i < b.length; i += 8192) s += String.fromCharCode.apply(null, b.subarray(i, i + 8192)); return btoa(s); };
 const repDec = s => { const bin = atob(s), b = new Uint8Array(bin.length & ~1); for (let i = 0; i < b.length; i++) b[i] = bin.charCodeAt(i); return new Int16Array(b.buffer); };
+// ---- 残像（タイムアタック）：ランキング1位の人の走りを、半透明のマシンとして一緒に走らせる。自分がスタートラインを越えるたびに、残像も1周の最初から走り直す。当たり判定はない
+let ghost = null, ghostTok = 0;
+function ghostLoad(){
+  ghost = null; const tok = ++ghostTok, sid = ST.id; if (sel.mode !== 'ta' || !sel.ghost) return;
+  const use = (rp, name, tag) => { if (tok !== ghostTok || ST.id !== sid || !rp || !rp.d) return false; let a; try { a = repDec(rp.d); } catch (e) { return false; } const n = Math.floor(a.length / 5); if (n < 10) return false;
+    const dk = decKt(rp.kt), k = newKart(0, false, name, ci(rp.ch, CH.length), hex(COLS[ci(rp.col, COLS.length)]), mkKt(dk)); k.gl = GLD[dk.gl]; k.id = 'ghost'; k.remote = true; k.ghost = true;
+    ghost = { a, n, ms: rp.ms || n * 100, name, tag, k, on: false }; ghostPose(0); if (state === 'race' || state === 'count') say(tag + '「' + name + '」の残像と走る', true, 2); return true; };
+  const local = () => use(LS.get('rm_rep4_' + sid, null), myName(), '自己ベスト');
+  jf(`${FB.db}/${RK}/${sid}.json?orderBy=%22lapMs%22&limitToFirst=1`).then(o => { const e = Object.entries(o || {}).filter(q => q[1] && q[1].lapMs > 0).sort((x, y) => x[1].lapMs - y[1].lapMs)[0]; if (!e) return local();
+    return jf(`${FB.db}/${RP}/${sid}/${e[0]}.json`).then(rp => { if (!use(rp, String(e[1].name || 'PLAYER').slice(0, 12), '1位')) local(); }); }).catch(local);
+}
+function ghostPose(t){
+  const g = ghost, k = g.k, a = g.a, f = clamp(t / .1, 0, g.n - 1.001), i = Math.floor(f), u = f - i, o = i * 5, q = o + 5, L = (x, y) => x + (y - x) * u, x0 = k.x, y0 = k.y, z0 = k.z;
+  k.x = L(a[o], a[q]) / 20 + bounds.cx; k.z = L(a[o + 1], a[q + 1]) / 20 + bounds.cz; k.y = L(a[o + 2], a[q + 2]) / 20; k.h = a[o + 3] / 1000 + wrapA((a[q + 3] - a[o + 3]) / 1000) * u; const fl = a[o + 4];
+  k.tier = fl & 3; k.drift = !!(fl & 4); k.dDir = fl & 8 ? 1 : -1; k.boost = fl & 16 ? 1 : 0; k.glide = !!(fl & 32); k.gy = null; k.air = 0; locate(k, true);
+  const mv = Math.hypot(k.x - x0, k.z - z0); k.pitch += ((mv > .03 && mv < 5 ? clamp(Math.atan2(k.y - y0, mv), -.6, .6) : 0) - k.pitch) * .2; rollOf(k);
+}
+function ghostStep(){ if (!ghost || !me) return; const t = me.lapNo >= 1 ? raceT - me.lapStart : 0; ghost.on = t <= (ghost.n - 1) * .1 + .5; ghostPose(t); }
 function mkReplay(sec){ return rec.a.length < 100 ? null : { d: repEnc(rec.a), ms: Math.round(sec * 1000), kt: encKt(sel), col: sel.col, ch: sel.ch }; }
 function startReplay(rp, name){
   let a; try { a = repDec(rp.d); } catch (e) { return false; } const n = Math.floor(a.length / 5); if (n < 10) return false;
@@ -2499,7 +2536,7 @@ function boot(){
 // ================================================================ 更新のお知らせ
 // 公開しているページ（index.html）が新しくなっていたら、試合のあとに「ゲームの更新があります」を出して読み込み直してもらう。
 // BUILD は公開するたびに変える番号。番号を変え忘れても、ページの中身が起動時と変わっていれば気づく
-const BUILD = '2026-11-11-06'; let updBase = null, updReady = false;
+const BUILD = '2026-11-11-08'; let updBase = null, updReady = false;
 async function updCheck(show){
   if (/^https?:$/.test(location.protocol) && !updReady) { try { const t = await (await fetch(location.pathname + '?upd=' + Date.now(), { cache: 'no-store' })).text(); let h = t.length; for (let i = 0; i < t.length; i += 7) h = (h * 31 + t.charCodeAt(i)) | 0;
     const m = /const BUILD = '([^']+)'/.exec(t); if (m && m[1] !== BUILD) updReady = true; else if (updBase === null) updBase = h; else if (h !== updBase) updReady = true; } catch (e) {} }
@@ -2523,7 +2560,7 @@ function start(saved){
   if (saved && saved.tab) tab = saved.tab;
   updCheck(false); layout(); selectStage(sel.stage); loadTex(carT); loadTex(chT); applyLayout(); boot(); renderPanel(); requestAnimationFrame(frame);
 }
-window.__rm = { BAL, get P(){ return P; }, get ST(){ return ST; }, updateKart, TH, surfUnder, opt, STAGES, get state(){ return state; }, get me(){ return me; }, get karts(){ return karts; }, input, sel, step, selectStage, startRace, toHome, goRace, roulette, startReplay, rec, LS, ACT, onb, ensureWorld, get rep(){ return rep; }, get boxes(){ return boxes; }, rpaint, paintFetch, paintSend, get TR(){ return TR; }, get tab(){ return tab; }, carT, chT, setTab(t, st){ tab = t; if (st) raceStep = st; if (t === 'paint') pe.t = 'car'; if (t === 'cpaint') pe.t = 'ch'; renderPanel(); }, room, acct, roomCreate, roomJoin, roomStart, ledOpen, get online(){ return online; } };
+window.__rm = { BAL, get ghost(){ return ghost; }, get P(){ return P; }, get ST(){ return ST; }, updateKart, TH, surfUnder, opt, STAGES, get state(){ return state; }, get me(){ return me; }, get karts(){ return karts; }, input, sel, step, selectStage, startRace, toHome, goRace, roulette, startReplay, rec, LS, ACT, onb, ensureWorld, get rep(){ return rep; }, get boxes(){ return boxes; }, rpaint, paintFetch, paintSend, get TR(){ return TR; }, get tab(){ return tab; }, carT, chT, setTab(t, st){ tab = t; if (st) raceStep = st; if (t === 'paint') pe.t = 'car'; if (t === 'cpaint') pe.t = 'ch'; renderPanel(); }, room, acct, roomCreate, roomJoin, roomStart, ledOpen, get online(){ return online; } };
 const hot = window.claude && window.claude.hot;
 if (hot && hot.snapshot) hot.snapshot(() => ({ stage: sel.stage, tab }));
 if (hot && hot.ready) hot.ready(start); else start((hot && hot.data) || {});
