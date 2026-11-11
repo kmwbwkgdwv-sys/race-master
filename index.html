@@ -547,7 +547,7 @@ const LS = { get(k, d){ try { const v = localStorage.getItem(k); return v === nu
 const ci = (v, n) => clamp(v | 0, 0, n - 1);
 let best = LS.get('rm_best4', {}) || {}, opt = Object.assign({ lite:false, bgm:true, se:true, fs:true, sens:1, mix:true, view:'tp' }, LS.get('rm_opt', {})), sel = Object.assign({ ch:0, kt:0, tire:0, wing:0, eng:0, col:0, gl:0, stage:0, mode:'ta', tod:'day', rnd:false, skin:false, hide:true, laps:3, items:true, ghost:false }, LS.get('rm_sel', {}));
 sel.ch = ci(sel.ch, CH.length); sel.kt = ci(sel.kt, KT.length); sel.tire = ci(sel.tire, TIRE.length); sel.wing = ci(sel.wing, WING.length); sel.eng = ci(sel.eng, ENG.length); sel.gl = ci(sel.gl, GLD.length); sel.col = ci(sel.col, COLS.length); sel.stage = ci(sel.stage, STAGES.length); opt.sens = ci(opt.sens, 3); opt.view = opt.view === 'fp' ? 'fp' : 'tp'; opt.mix = opt.mix !== false; if (typeof opt.hdl !== 'number') opt.hdl = [.85, 1, 1.2][opt.sens]; opt.hdl = clamp(Math.round(opt.hdl * 20) / 20, .6, 1.5);      // hdl = ハンドルの曲がる量（カスタム画面で変える）
-sel.tod = sel.tod === 'night' ? 'night' : 'day'; sel.rnd = !!sel.rnd; sel.skin = !!sel.skin; if (!['ta', 'vs', 'on'].includes(sel.mode)) sel.mode = 'ta'; if (![1, 3, 5].includes(sel.laps)) sel.laps = 3; sel.items = sel.items !== false; sel.ghost = !!sel.ghost;
+sel.tod = sel.tod === 'night' ? 'night' : 'day'; sel.rnd = !!sel.rnd; sel.skin = !!sel.skin; if (!['ta', 'vs', 'on'].includes(sel.mode)) sel.mode = 'ta'; if (![1, 2, 3, 5].includes(sel.laps)) sel.laps = 3; sel.items = sel.items !== false; sel.ghost = !!sel.ghost;
 const save = () => { LS.set('rm_best4', best); LS.set('rm_opt', opt); LS.set('rm_sel', sel); };
 // パーツの組み合わせから性能を作る
 function mkKt(o){
@@ -1767,7 +1767,7 @@ function roomStart(){
   roomPut('', { pos: null, ev: null, start: { stageId: STAGES[si].id, aiCount: 12 - ps.length, seed: Math.floor(Math.random() * 1e9), order: ps.join(','), tod: sel.tod, rnd: sel.rnd ? 1 : 0, laps: sel.laps, items: sel.items ? 1 : 0, nonce: SV } }, 'PATCH');
 }
 function onlineStart(st){
-  const order = String(st.order || '').split(',').filter(Boolean), i = STAGES.findIndex(s => s.id === st.stageId), laps = [1, 3, 5].includes(st.laps | 0) ? st.laps | 0 : 3, items = st.items !== 0;
+  const order = String(st.order || '').split(',').filter(Boolean), i = STAGES.findIndex(s => s.id === st.stageId), laps = [1, 2, 3, 5].includes(st.laps | 0) ? st.laps | 0 : 3, items = st.items !== 0;
   if (i < 0 || !order.includes(acct.uid)) return;            // 開始後に入った人は次のレースから
   $('#led').hidden = true; $('#hud').classList.remove('editing'); sel.mode = 'on'; tab = 'race'; raceStep = 'go';
   room.mid = (st.nonce > 0 ? st.nonce : Date.now()) + '_' + room.id;      // 管理者サイト用：だれが参加し、どんなルールだったかをホストが記録する
@@ -2110,10 +2110,10 @@ function roomHtml(){
   const d = room.data || {}, ps = roomPlayers();
   return `<div class="box"><b>ルームID　<span class="code">${room.id}</span></b><button class="mini" type="button" data-act="ridcopy">IDをコピー</button></div>` +
     (room.host ? `<div class="chips"><span class="lbl">時間帯</span><button class="chip" type="button" data-tod="day" aria-pressed="${sel.tod === 'day'}">昼</button><button class="chip" type="button" data-tod="night" aria-pressed="${sel.tod === 'night'}">夜</button></div>
-      <div class="chips"><span class="lbl">周回</span>${[1, 3, 5].map(n => `<button class="chip" type="button" data-laps="${n}" aria-pressed="${sel.laps === n}">${n}周</button>`).join('')}<span class="lbl">アイテム</span><button class="chip" type="button" data-items="1" aria-pressed="${sel.items}">あり</button><button class="chip" type="button" data-items="0" aria-pressed="${!sel.items}">なし</button></div>
+      <div class="chips"><span class="lbl">周回</span>${[1, 2, 3, 5].map(n => `<button class="chip" type="button" data-laps="${n}" aria-pressed="${sel.laps === n}">${n}周</button>`).join('')}<span class="lbl">アイテム</span><button class="chip" type="button" data-items="1" aria-pressed="${sel.items}">あり</button><button class="chip" type="button" data-items="0" aria-pressed="${!sel.items}">なし</button></div>
       <p class="note">${sel.items ? 'アイテムあり：光る箱からアイテムが出ます。' : '<b>アイテムなし</b>：ダッシュパネルはタイムアタックと同じ数になり、<b>1周の自己ベストを更新するとランキングに載ります</b>（リプレイつき）。'}</p>
       <div class="chips"><button class="chip" type="button" data-stage="r" aria-pressed="${sel.rnd}">ランダム</button>` + STAGES.map((s, i) => `<button class="chip" type="button" data-stage="${i}" aria-pressed="${!sel.rnd && i === sel.stage}">${i + 1}. ${s.name}</button>`).join('') + `</div>`
-      : `<div class="grp">コース：${d.stageId === 'random' ? 'ランダム（ルーレット）' : ST.name}</div><div class="grp">ルール：${[1, 3, 5].includes(d.laps) ? d.laps : 3}周・アイテム${d.items === 0 ? 'なし（1周の自己ベストがランキングに載る）' : 'あり'}</div>`) +
+      : `<div class="grp">コース：${d.stageId === 'random' ? 'ランダム（ルーレット）' : ST.name}</div><div class="grp">ルール：${[1, 2, 3, 5].includes(d.laps) ? d.laps : 3}周・アイテム${d.items === 0 ? 'なし（1周の自己ベストがランキングに載る）' : 'あり'}</div>`) +
     ps.map(([id, p]) => `<div class="rk"><span class="r"></span><canvas width="68" height="68" data-face="${chOf(p)}"></canvas><span class="nm2">${esc(p.name || 'PLAYER')}${id === d.hostUid ? '<span class="tag">ホスト</span>' : ''}${id === acct.uid ? '<span class="tag">あなた</span>' : ''}</span><span class="tm"></span></div>`).join('') +
     `<p class="note">参加 ${ps.length} 人。残り ${12 - ps.length} 枠はCPUが走ります。${esc(room.msg)}</p>` +
     (room.host ? `<button class="opt pri" type="button" data-act="rstart"><b>レース開始</b><small>全員の画面で同時に始まります</small></button>` : `<p class="note">ホストがレースを始めるのを待っています。</p>`) +
@@ -2137,10 +2137,10 @@ function renderPanel(){
     const again = `<div class="chips">${chip('rmode', '← モードを選び直す')}</div>`;
     if (raceStep === 'mode') h = `<h2>試合<small>まずモードを選ぶ</small></h2><div class="scroll">
       <button class="opt big" data-mode="ta" type="button"><b>タイムアタック</b><small>1人でじっくり走って最速ラップを狙う。アイテムなし。ダッシュパネルは全部出る。記録とリプレイはランキングへ。1位の人の残像と一緒に走ることもできる。</small></button>
-      <button class="opt big" data-mode="vs" type="button"><b>VSレース</b><small>CPU 11台とのレース。1周・3周・5周から選べる。アイテムあり。ダッシュパネルは少なめ。</small></button>
-      <button class="opt big" data-mode="on" type="button"><b>オンライン対戦</b><small>ルームIDを共有して最大12人で対戦。空き枠はCPU。周回数（1・3・5周）とアイテムのあり/なしを選べる。</small></button></div>`;
+      <button class="opt big" data-mode="vs" type="button"><b>VSレース</b><small>CPU 11台とのレース。1・2・3・5周から選べる。アイテムあり。ダッシュパネルは少なめ。</small></button>
+      <button class="opt big" data-mode="on" type="button"><b>オンライン対戦</b><small>ルームIDを共有して最大12人で対戦。空き枠はCPU。周回数（1・2・3・5周）とアイテムのあり/なしを選べる。</small></button></div>`;
     else if (sel.mode === 'on') h = `<h2>オンライン対戦<small>ルームIDを共有して集まる</small></h2><div class="scroll">${room.id ? '' : again}${roomHtml()}</div>`;
-    else h = `<h2>${modeName}<small>コースと時間帯を選んでスタート</small></h2><div class="chips">${chip('rmode', '← モード')}<span class="lbl">時間帯</span><button class="chip" type="button" data-tod="day" aria-pressed="${sel.tod === 'day'}">昼</button><button class="chip" type="button" data-tod="night" aria-pressed="${sel.tod === 'night'}">夜</button>${sel.mode === 'vs' ? `<span class="lbl">周回</span>` + [1, 3, 5].map(n => `<button class="chip" type="button" data-laps="${n}" aria-pressed="${sel.laps === n}">${n}周</button>`).join('') : `<span class="lbl">1位の残像</span><button class="chip" type="button" data-ghost="0" aria-pressed="${!sel.ghost}">なし</button><button class="chip" type="button" data-ghost="1" aria-pressed="${sel.ghost}">あり</button>`}</div>${sel.mode === 'ta' && sel.ghost ? `<p class="note"><b>残像あり</b>：ランキング1位の人の走りが、半透明のマシンとして一緒に走ります。これを追い抜けば1位。相手の使っている近道も見つけやすくなります。当たり判定はありません（まだ記録がないコースや通信できないときは、自分のベストの残像になります）。</p>` : ''}<div class="scroll">
+    else h = `<h2>${modeName}<small>コースと時間帯を選んでスタート</small></h2><div class="chips">${chip('rmode', '← モード')}<span class="lbl">時間帯</span><button class="chip" type="button" data-tod="day" aria-pressed="${sel.tod === 'day'}">昼</button><button class="chip" type="button" data-tod="night" aria-pressed="${sel.tod === 'night'}">夜</button>${sel.mode === 'vs' ? `<span class="lbl">周回</span>` + [1, 2, 3, 5].map(n => `<button class="chip" type="button" data-laps="${n}" aria-pressed="${sel.laps === n}">${n}周</button>`).join('') : `<span class="lbl">1位の残像</span><button class="chip" type="button" data-ghost="0" aria-pressed="${!sel.ghost}">なし</button><button class="chip" type="button" data-ghost="1" aria-pressed="${sel.ghost}">あり</button>`}</div>${sel.mode === 'ta' && sel.ghost ? `<p class="note"><b>残像あり</b>：ランキング1位の人の走りが、半透明のマシンとして一緒に走ります。これを追い抜けば1位。相手の使っている近道も見つけやすくなります。当たり判定はありません（まだ記録がないコースや通信できないときは、自分のベストの残像になります）。</p>` : ''}<div class="scroll">
       <button class="stg" type="button" data-stage="r" aria-pressed="${sel.rnd}" style="--sw:#ffd60a"><canvas width="192" height="120" data-thumb="r"></canvas><span class="nm">ランダム<span class="ft">ルーレットで決まる。どのコースになるかはお楽しみ</span></span><span class="bt"></span></button>` +
       STAGES.map((s, i) => `<button class="stg" type="button" data-stage="${i}" aria-pressed="${!sel.rnd && i === sel.stage}" style="--sw:${s.sw}"><canvas width="192" height="120" data-thumb="${i}"></canvas><span class="nm">${s.name}<span class="ft">${s.feat}／1周 約${lapSec(i)}</span></span><span class="bt">${fmt(best[s.id])}<i>ベストラップ</i></span></button>`).join('') + `<p class="note">コース図の水色がグライダー区間です。どのコースにも、コース図に載っていない<b>小さな隠し近道</b>が3本あります。カーブの内側をほんの少し縮めるだけの細い道で、目印はありません。道のわきをよく見てさがしてみよう。</p></div>`;
   } else if (tab === 'char') {
@@ -2209,7 +2209,7 @@ $('#panel').addEventListener('click', e => {
     if (ds.stage === 'r') sel.rnd = true; else { if (tab !== 'rank') sel.rnd = false; selectStage(+ds.stage); rkMsg = ''; }
     if (host) roomPut('/stageId', sel.rnd ? 'random' : ST.id); }
   else if (ds.laps || ds.items) { const host = sel.mode === 'on' && room.id && tab === 'race'; if (host && !room.host) return;      // 周回数・アイテムのあり/なし（ルーム戦ではホストが決める）
-    if (ds.laps) { sel.laps = [1, 3, 5].includes(+ds.laps) ? +ds.laps : 3; if (host) roomPut('/laps', sel.laps); } else { sel.items = ds.items === '1'; if (host) roomPut('/items', sel.items ? 1 : 0); } }
+    if (ds.laps) { sel.laps = [1, 2, 3, 5].includes(+ds.laps) ? +ds.laps : 3; if (host) roomPut('/laps', sel.laps); } else { sel.items = ds.items === '1'; if (host) roomPut('/items', sel.items ? 1 : 0); } }
   else if (ds.ghost) { sel.ghost = ds.ghost === '1'; }
   else if (ds.tod) { sel.tod = ds.tod === 'night' ? 'night' : 'day'; }
   else if (ds.ch) { sel.ch = +ds.ch; syncProfile(); }
@@ -2536,7 +2536,7 @@ function boot(){
 // ================================================================ 更新のお知らせ
 // 公開しているページ（index.html）が新しくなっていたら、試合のあとに「ゲームの更新があります」を出して読み込み直してもらう。
 // BUILD は公開するたびに変える番号。番号を変え忘れても、ページの中身が起動時と変わっていれば気づく
-const BUILD = '2026-11-11-08'; let updBase = null, updReady = false;
+const BUILD = '2026-11-11-09'; let updBase = null, updReady = false;
 async function updCheck(show){
   if (/^https?:$/.test(location.protocol) && !updReady) { try { const t = await (await fetch(location.pathname + '?upd=' + Date.now(), { cache: 'no-store' })).text(); let h = t.length; for (let i = 0; i < t.length; i += 7) h = (h * 31 + t.charCodeAt(i)) | 0;
     const m = /const BUILD = '([^']+)'/.exec(t); if (m && m[1] !== BUILD) updReady = true; else if (updBase === null) updBase = h; else if (h !== updBase) updReady = true; } catch (e) {} }

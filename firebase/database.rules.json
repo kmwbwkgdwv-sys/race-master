@@ -111,7 +111,7 @@
           ".validate": "newData.isString() && newData.val().length <= 32"
         },
         "laps": {
-          ".validate": "newData.val() === 1 || newData.val() === 3 || newData.val() === 5"
+          ".validate": "newData.val() === 1 || newData.val() === 2 || newData.val() === 3 || newData.val() === 5"
         },
         "items": {
           ".validate": "newData.val() === 0 || newData.val() === 1"
@@ -173,7 +173,7 @@
             ".validate": "newData.isNumber()"
           },
           "laps": {
-            ".validate": "newData.val() === 1 || newData.val() === 3 || newData.val() === 5"
+            ".validate": "newData.val() === 1 || newData.val() === 2 || newData.val() === 3 || newData.val() === 5"
           },
           "items": {
             ".validate": "newData.val() === 0 || newData.val() === 1"
