@@ -536,7 +536,7 @@ const GLD = [
 const COLS = ['#ff3b1f','#ffd60a','#2a7dff','#22c55e','#ff5ca8','#f4f6fa','#8b5cf6','#20252e','#ff8a1f','#20c7c7','#9a5b2e','#b7f04a'];
 const ITEMS = {
   orb:{ n:'プラズマ・オーブ', c:'#5cc8ff', d:'前方へまっすぐ飛ぶ高速弾。当たった相手のブーストを消し、最高速度を下げる。「うしろ」を押しながら使うと後ろへ飛ぶ。' },
-  homing:{ n:'ホーミング・ボルト', c:'#ffe14d', d:'1つ前を走る相手を自動で追いかけ、1.5秒間ハンドルを左右逆にする。「うしろ」を押しながら使うと、すぐ後ろの相手をねらう。' },
+  homing:{ n:'リバース・ボルト', c:'#ffe14d', d:'前方へまっすぐ飛ぶ弾（自動では追いかけない）。当たった相手のハンドルを1.5秒間、左右逆にする。「うしろ」を押しながら使うと後ろへ飛ぶ。' },
   trap:{ n:'重力トラップ', c:'#b05cff', d:'コース上に置く罠。踏んだ相手を2秒間スローにする。' },
   nova:{ n:'フォトン・ノヴァ', c:'#ffffff', low:1, d:'1位の画面を光で隠し、強制的にバックさせる。' },
   nitro:{ n:'ニトロ・カプセル', c:'#ff8a1f', d:'3秒間の猛加速。悪路や溶岩の上でも減速しない。' },
@@ -1468,7 +1468,7 @@ function useItem0(k){
   else if (it === 'shield') { k.shield = 15; if (mine) se(660, .25, 'triangle', .08, 1.5); }
   else if (it === 'chip') { k.chips = Math.min(10, k.chips + 1); if (mine) se(880, .1, 'square', .06, 1.5); }
   else if (it === 'orb') { shots.push({ kind: 'orb', x: k.x + sx * 2.5, z: k.z + sz * 2.5, h: sh, idx: k.idx, ty: k.y, y: k.y, life: 3, owner: k }); if (mine) { se(900, .25, 'square', .06, .3); if (back) say('うしろへ発射！', true, .7); } }
-  else if (it === 'homing') { const r = rankOf(k), t = back ? byRank(r + 1) || null : r > 0 ? byRank(r - 1) : null; shots.push({ kind: 'homing', x: k.x + sx * 2.5, z: k.z + sz * 2.5, h: sh, idx: k.idx, ty: k.y, y: k.y, life: back ? 4 : 7, owner: k, target: t }); if (mine) { se(500, .3, 'sawtooth', .06, 2.4); if (back) say('うしろへ発射！', true, .7); } }      // 後ろ向きなら、すぐ後ろの相手を追いかける
+  else if (it === 'homing') { shots.push({ kind: 'homing', x: k.x + sx * 2.5, z: k.z + sz * 2.5, h: sh, idx: k.idx, ty: k.y, y: k.y, life: 3, owner: k, target: null }); if (mine) { se(500, .3, 'sawtooth', .06, 2.4); if (back) say('うしろへ発射！', true, .7); } }      // 自動追尾はしない。ねらった向きへまっすぐ飛ぶ
   else if (it === 'trap') { const tp = { x: +(k.x - fx * 3).toFixed(2), z: +(k.z - fz * 3).toFixed(2), y: +k.y.toFixed(2) }; if (online) evSend({ k: 'trap', ...tp }); else traps.push({ ...tp, life: 28, arm: .6 }); if (mine) se(240, .2, 'triangle', .08, .6); }
   else if (it === 'nova') { const t = byRank(0); if (t && t !== k) strike(t, .6, 1.6, 'nova'); if (mine) se(1200, .6, 'sine', .08, .2); }
   else if (it === 'warp') { const r = rankOf(k), t = byRank(Math.max(0, r - 3));
@@ -1826,7 +1826,7 @@ function netEv(){
   for (const id in ev) { if (room.seen[id]) continue; room.seen[id] = 1; const e = ev[id]; if (!e || !online || state !== 'race') continue;
     if (e.k === 'hit') { const k = karts.find(q => q.id === e.to && !q.remote); if (k) hit(k, +e.s || .5, +e.d || 1.5, e.kind); }
     else if (e.k === 'bump') { const k = karts.find(q => q.id === e.to && !q.remote); if (k && k.rocket <= 0) bumped(k); }
-    else if (e.k === 'shot' && e.from !== acct.uid && ITEMS[e.kind]) { const o = { kind: e.kind, x: +e.x, z: +e.z, h: +e.h, idx: 0, ty: 0, y: 0, life: e.kind === 'homing' ? 7 : 3, owner: null, cos: true, target: karts.find(q => q.id === e.to) || null }; locate(o, true); o.y = o.ty; shots.push(o); }
+    else if (e.k === 'shot' && e.from !== acct.uid && ITEMS[e.kind]) { const o = { kind: e.kind, x: +e.x, z: +e.z, h: +e.h, idx: 0, ty: 0, y: 0, life: 3, owner: null, cos: true, target: null }; locate(o, true); o.y = o.ty; shots.push(o); }
     else if (e.k === 'trap') traps.push({ id, x: +e.x, z: +e.z, y: +e.y || 0, life: 28, arm: .6 });
     else if (e.k === 'trapDel') traps = traps.filter(t => t.id !== e.id); }
 }
@@ -2568,7 +2568,7 @@ function boot(){
 // ================================================================ 更新のお知らせ
 // 公開しているページ（index.html）が新しくなっていたら、試合のあとに「ゲームの更新があります」を出して読み込み直してもらう。
 // BUILD は公開するたびに変える番号。番号を変え忘れても、ページの中身が起動時と変わっていれば気づく
-const BUILD = '2026-11-11-11'; let updBase = null, updReady = false;
+const BUILD = '2026-11-11-12'; let updBase = null, updReady = false;
 async function updCheck(show){
   if (/^https?:$/.test(location.protocol) && !updReady) { try { const t = await (await fetch(location.pathname + '?upd=' + Date.now(), { cache: 'no-store' })).text(); let h = t.length; for (let i = 0; i < t.length; i += 7) h = (h * 31 + t.charCodeAt(i)) | 0;
     const m = /const BUILD = '([^']+)'/.exec(t); if (m && m[1] !== BUILD) updReady = true; else if (updBase === null) updBase = h; else if (h !== updBase) updReady = true; } catch (e) {} }
