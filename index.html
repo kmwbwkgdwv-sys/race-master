@@ -185,9 +185,12 @@ button.rk:active{background:rgba(255,214,10,.16)}
 
 .seg3{grid-template-columns:1fr 1fr 1fr}
 .opt.pri{background:var(--hot);border-color:var(--hot);color:#fff}.opt.pri small{color:rgba(255,255,255,.85)}
-.pwrap{flex:none;aspect-ratio:2/1;border:2px solid var(--line);border-radius:4px;overflow:hidden;background:repeating-conic-gradient(#2a2d36 0 25%,#21242c 0 50%) 0 0/20px 20px}
+.pwrap{flex:none;aspect-ratio:2/1;width:min(100%,70vh);align-self:center;border:2px solid var(--line);border-radius:4px;overflow:hidden;background:repeating-conic-gradient(#2a2d36 0 25%,#21242c 0 50%) 0 0/20px 20px}
 #pcv{display:block;width:100%;touch-action:none;cursor:crosshair}
-.pwrap.ch{width:min(100%,236px);aspect-ratio:1/1;align-self:center}
+.pwrap.ch{width:min(100%,236px,34vh);aspect-ratio:1/1;align-self:center}
+#panel .pwrap~.scroll{min-height:104px}
+h2.pth{align-items:center}h2.pth .backb{padding:5px 12px;font-size:12px}
+.chips.ptool{gap:5px;flex:none;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.chips.ptool .lbl{flex:none}.chips.ptool .chip{padding:6px 10px;font-size:12px;white-space:nowrap;flex:none}
 .sw.s{width:28px;height:28px}
 .field span{font-size:12px;font-weight:900;white-space:nowrap}.field input[type=range]{padding:0;accent-color:var(--hot)}
 .tag{font-size:10px;padding:1px 7px;border-radius:99px;border:1px solid var(--volt);color:var(--volt);margin-left:6px;font-weight:900}
@@ -480,32 +483,32 @@ const CH = [
 //       pad=ダッシュパネル・ジャンプ台のブーストの長さ jump=着地ダッシュの長さ air=空中の曲がりやすさ tough=立ち直りの早さ（小さいほど早い）
 //       bsp=ブースト中のスピード上乗せ bst=すべてのブーストの長さ gsp=グライダーのスピード
 const KT = [
-  { n:'スタンダード', d:'くせのない万能型', v:0, top:1, acc:1, turn:1, mt:1, len:1, wing:1 },
+  { n:'スタンダード', d:'くせのない万能型。最高速・加速・ハンドリングがどれも少し高い', v:0, top:1.003, acc:1.02, turn:1.02, mt:1, len:1, wing:1 },
   { n:'ブレイザー', d:'最高速重視。加速とハンドリングは重く、カーブで失速しやすい', v:1, top:1.015, acc:.9, turn:.93, mt:.92, len:1.14, wing:.8 },
   { n:'スピナー', d:'小回りがきき、ドリフトのチャージが速い', v:2, top:.99, acc:1.1, turn:1.12, dc:1.25, len:.9, wing:1.25 },
   { n:'タンク', d:'幅広で重い。コース外でも失速しにくい', v:3, top:1, acc:.95, turn:.95, len:1.06, wing:1, wide:1.14, off:.3 },
   { n:'フォーミュラ', d:'長く低い車体。ダッシュパネルとジャンプ台のブーストが長く続く', v:4, top:1.005, acc:.96, turn:.95, pad:1.4, len:1.22, wing:.9 },
   { n:'バギー', d:'コース外にいちばん強い。舗装路の最高速は低い', v:5, top:.995, acc:1.05, turn:1.02, len:.96, wing:1, off:.4 },
   { n:'ミニ', d:'とても小さい。加速と小回りは最高で、カーブでほとんど失速しない。最高速は低い', v:6, top:.99, acc:1.16, turn:1.14, len:.8, wing:1.1, wide:.9 },
-  { n:'ホットロッド', d:'ドリフトのブーストが長い。ハンドリングは重い', v:7, top:1, acc:1.03, turn:.93, mt:1.3, len:1.1, wing:.9 },
+  { n:'ホットロッド', d:'ドリフトのブーストが長い。ハンドリングは重い', v:7, top:1, acc:1.03, turn:.97, mt:1.35, len:1.1, wing:.9 },
   { n:'ホバー', d:'ジャンプの着地ダッシュが長く、空中でもよく曲がる', v:8, top:1, acc:.97, turn:1.05, jump:1.6, air:1.5, len:1, wing:1 },
   { n:'トラック', d:'重くて大きい。攻撃や障害物を受けても立ち直りが早い', v:9, top:1, acc:.93, turn:.94, tough:.55, len:1.12, wing:1, wide:1.2 },
 ];
 const TIRE = [
-  { n:'スタンダード', d:'どの路面でも安定', top:1, acc:1, turn:1, r:1, w:1, c:[.1,.1,.12], rim:[.85,.85,.88] },
+  { n:'スタンダード', d:'どの路面でも安定。全部の性能が少しずつ高い', top:1.003, acc:1.01, turn:1.01, r:1, w:1, c:[.1,.1,.12], rim:[.85,.85,.88] },
   { n:'スリック', d:'舗装路で最高速が伸びる。コース外は苦手', top:1.01, acc:.98, turn:.98, off:-.3, r:.94, w:1.22, c:[.07,.07,.08], rim:[1,.8,.2] },
   { n:'オフロード', d:'ジャンプの着地ダッシュが長い。コース外もそこそこ走れる', top:.995, jump:1.5, off:.2, r:1.18, w:1.1, c:[.17,.14,.11], rim:[.6,.62,.66] },
   { n:'ローラー', d:'小さく軽い。加速と小回りが良い', top:.995, acc:1.1, turn:1.06, r:.82, w:.9, c:[.12,.12,.2], rim:[.3,.9,1] },
   { n:'モンスター', d:'巨大タイヤ。コース外にとても強いが、ふだんは遅い', top:.99, acc:.97, turn:.96, off:.4, r:1.34, w:1.3, c:[.13,.12,.11], rim:[.9,.3,.2] },
   { n:'レーシング', d:'ブースト中のスピードがさらに伸びる。コース外はとても苦手', top:1, acc:.97, bsp:.05, off:-.4, r:.98, w:1.32, c:[.06,.06,.07], rim:[.95,.95,.98] },
-  { n:'ドリフト', d:'すべりやすく、ドリフトのブーストが長い', top:.995, turn:1.03, mt:1.25, off:-.1, r:.95, w:1.05, c:[.1,.1,.11], rim:[1,.35,.7] },
+  { n:'ドリフト', d:'すべりやすく、ドリフトのブーストが長い', top:1, turn:1.03, mt:1.3, off:-.1, r:.95, w:1.05, c:[.1,.1,.11], rim:[1,.35,.7] },
   { n:'スポンジ', d:'やわらかい。攻撃や障害物からの立ち直りが早い。最高速は控えめ', top:.995, acc:1.05, tough:.6, r:1.05, w:1.15, c:[.85,.7,.2], rim:[.95,.9,.6] },
   { n:'ネオン', d:'光るホイール。ドリフトのチャージが速い', top:1, turn:1.02, dc:1.22, r:1, w:1.05, c:[.08,.08,.12], rim:[.3,1,.9] },
   { n:'ウッド', d:'細い木の車輪。ダッシュパネルのブーストが長い。コース外も少し走れる', top:.995, turn:1.03, pad:1.3, off:.12, r:1.12, w:.78, c:[.42,.28,.16], rim:[.7,.52,.3] },
 ];
 const WING = [
-  { n:'スタンダード', d:'標準のリアウィング', v:0, top:1, turn:1, s:1 },
-  { n:'ビッグウィング', d:'曲がりやすくカーブで失速しにくい。ドリフトのブーストも伸びる', v:1, top:.995, turn:1.06, mt:1.12, s:1.3 },
+  { n:'スタンダード', d:'標準のリアウィング。最高速とハンドリングが少し高い', v:0, top:1.002, turn:1.01, s:1 },
+  { n:'ビッグウィング', d:'曲がりやすくカーブで失速しにくい。ドリフトのブーストも伸びる', v:1, top:1, turn:1.06, mt:1.12, s:1.3 },
   { n:'ローダウン', d:'低い羽。ダッシュパネルとジャンプ台のブーストが長い', v:2, top:1, turn:.98, pad:1.3, s:.8 },
   { n:'ツインフィン', d:'2枚の垂直フィン。コース外で減速しにくい', v:3, top:1, turn:1.01, off:.15, s:1 },
   { n:'トリプルデッキ', d:'3枚羽。空中でよく曲がり、着地ダッシュが長い。最高速は落ちる', v:4, top:.99, turn:1.03, air:1.5, jump:1.4, s:1.2 },
@@ -516,15 +519,15 @@ const WING = [
   { n:'ジェットフィン', d:'背の高い2枚フィン。攻撃や障害物からの立ち直りが早い', v:9, top:1, turn:1.02, tough:.7, s:1.05 },
 ];
 const ENG = [
-  { n:'バランス', d:'標準のエンジン', v:0, top:1, acc:1 },
-  { n:'ターボ', d:'ドリフトのブーストが長い。立ち上がりは少し遅い', v:1, top:1, acc:.93, mt:1.2 },
+  { n:'バランス', d:'標準のエンジン。最高速と加速が少し高い', v:0, top:1.003, acc:1.02 },
+  { n:'ターボ', d:'ドリフトのブーストが長い。立ち上がりは少し遅い', v:1, top:1, acc:.98, mt:1.25 },
   { n:'クイック', d:'加速重視。最高速は控えめ', v:2, top:.995, acc:1.18 },
   { n:'エコブースト', d:'ダッシュパネルとジャンプ台のブーストが長く続く', v:3, top:1, acc:1.02, pad:1.4 },
   { n:'V8ビッグブロック', d:'最高速は最大級。加速はとても遅く、カーブのあとの立ち上がりが苦手', v:4, top:1.012, acc:.84 },
   { n:'ジェットタービン', d:'ブースト中のスピードが大きく伸びる。ブーストは短め', v:5, top:1, acc:.94, bsp:.07, bst:.85 },
   { n:'エレクトリック', d:'静かでなめらか。ドリフトのチャージが速く、加速もよい', v:6, top:.99, acc:1.1, dc:1.2 },
   { n:'ツインターボ', d:'最高速・加速・ブーストが少しずつ伸びる', v:7, top:1.004, acc:1.02, bst:1.08 },
-  { n:'ロケットモーター', d:'あらゆるブーストが長く続く。ふだんの速さは控えめ', v:8, top:.99, acc:.97, bst:1.3 },
+  { n:'ロケットモーター', d:'あらゆるブーストが長く続く。ふだんの速さは控えめ', v:8, top:.997, acc:1, bst:1.3 },
   { n:'ハイブリッド', d:'加速がよく、コース外でも減速しにくい', v:9, top:1, acc:1.08, off:.15 },
 ];
 // グライダー：spd=滑空スピード / ctl=空中の操作性（左右に動ける幅も広がる） / arc=飛ぶ高さ / land=着地したときのブースト秒数 / lch=発進ブーストの長さ / ring=リングのブーストの長さ / rr=リングをくぐれる広さ
@@ -2211,7 +2214,7 @@ function renderPanel(){
       <div class="field"><input id="rcode" maxlength="19" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off"><button type="button" data-act="restore">このコードで引き継ぐ</button></div><small id="rmsg">${esc(net.note)}</small></div></div>`;
   }
   if (tab === 'race') raceOpen = raceStep === 'go';
-  { const n = navTarget(); if (n) h = `<button class="backb" type="button" data-act="navback">← ${n.n}にもどる</button>` + h; }
+  { const n = navTarget(); if (n) { const btn = `<button class="backb" type="button" data-act="navback">← ${n.n}にもどる</button>`; h = tab === 'paint' || tab === 'cpaint' ? h.replace(/<h2>[^<]*</, '<h2 class="pth">' + btn + '<') : btn + h; } }      // 絵を描く画面は高さが足りないので、もどるボタンを見出しの行に入れる
   el.innerHTML = h;
   { const sc = el.querySelector('.scroll'); if (sc && pkey === panelKey) { sc.scrollTop = keepTop; if (drag) drag.el = sc; } panelKey = pkey; }
   if (tab === 'rank') { if (net.stage !== ST.id) { net.rows = null; net.err = ''; } renderRank(); net.poll = time; loadTop(ST.id); }
@@ -2316,11 +2319,11 @@ function peBind(){
 }
 function paintHtml(){
   const car = pe.t === 'car', o = PO();
-  return `<h2>${car ? 'ペイント' : 'スキンを描く'}<small>${car ? '上から見たマシン（右が前）' : '正面から見た ' + CH[sel.ch].n}</small></h2><div class="pwrap ${pe.t}"><canvas id="pcv" width="${o.W}" height="${o.H}"></canvas></div><div class="chips"><span class="lbl">絵の拡大</span>${chip('pzm', '−', false, 'data-d="-1" aria-label="絵を縮小"')}<span class="lbl" id="pzv">${Math.round(pe.zoom * 100)}%</span>${chip('pzm', '＋', false, 'data-d="1" aria-label="絵を拡大"')}${chip('pzm', '全体', false, 'data-d="0"')}${chip('ppan', '手のひら（動かす）', pe.pan)}</div><div class="scroll">` +
+  return `<h2>${car ? 'ペイント' : 'スキンを描く'}<small>${car ? '上から見たマシン（右が前）' : '正面から見た ' + CH[sel.ch].n}</small></h2><div class="pwrap ${pe.t}"><canvas id="pcv" width="${o.W}" height="${o.H}"></canvas></div><div class="chips ptool">${chip('pundo', '↶ 元に戻す')}<span class="lbl">拡大</span>${chip('pzm', '−', false, 'data-d="-1" aria-label="絵を縮小"')}<span class="lbl" id="pzv">${Math.round(pe.zoom * 100)}%</span>${chip('pzm', '＋', false, 'data-d="1" aria-label="絵を拡大"')}${chip('pzm', '全体', false, 'data-d="0"')}${chip('ppan', '手のひら', pe.pan)}</div><div class="scroll">` +
     (pe.stamp ? `<div class="field"><span>大きさ</span><input id="psz" type="range" min="${o.W * .06}" max="${o.W}" value="${pe.stamp.w}"></div><p class="note">絵の上をドラッグして位置を決めます。</p><div class="chips">${chip('pok', 'この位置に貼る')}${chip('pno', 'やめる')}</div>`
     : `<div class="sws">` + PCOL.map(c => `<button class="sw s" type="button" data-act="pcol" data-c="${c}" aria-pressed="${!pe.erase && pe.col === c}" aria-label="色 ${c}" style="--c:${c}"></button>`).join('') + `<label class="sw s pick" aria-label="好きな色"><input id="pcpick" type="color" value="${pe.col}"></label></div>
       <div class="chips">${chip('psize', '細い', pe.size === 6, 'data-s="6"')}${chip('psize', 'ふつう', pe.size === 14, 'data-s="14"')}${chip('psize', '太い', pe.size === 30, 'data-s="30"')}${chip('perase', '消しゴム', pe.erase)}</div>
-      <div class="chips">${chip('pundo', '元に戻す')}${chip('pclear', '全部消す')}${chip('pimg', '画像を貼る（PNG/JPG）')}</div><input id="pfile" type="file" accept="image/png,image/jpeg" hidden>`) +
+      <div class="chips">${chip('pclear', '全部消す')}${chip('pimg', '画像を貼る（PNG/JPG）')}</div><input id="pfile" type="file" accept="image/png,image/jpeg" hidden>`) +
     (car ? '' : `<div class="chips">${chip('skon', 'このスキンを着る', sel.skin)}${chip('skoff', '着ない', !sel.skin)}${chip('phide', 'もとの顔パーツを隠す', sel.hide)}</div>`) +
     galHtml(pe.t) + `<div class="chips">${chip('pzin', (car ? 'マシン' : 'キャラ') + 'を拡大')}${chip('pzout', (car ? 'マシン' : 'キャラ') + 'を縮小')}${chip('pback', car ? 'カスタムへ戻る' : 'キャラへ戻る')}</div><p class="note"><b>絵の拡大・縮小</b>：＋／− のボタン、または指2本でつまむ（パソコンはホイール）。拡大中は指2本か「手のひら」で見る場所を動かせます。<br>左の${car ? 'マシン' : 'キャラ'}はドラッグで回せます。${car ? '描いた絵はボディの種類ごとに覚えています。' : '耳や頭の飾りは立体のまま付きます。'}</p></div>`;
 }
@@ -2577,7 +2580,7 @@ function boot(){
 // ================================================================ 更新のお知らせ
 // 公開しているページ（index.html）が新しくなっていたら、試合のあとに「ゲームの更新があります」を出して読み込み直してもらう。
 // BUILD は公開するたびに変える番号。番号を変え忘れても、ページの中身が起動時と変わっていれば気づく
-const BUILD = '2026-11-11-13'; let updBase = null, updReady = false;
+const BUILD = '2026-11-11-14'; let updBase = null, updReady = false;
 async function updCheck(show){
   if (/^https?:$/.test(location.protocol) && !updReady) { try { const t = await (await fetch(location.pathname + '?upd=' + Date.now(), { cache: 'no-store' })).text(); let h = t.length; for (let i = 0; i < t.length; i += 7) h = (h * 31 + t.charCodeAt(i)) | 0;
     const m = /const BUILD = '([^']+)'/.exec(t); if (m && m[1] !== BUILD) updReady = true; else if (updBase === null) updBase = h; else if (h !== updBase) updReady = true; } catch (e) {} }
