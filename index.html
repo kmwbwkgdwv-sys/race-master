@@ -268,6 +268,13 @@ button.rk:active{background:rgba(255,214,10,.16)}
 .card .row{display:flex;gap:10px;flex-wrap:wrap}
 .card .row button{padding:11px 20px;border:2px solid var(--line);border-radius:4px;font-weight:900;background:var(--glass)}
 .card .row button.pri{background:var(--hot);border-color:var(--hot);color:#fff}
+/* ---------- スマホの切り欠き（ダイナミックアイランド・ノッチ・カメラ穴）をよける ----------
+   横向きのとき、切り欠きのある側は切り欠きの幅ぶん、反対側はその3分の1だけ内側に寄せる。景色（3D）は画面いっぱいのまま。
+   --nl / --nr は切り欠きがどちら側にあるかで入れ替える（html.nr = 右側にある） */
+:root{--nl:env(safe-area-inset-left,0px);--nr:calc(env(safe-area-inset-right,0px) * .34)}
+html.nr{--nl:calc(env(safe-area-inset-left,0px) * .34);--nr:env(safe-area-inset-right,0px)}
+#home,#hud{left:var(--nl);right:var(--nr)}
+#result,#onb,#roul,#upd{padding-left:max(14px,var(--nl));padding-right:max(14px,var(--nr))}
 #err{position:absolute;inset:0;display:none;place-items:center;padding:24px;text-align:center;line-height:1.8}
 /* ---------- 縦向きのときに出る「横にしてください」 / コースの準備中 ---------- */
 #turn{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:28px;text-align:center;background:radial-gradient(circle at 50% 38%,#1c2238,#090b11 75%)}
@@ -1848,7 +1855,9 @@ setInterval(netTick, 50);
 // ================================================================ render
 const stageEl = $('#stage'), coarse = matchMedia('(pointer: coarse)').matches; let portrait = false;
 // スマホは横画面専用：縦に持っているあいだは「横向きにしてください」の画面を出し、ゲームは止める（スマホを横にたおすと遊べる）
-function layout(){ const was = portrait; portrait = coarse && innerHeight > innerWidth; $('#turn').hidden = !portrait; if (portrait && !was) { input.steer = 0; input.drift = input.brake = input.back = false; } }
+function layout(){ const was = portrait; portrait = coarse && innerHeight > innerWidth;
+  { let a = 90; try { a = screen.orientation ? screen.orientation.angle : (typeof window.orientation === 'number' ? window.orientation : 90); } catch (e) {} document.documentElement.classList.toggle('nr', a === 270 || a === -90); }      // 切り欠きが右側にくる向き（スマホを右にたおしたとき）
+  $('#turn').hidden = !portrait; if (portrait && !was) { input.steer = 0; input.drift = input.brake = input.back = false; } }
 addEventListener('resize', layout); addEventListener('orientationchange', () => setTimeout(layout, 120)); if (window.visualViewport) visualViewport.addEventListener('resize', layout);
 // 横向きのときに画面をタップすると全画面にする（向きは固定しない。スマホをたおした向きに合わせる）
 const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement;
@@ -2568,7 +2577,7 @@ function boot(){
 // ================================================================ 更新のお知らせ
 // 公開しているページ（index.html）が新しくなっていたら、試合のあとに「ゲームの更新があります」を出して読み込み直してもらう。
 // BUILD は公開するたびに変える番号。番号を変え忘れても、ページの中身が起動時と変わっていれば気づく
-const BUILD = '2026-11-11-12'; let updBase = null, updReady = false;
+const BUILD = '2026-11-11-13'; let updBase = null, updReady = false;
 async function updCheck(show){
   if (/^https?:$/.test(location.protocol) && !updReady) { try { const t = await (await fetch(location.pathname + '?upd=' + Date.now(), { cache: 'no-store' })).text(); let h = t.length; for (let i = 0; i < t.length; i += 7) h = (h * 31 + t.charCodeAt(i)) | 0;
     const m = /const BUILD = '([^']+)'/.exec(t); if (m && m[1] !== BUILD) updReady = true; else if (updBase === null) updBase = h; else if (h !== updBase) updReady = true; } catch (e) {} }
