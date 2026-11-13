@@ -234,7 +234,8 @@ h2.pth{align-items:center}h2.pth .backb{padding:5px 12px;font-size:12px}
 #chips{font-size:12px;font-weight:900;color:#7dff5c}
 #pos{font-size:clamp(34px,7vw,56px);line-height:.9}
 #pos small{font-size:.4em;color:var(--dim)}
-#spd{font-size:13px}
+#spd{font-size:13px;transition:color .15s}
+#spd.bst{color:var(--volt)}
 #quit{pointer-events:auto;margin-top:4px;padding:6px 12px;font-size:12px;font-weight:700;background:var(--glass);border:1px solid var(--line);border-radius:4px}
 #map{position:absolute;left:50%;top:6px;transform:translateX(-50%);width:112px;height:112px;opacity:.94;background:rgba(9,11,17,.35);border-radius:10px}
 #msg{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%) skewX(-9deg);font-family:var(--display);
@@ -242,10 +243,10 @@ h2.pth{align-items:center}h2.pth .backb{padding:5px 12px;font-size:12px}
 #msg.on{opacity:1}
 #msg.small{font-size:clamp(18px,4.2vw,32px);color:var(--paper)}
 #nova{position:absolute;inset:0;background:radial-gradient(circle,#fff 0%,#fff 38%,rgba(255,255,255,.2) 78%);opacity:0;pointer-events:none}
-#rush{position:absolute;inset:0;opacity:0;transition:opacity .2s;pointer-events:none;
-  background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.16) 0deg 1.2deg,transparent 1.2deg 9deg);
-  -webkit-mask:radial-gradient(circle,transparent 42%,#000 85%);mask:radial-gradient(circle,transparent 42%,#000 85%)}
-#rush.on{opacity:1}
+/* 集中線：濃さは毎フレーム JS で決める。回してちらつかせるので、画面より大きく作って #stage で切り取る（見える範囲は前と同じ） */
+#rush{position:absolute;inset:-50%;opacity:0;pointer-events:none;will-change:transform,opacity;
+  background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.2) 0deg 1.2deg,transparent 1.2deg 9deg);
+  -webkit-mask:radial-gradient(circle,transparent 21%,#000 42.5%);mask:radial-gradient(circle,transparent 21%,#000 42.5%)}
 .pad{position:absolute;border-radius:50%;pointer-events:none;display:none}
 #ring{width:120px;height:120px;margin:-60px 0 0 -60px;border:2px solid rgba(246,242,232,.45);background:rgba(246,242,232,.06)}
 #knob{width:46px;height:46px;margin:-23px 0 0 -23px;background:rgba(246,242,232,.72)}
@@ -572,7 +573,7 @@ const MAXV = 30, ACC = 16, TURN = 1.24;
 const LS = { get(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
   raw(k){ try { return localStorage.getItem(k); } catch (e) { return null; } }, setRaw(k, v){ try { localStorage.setItem(k, v); return true; } catch (e) { return false; } } };
 const ci = (v, n) => clamp(v | 0, 0, n - 1);
-let best = LS.get('rm_best4', {}) || {}, opt = Object.assign({ lite:false, bgm:true, se:true, fs:true, sens:1, mix:true, view:'tp' }, LS.get('rm_opt', {})), sel = Object.assign({ ch:0, kt:0, tire:0, wing:0, eng:0, col:0, gl:0, stage:0, mode:'ta', tod:'day', rnd:false, skin:false, hide:true, laps:3, items:true, ghost:false }, LS.get('rm_sel', {}));
+let best = LS.get('rm_best4', {}) || {}, opt = Object.assign({ lite:false, bgm:true, se:true, fs:true, sens:1, mix:true, view:'tp', fx:true }, LS.get('rm_opt', {})), sel = Object.assign({ ch:0, kt:0, tire:0, wing:0, eng:0, col:0, gl:0, stage:0, mode:'ta', tod:'day', rnd:false, skin:false, hide:true, laps:3, items:true, ghost:false }, LS.get('rm_sel', {}));
 sel.ch = ci(sel.ch, CH.length); sel.kt = ci(sel.kt, KT.length); sel.tire = ci(sel.tire, TIRE.length); sel.wing = ci(sel.wing, WING.length); sel.eng = ci(sel.eng, ENG.length); sel.gl = ci(sel.gl, GLD.length); sel.col = ci(sel.col, COLS.length); sel.stage = ci(sel.stage, STAGES.length); opt.sens = ci(opt.sens, 3); opt.view = opt.view === 'fp' ? 'fp' : 'tp'; opt.mix = opt.mix !== false; if (typeof opt.hdl !== 'number') opt.hdl = [.85, 1, 1.2][opt.sens]; opt.hdl = clamp(Math.round(opt.hdl * 20) / 20, .6, 1.5);      // hdl = ハンドルの曲がる量（カスタム画面で変える）
 sel.tod = sel.tod === 'night' ? 'night' : 'day'; sel.rnd = !!sel.rnd; sel.skin = !!sel.skin; if (!['ta', 'vs', 'on'].includes(sel.mode)) sel.mode = 'ta'; if (![1, 2, 3, 5].includes(sel.laps)) sel.laps = 3; sel.items = sel.items !== false; sel.ghost = !!sel.ghost;
 const save = () => { LS.set('rm_best4', best); LS.set('rm_opt', opt); LS.set('rm_sel', sel); };
@@ -1259,9 +1260,10 @@ function audioInit(){
     const cmp = c.createDynamicsCompressor(); cmp.threshold.value = -14; cmp.ratio.value = 5; cmp.attack.value = .004; cmp.release.value = .16; cmp.connect(c.destination);
     AU.out = c.createGain(); AU.out.gain.value = .9; AU.out.connect(cmp);            // 効果音
     AU.mus = c.createGain(); AU.mus.gain.value = 0; AU.mus.connect(cmp);            // BGM（レース中だけ上げる）
-    AU.eng = c.createOscillator(); AU.eng.type = 'sawtooth'; const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 620; AU.engG = c.createGain(); AU.engG.gain.value = 0; AU.eng.connect(f); f.connect(AU.engG); AU.engG.connect(AU.out); AU.eng.start();
+    AU.eng = c.createOscillator(); AU.eng.type = 'sawtooth'; const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 620; AU.engF = f; AU.engG = c.createGain(); AU.engG.gain.value = 0; AU.eng.connect(f); f.connect(AU.engG); AU.engG.connect(AU.out); AU.eng.start();
     const buf = AU.nbuf = c.createBuffer(1, c.sampleRate, c.sampleRate), ch = buf.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
     AU.noise = c.createBufferSource(); AU.noise.buffer = buf; AU.noise.loop = true; const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1800; AU.nzG = c.createGain(); AU.nzG.gain.value = 0; AU.noise.connect(bp); bp.connect(AU.nzG); AU.nzG.connect(AU.out); AU.noise.start();
+    AU.wind = c.createBufferSource(); AU.wind.buffer = buf; AU.wind.loop = true; AU.windF = c.createBiquadFilter(); AU.windF.type = 'lowpass'; AU.windF.frequency.value = 600; AU.wzG = c.createGain(); AU.wzG.gain.value = 0; AU.wind.connect(AU.windF); AU.windF.connect(AU.wzG); AU.wzG.connect(AU.out); AU.wind.start(.37);      // 風を切る音（スピード演出。ブーストで速いときに大きくなる）
     if (c.state !== 'running') c.resume().catch(() => {});
     audioMode();
   } catch (e) { AU.ctx = null; }
@@ -1302,8 +1304,11 @@ const BGM = {
 };
 function audioTick(){
   if (!AU.ctx) return; const c = AU.ctx, racing = state === 'race' || state === 'count' || state === 'replay', k = me, now = c.currentTime;
-  const tv = opt.se && racing && k ? .035 + Math.min(.025, Math.abs(k.v) * .0007) : 0;
+  const fx = opt.fx && k, bst = fx && k.boost > 0, r = k ? Math.abs(k.v) / MAXV : 0;      // スピード演出：ブースト中はエンジンが大きく・明るく鳴り、速いほど風の音
+  const tv = opt.se && racing && k ? .035 + Math.min(.025, Math.abs(k.v) * .0007) + (bst ? .014 : 0) : 0;
   AU.engG.gain.setTargetAtTime(tv, now, .08); if (k) AU.eng.frequency.setTargetAtTime(64 + Math.abs(k.v) * 4.6 + (k.boost > 0 ? 40 : 0) + (k.rocket > 0 ? 60 : 0), now, .06);
+  if (AU.engF) AU.engF.frequency.setTargetAtTime(fx ? 520 + Math.min(1.8, r) * 160 + (bst ? 650 : 0) : 620, now, bst ? .05 : .25);
+  if (AU.wzG) { AU.wzG.gain.setTargetAtTime(opt.se && racing && fx && state !== 'count' ? clamp((r - .92) * .1, 0, .042) : 0, now, .12); AU.windF.frequency.setTargetAtTime(380 + Math.min(1.8, r) * 520, now, .2); }
   AU.nzG.gain.setTargetAtTime(opt.se && racing && k && (k.drift || k.off) ? .045 : 0, now, .05);
   const on = opt.bgm && racing && c.state === 'running' && !portrait; AU.mus.gain.setTargetAtTime(on ? .9 : 0, now, .12);
   if (!on) { AU.next = 0; return; }
@@ -1417,7 +1422,7 @@ let state = 'home', karts = [], me = null, raceT = 0, countT = 0, endT = 0, time
 let shots = [], traps = [], boxes = [], parts = [], rep = null, TOD = 'day', PL = null, rlTok = 0, worldFor = '', PADS = [], PADT = .9;
 const rec = { a: [], t: 0 };
 const input = { steer: 0, drift: false, brake: false, item: false, back: false };
-const cam = { h: 0, ky: 0, g: 0, roll: 0 };
+const cam = { h: 0, ky: 0, g: 0, roll: 0, fk: null, v: 0, sv: 0, lag: 0, kick: 0, pb: 0, rush: 0, fov: 0, shx: 0, shy: 0, rt: 0 };      // fk 以降はスピード演出（camFx）用
 const RC = { laps: 3, items: true, full: false };      // このレースのルール（周回数・アイテムあり/なし・ダッシュパネル全部）
 const mode = () => sel.mode;
 
@@ -1462,7 +1467,7 @@ function startRace(o){
   });
   ghostLoad();
   boxes = vsLike() && RC.items ? boxesAt.flatMap(idx => [-1.5, -.5, .5, 1.5].map(s => ({ idx, lat: s * ST.width * .2, t: 0 }))).concat([-1.5, -.5, .5, 1.5].map(s => ({ idx: G0 + Math.floor((G1 - G0) * .54), lat: s * ST.width * .2, t: 0, air: true }))) : [];      // air = グライダーで飛ぶ高さに浮いている箱（飛んでいるあいだに取れる）
-  raceT = 0; countT = 3.3; endT = 0; novaT = 0; dboost.t = 0; state = 'count'; cam.h = me.h; cam.ky = me.y; cam.g = 0; rec.a = []; rec.t = 0; rep = null; for (const r of TR.rings) r.t = 0;
+  raceT = 0; countT = 3.3; endT = 0; novaT = 0; dboost.t = 0; state = 'count'; cam.h = me.h; cam.ky = me.y; cam.g = 0; cam.fk = null; rec.a = []; rec.t = 0; rep = null; for (const r of TR.rings) r.t = 0;
   spec = null; $('#hud').classList.remove('rep', 'spec'); $('#quit').textContent = 'ホームへ'; $('#roul').hidden = true;
   $('#home').hidden = true; $('#result').hidden = true; $('#hud').hidden = false; $('#bItem').hidden = !(vsLike() && RC.items); $('#pos').style.display = vsLike() ? '' : 'none';
   releaseAll(); say('3'); se(440, .12);
@@ -1946,6 +1951,27 @@ function drawTrap(t){
 }
 let studioQuad = null, starObj = null, DYN = [1, 1, 1];
 const TRM = new Float32Array(IDENT);
+// ---------------------------------------------------------------- 加速の手ごたえ（見た目だけ。走りの性能・タイムは変わらない。設定の「スピード演出」でオフにできる）
+//   ・速いほど画面が広がる（ふつうの最高速でいままでと同じ広さ。止まっているときは少しせまい）
+//   ・加速するとカメラが少し置いていかれて、マシンが前へ飛び出して見える。減速するとカメラが追いつく
+//   ・ブーストの瞬間は画面がぐっと広がって小さくゆれ、集中線がちらつく。ブーストが終わっても広がりはゆっくり戻る
+const RMOT = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : null;
+function camFx(k, dt){
+  const f = cam, sp = Math.abs(k.v || 0), e = x => Math.min(1, dt * x);
+  if (f.fk !== k) { f.fk = k; f.v = f.sv = sp; f.lag = 0; f.kick = 0; f.pb = 0; f.rush = 0; f.fov = -.05 * (1 - Math.min(1, sp / MAXV)); }
+  f.v += (sp - f.v) * e(14);      // マシンの速さ（リプレイの0.1秒ごとの段差をならす）
+  f.sv += (f.v - f.sv) * e(2.6);      // カメラは少しおくれて同じ速さに追いつく
+  const r = f.v / MAXV, bst = k.boost > 0, rk = k.rocket > 0;
+  if (bst && (!f.pb || k.boost > f.pb + .15)) f.kick = 1;      // ブーストが始まった・のびた瞬間
+  f.pb = bst ? k.boost : 0; f.kick *= Math.exp(-dt * 5);
+  f.lag += (clamp((f.v - f.sv) * .2, -.8, 2.6) - f.lag) * e(8);      // 速さの差のぶんだけカメラが離れる（加速中は＋、減速中は−）
+  const fovT = -.05 * (1 - Math.min(1, r)) + .2 * clamp(r - 1, 0, .7) + (bst ? (rk ? .1 : .06) : 0) + .05 * f.kick;
+  f.fov += (fovT - f.fov) * e(fovT > f.fov ? 7 : 2.4);      // 広がるのは速く、戻るのはゆっくり
+  const rushT = bst ? clamp(.55 + (r - 1) * 1.4, .55, 1) : clamp((r - 1.04) * 2.5, 0, .45);
+  f.rush += (rushT - f.rush) * e(rushT > f.rush ? 14 : 4);
+  const sh = RMOT && RMOT.matches ? 0 : (bst ? (rk ? .045 : .025) : 0) + .08 * f.kick;      // 小さなゆれ（OS の「視差効果を減らす」がオンなら出さない）
+  f.shx = sh * (Math.sin(time * 61) + .6 * Math.sin(time * 37.3)); f.shy = sh * (Math.sin(time * 53.7 + 1) + .6 * Math.sin(time * 29.1));
+}
 function render(dt){
   const asp = resize(); let eye, tgt, fov = 1.02; const menu = inMenu(), studio = menu && state === 'home' && PV();
   if (menu) {
@@ -1956,10 +1982,13 @@ function render(dt){
     else if (tab === 'kart' || cuOn()) { eye = [0, 3.3 * hz, -10.8 * hz]; tgt = [2.5 * (asp > 1.5 ? 1 : .3), 3.9, 0]; }      // カスタム：上に性能表を出すので、マシンは下のほうに映す
     else { eye = [0, 3.1 * hz, -8.2 * hz]; tgt = [1.9 * (asp > 1.5 ? 1 : .3), 1.1, 0]; }
   } else { const k = spec || me, back = input.back && state !== 'replay' && !spec ? -1 : 1, fp = FP(); cam.h += wrapA(k.h - cam.h) * Math.min(1, dt * (fp ? 16 : 5.5)); cam.ky += (k.y - cam.ky) * Math.min(1, dt * (fp ? 18 : 6)); cam.g += ((k.glide ? 1 : 0) - cam.g) * Math.min(1, dt * 2.6); cam.roll += ((k.roll || 0) * (fp ? 1 : .55) * back - cam.roll) * Math.min(1, dt * (fp ? 8 : 4));
-    const s = Math.sin(cam.h) * back, c = Math.cos(cam.h) * back, g = cam.g; if (k.boost > 0) fov += k.rocket > 0 ? .22 : .13;
-    // グライダー中はカメラを引いて高く上げ、着地する先の道が見えるようにする
-    eye = [k.x - s * (7.8 + 5 * g), cam.ky + 3.6 + 5.4 * g, k.z - c * (7.8 + 5 * g)]; tgt = [k.x + s * (6 + 16 * g), cam.ky + 1.2 - 3.4 * g, k.z + c * (6 + 16 * g)];
-    if (fp) { const ey = cam.ky + 1.7, pt = clamp(Math.tan(k.pitch) * back, -.5, .5); fov += .1; eye = [k.x + s * .35, ey, k.z + c * .35]; tgt = [k.x + s * 12, ey + pt * 11.65 - 1.1 - 2.2 * g, k.z + c * 12]; } }      // 一人称：運転席の目の高さから前を見る（坂ではいっしょに上下を向く）
+    const s = Math.sin(cam.h) * back, c = Math.cos(cam.h) * back, g = cam.g, fx = opt.fx;
+    if (fx) { camFx(k, dt); fov += cam.fov; } else { if (k.boost > 0) fov += k.rocket > 0 ? .22 : .13; cam.fk = null; cam.rush += ((k.boost > 0 ? 1 : 0) - cam.rush) * Math.min(1, dt * 12); }
+    // グライダー中はカメラを引いて高く上げ、着地する先の道が見えるようにする。lag = 加速したときにカメラが置いていかれる分（うしろを見ているときは使わない）
+    const bk = 7.8 + 5 * g + (fx && back > 0 ? cam.lag : 0);
+    eye = [k.x - s * bk, cam.ky + 3.6 + 5.4 * g, k.z - c * bk]; tgt = [k.x + s * (6 + 16 * g), cam.ky + 1.2 - 3.4 * g, k.z + c * (6 + 16 * g)];
+    if (fp) { const ey = cam.ky + 1.7, pt = clamp(Math.tan(k.pitch) * back, -.5, .5); fov += .1; eye = [k.x + s * .35, ey, k.z + c * .35]; tgt = [k.x + s * 12, ey + pt * 11.65 - 1.1 - 2.2 * g, k.z + c * 12]; }      // 一人称：運転席の目の高さから前を見る（坂ではいっしょに上下を向く）
+    if (fx) { const q = fp ? .5 : 1; eye[0] += c * cam.shx * q; eye[2] -= s * cam.shx * q; eye[1] += cam.shy * q; tgt[1] += cam.shy * q * .4; fov = Math.min(fov, fp ? 1.36 : 1.28); } }      // ブーストのゆれ
   const cr = menu ? 0 : cam.roll, view = lookAt(eye, tgt), VP = new Float32Array(mul(persp(fov, asp, .6, 9000), cr ? mul([Math.cos(cr), Math.sin(cr), 0, 0, -Math.sin(cr), Math.cos(cr), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1], view) : view));      // 傾いた道ではカメラも少し傾く
   gl.uniform1f(U.uA, 1); gl.uniform3f(U.uTint, 1, 1, 1); gl.uniformMatrix4fv(U.uM, false, IDENT);
   if (studio) {
@@ -2021,7 +2050,9 @@ function hud(){
     else if (dboost.t > 0 && !rp) { dg.className = 'on fire'; $('#dgF').style.width = '100%'; $('#dgT').textContent = 'ドリフトブースト！ ' + dboost.sec.toFixed(1) + '秒'; }
     else if (dg.className) dg.className = ''; }
   if ((k.item || '') !== lastItem) { lastItem = k.item || ''; const ic = $('#iIcon'); if (k.item) drawItemIcon(ic, k.item); else ic.getContext('2d').clearRect(0, 0, ic.width, ic.height); $('#bItem').classList.toggle('has', !!k.item); $('#iName').textContent = k.item ? ITEMS[k.item].n : ''; }
-  $('#rush').classList.toggle('on', k.boost > 0 && !opt.lite); $('#rush').classList.toggle('rk', k.rocket > 0);
+  { const ru = $('#rush'), ro = opt.lite ? 0 : cam.rush; ru.style.opacity = ro < .01 ? 0 : ro.toFixed(3); ru.classList.toggle('rk', k.rocket > 0);      // 集中線（濃さは camFx で決める）
+    if (opt.fx && ro >= .01 && !(RMOT && RMOT.matches) && Math.abs(time - cam.rt) > .05) { cam.rt = time; ru.style.transform = 'rotate(' + (Math.random() * 9).toFixed(2) + 'deg)'; } }      // 1秒に20回くらい線の位置を変えて、流れて見せる
+  $('#spd').classList.toggle('bst', opt.fx && k.boost > 0);
   $('#nova').style.opacity = novaT > 0 ? Math.min(1, novaT * 1.2) : 0;
   if (ghost && !rp) { const gt = k.lapNo >= 1 && ghost.on ? '' : ''; $('#chips').textContent = '残像：' + ghost.tag + ' ' + ghost.name + '　' + fmt(ghost.ms / 1000) + gt; }
   drawMap(mapCtx, TR, 320, 320, ghost && ghost.on && !rp ? karts.concat(ghost.k) : karts);
@@ -2250,7 +2281,7 @@ function renderPanel(){
     h = `<h2>設定</h2><div class="scroll"><div class="box"><b>プレイヤー名</b><div class="field"><input id="pname" maxlength="12" placeholder="プレイヤー名（12文字まで）" value="${esc(pname)}" autocomplete="off"><button type="button" data-act="name">名前を保存</button></div></div>
       ${tg('fs', '全画面で遊ぶ', 'スマホを横向きにして画面をタップしたとき、全画面にする')}<div class="box"><b>ハンドルの曲がる量</b><small>「カスタム」の画面のいちばん上で、細かく変えられます（いま ${Math.round(opt.hdl * 100)}%）。</small><div class="chips">${chip('gotab', 'カスタムを開く', false, 'data-to="kart"')}</div></div>
       <div class="box"><b>視点</b><div class="chips">${chip('view', '三人称（うしろから）', opt.view !== 'fp', 'data-v="tp"')}${chip('view', '一人称（運転席から）', opt.view === 'fp', 'data-v="fp"')}</div><small>レース中にキーボードの C でも切り替えられます。リプレイはいつも三人称です。</small></div>
-      ${tg('mix', 'ほかのアプリの音楽と一緒に鳴らす', 'YouTube や Spotify を流したまま、ゲームの音を重ねて鳴らす。オフにするとゲームの音が主役になり、iPhone のマナーモードでも鳴る（ほかの音楽は止まる）')}${tg('lite', '軽量化モード', '解像度を下げ、影とエフェクトを省いて動作を軽くする')}${tg('bgm', 'BGM', 'レース中の音楽')}${tg('se', '効果音', 'エンジン音・アイテム・ドリフトの音')}
+      ${tg('mix', 'ほかのアプリの音楽と一緒に鳴らす', 'YouTube や Spotify を流したまま、ゲームの音を重ねて鳴らす。オフにするとゲームの音が主役になり、iPhone のマナーモードでも鳴る（ほかの音楽は止まる）')}${tg('lite', '軽量化モード', '解像度を下げ、影とエフェクトを省いて動作を軽くする')}${tg('fx', 'スピード演出', '速いほど画面が広がり、加速するとカメラが少し引く。ブーストの瞬間は画面がゆれて集中線が出る。走りの速さは変わらない（酔いやすい人はオフ）')}${tg('bgm', 'BGM', 'レース中の音楽')}${tg('se', '効果音', 'エンジン音・アイテム・ドリフトの音')}
       <button class="opt" type="button" data-act="layout"><b>ボタン配置を変える</b><small>DRIFT・BRAKE・ITEM・うしろ の位置と大きさをドラッグで調整</small></button>
       <p class="note"><b>ハンドル</b>：画面のどこでも触って左右にスライド（触れた場所が中心）<br><b>ドリフト</b>：曲がりながら右下の DRIFT を長押し。離すと、ドリフトしていた時間に応じてブースト（0.5秒以上で発動。長いほど長く続く。色は青・黄・紫と変わり、画面の下にもらえる秒数が出る）。タイムアタック・VS・オンラインのどれでも同じ<br><b>うしろ</b>：押している間だけ後ろを見る。押しながらアイテムを使うと、投げるアイテムは後ろへ飛ぶ<br><b>アクセル</b>は自動。キーボードは ←→ / Space / ↓ / E / Q（うしろ）<br>スマホは横画面専用です。縦に持っているあいだは遊べません（スマホを横にたおしてください）。共有メニューの「ホーム画面に追加」から開くと、アイコンつきのアプリとして全画面で遊べます。</p>
       <div class="box"><b>引き継ぎコード</b>${acct.code ? `<span class="code">${acct.code}</span><small>別の端末でこのコードを入力すると、記録を引き継げます。他の人には見せないでください。${acct.reg ? '' : '（まだサーバーと同期できていません。接続できたときに自動で同期します）'}</small><button class="mini" type="button" data-act="copy">コードをコピー</button>` : ''}
@@ -2560,7 +2591,7 @@ function startReplay(rp, name){
   let a; try { a = repDec(rp.d); } catch (e) { return false; } const n = Math.floor(a.length / 5); if (n < 10) return false;
   audioInit(); ensureWorld(sel.tod, true); const dk = decKt(rp.kt), k = newKart(0, false, name, ci(rp.ch, CH.length), hex(COLS[ci(rp.col, COLS.length)]), mkKt(dk)); k.gl = GLD[dk.gl]; k.id = 'rep'; k.remote = true; k.lapNo = 1;
   karts = [k]; me = k; shots = []; traps = []; parts = []; boxes = []; online = false; rep = { a, n, t: 0, name, ms: rp.ms || n * 100, end: 0 }; raceT = 0; novaT = 0; endT = 0;
-  repPose(0); cam.h = k.h; cam.ky = k.y; cam.g = 0; state = 'replay';
+  repPose(0); cam.h = k.h; cam.ky = k.y; cam.g = 0; cam.fk = null; state = 'replay';
   $('#home').hidden = true; $('#result').hidden = true; $('#hud').hidden = false; $('#hud').classList.add('rep'); $('#pos').style.display = 'none'; $('#quit').textContent = 'リプレイを終わる'; say('REPLAY', true, 1.2); return true;
 }
 function repPose(t){
@@ -2667,7 +2698,7 @@ function boot(){
 // ================================================================ 更新のお知らせ
 // 公開しているページ（index.html）が新しくなっていたら、試合のあとに「ゲームの更新があります」を出して読み込み直してもらう。
 // BUILD は公開するたびに変える番号。番号を変え忘れても、ページの中身が起動時と変わっていれば気づく
-const BUILD = '2026-11-13-1'; let updBase = null, updReady = false;
+const BUILD = '2026-11-13-2'; let updBase = null, updReady = false;
 async function updCheck(show){
   if (/^https?:$/.test(location.protocol) && !updReady) { try { const t = await (await fetch(location.pathname + '?upd=' + Date.now(), { cache: 'no-store' })).text(); let h = t.length; for (let i = 0; i < t.length; i += 7) h = (h * 31 + t.charCodeAt(i)) | 0;
     const m = /const BUILD = '([^']+)'/.exec(t); if (m && m[1] !== BUILD) updReady = true; else if (updBase === null) updBase = h; else if (h !== updBase) updReady = true; } catch (e) {} }
