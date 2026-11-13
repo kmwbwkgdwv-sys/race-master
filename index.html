@@ -172,6 +172,15 @@ button.rk:active{background:rgba(255,214,10,.16)}
 .rk .nm2{font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rk .tm{font-family:var(--display);font-variant-numeric:tabular-nums;color:var(--volt)}
 .rk.me{outline:2px solid var(--volt)}
+/* ランキング：記録ごとの「カスタム」ボタンと、その人のカスタムの画面 */
+.rkrow{display:flex;gap:5px;align-items:stretch}.rkrow>.rk{flex:1;min-width:0;width:auto;grid-template-columns:20px 30px minmax(0,1fr) auto;gap:6px;padding:4px 8px}.rkrow>.rk canvas{width:30px;height:30px}.rkrow>.rk .nm2 small{white-space:normal;line-height:1.35}
+.rkcu{flex:none;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:1px;padding:0 7px;border:2px solid var(--line);border-radius:4px;background:var(--glass);font-weight:900;font-size:11px;white-space:nowrap}
+.rkcu small{font-size:9px;font-weight:700;color:var(--dim)}.rkcu:active{border-color:var(--volt)}
+.cul{display:flex;flex-direction:column;gap:4px}
+.cup{display:grid;grid-template-columns:64px minmax(0,1fr);gap:1px 8px;align-items:center;padding:6px 10px;background:var(--glass);border-radius:4px}
+.cup .lb{grid-row:span 2;font-size:11px;font-weight:900;color:var(--dim)}
+.cup b{display:flex;align-items:center;gap:7px;font-weight:900;font-size:13.5px}.cup small{font-size:11px;line-height:1.45;color:var(--dim)}
+.cup canvas{width:26px;height:26px}.cup .dot{width:18px;height:18px}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{padding:5px 11px;border:2px solid var(--line);border-radius:99px;font-size:12px;font-weight:900;background:var(--glass)}
 .chip[aria-pressed="true"]{border-color:var(--volt);background:rgba(255,214,10,.16)}
@@ -1456,9 +1465,9 @@ function startRace(o){
   raceT = 0; countT = 3.3; endT = 0; novaT = 0; dboost.t = 0; state = 'count'; cam.h = me.h; cam.ky = me.y; cam.g = 0; rec.a = []; rec.t = 0; rep = null; for (const r of TR.rings) r.t = 0;
   spec = null; $('#hud').classList.remove('rep', 'spec'); $('#quit').textContent = 'ホームへ'; $('#roul').hidden = true;
   $('#home').hidden = true; $('#result').hidden = true; $('#hud').hidden = false; $('#bItem').hidden = !(vsLike() && RC.items); $('#pos').style.display = vsLike() ? '' : 'none';
-  input.steer = 0; input.drift = input.brake = input.item = input.back = false; say('3'); se(440, .12);
+  releaseAll(); say('3'); se(440, .12);
 }
-function toHome(){ spec = null; $('#hud').classList.remove('spec'); ghost = null; ghostTok++; const after = state !== 'home'; saveAcct(); syncPlay(); navStack.length = 0; rlTok++; $('#roul').hidden = true; $('#load').hidden = true; if (state === 'replay') tab = 'rank'; state = 'home'; karts = []; me = null; if (online || room.id) { tab = 'race'; raceStep = 'go'; } online = false; $('#led').hidden = true; $('#hud').classList.remove('editing'); $('#home').hidden = false; $('#result').hidden = true; $('#hud').hidden = true; renderPanel(); if (after) updCheck(true); }
+function toHome(){ releaseAll(); spec = null; $('#hud').classList.remove('spec'); ghost = null; ghostTok++; const after = state !== 'home'; saveAcct(); syncPlay(); navStack.length = 0; rlTok++; $('#roul').hidden = true; $('#load').hidden = true; if (state === 'replay') tab = 'rank'; state = 'home'; karts = []; me = null; if (online || room.id) { tab = 'race'; raceStep = 'go'; } online = false; $('#led').hidden = true; $('#hud').classList.remove('editing'); $('#home').hidden = false; $('#result').hidden = true; $('#hud').hidden = true; renderPanel(); if (after) updCheck(true); }
 function say(t, small, dur = 1){ const m = $('#msg'); m.textContent = t; m.className = 'on' + (small ? ' small' : ''); msgT = dur; }
 const rankVal = k => k.fin ? 1e9 - k.finT : k.prog;
 function rankOf(k){ let r = 0; const v = rankVal(k); for (const o of karts) if (o !== k && rankVal(o) > v) r++; return r; }
@@ -1863,7 +1872,7 @@ const stageEl = $('#stage'), coarse = matchMedia('(pointer: coarse)').matches; l
 // スマホは横画面専用：縦に持っているあいだは「横向きにしてください」の画面を出し、ゲームは止める（スマホを横にたおすと遊べる）
 function layout(){ const was = portrait; portrait = coarse && innerHeight > innerWidth;
   { let a = 90; try { a = screen.orientation ? screen.orientation.angle : (typeof window.orientation === 'number' ? window.orientation : 90); } catch (e) {} document.documentElement.classList.toggle('nr', a === 270 || a === -90); }      // 切り欠きが右側にくる向き（スマホを右にたおしたとき）
-  $('#turn').hidden = !portrait; if (portrait && !was) { input.steer = 0; input.drift = input.brake = input.back = false; } }
+  $('#turn').hidden = !portrait; if (portrait && !was) releaseAll(); }
 addEventListener('resize', layout); addEventListener('orientationchange', () => setTimeout(layout, 120)); if (window.visualViewport) visualViewport.addEventListener('resize', layout);
 // 横向きのときに画面をタップすると全画面にする（向きは固定しない。スマホをたおした向きに合わせる）
 const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement;
@@ -1881,7 +1890,7 @@ function resize(){ const dpr = opt.lite ? 1 : Math.min(2, window.devicePixelRati
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const FP = () => opt.view === 'fp' && state !== 'replay' && !spec;      // 一人称（運転席）の視点か
 const inMenu = () => state === 'home' || state === 'layout' || state === 'roul';
-const PV = () => tab === 'char' || tab === 'kart' || tab === 'paint' || tab === 'cpaint';      // マシンのプレビューを出すタブ
+const PV = () => tab === 'char' || tab === 'kart' || tab === 'paint' || tab === 'cpaint' || cuOn();      // マシンのプレビューを出すタブ（ランキングでその人のカスタムを見ているときも）
 
 function drawRacer(k){
   const spin = k.spin > 0 ? k.spin * 18 : 0, h = k.h + (k.drift ? k.dDir * .38 : 0) + spin, night = TOD === 'night';
@@ -1944,7 +1953,7 @@ function render(dt){
     const hz = homeZoom; fov = .9;
     if (tab === 'cpaint') { eye = [.9 * hz, 2.1, 6.4 * hz]; tgt = [-1.1 * (asp > 1.5 ? 1 : .3), 1.25, 0]; }
     else if (tab === 'paint') { eye = [0, 5 + 2.6 * hz, -5.4 * hz]; tgt = [1.7 * (asp > 1.5 ? 1 : .3), .4, 0]; }
-    else if (tab === 'kart') { eye = [0, 3.3 * hz, -10.8 * hz]; tgt = [2.5 * (asp > 1.5 ? 1 : .3), 3.9, 0]; }      // カスタム：上に性能表を出すので、マシンは下のほうに映す
+    else if (tab === 'kart' || cuOn()) { eye = [0, 3.3 * hz, -10.8 * hz]; tgt = [2.5 * (asp > 1.5 ? 1 : .3), 3.9, 0]; }      // カスタム：上に性能表を出すので、マシンは下のほうに映す
     else { eye = [0, 3.1 * hz, -8.2 * hz]; tgt = [1.9 * (asp > 1.5 ? 1 : .3), 1.1, 0]; }
   } else { const k = spec || me, back = input.back && state !== 'replay' && !spec ? -1 : 1, fp = FP(); cam.h += wrapA(k.h - cam.h) * Math.min(1, dt * (fp ? 16 : 5.5)); cam.ky += (k.y - cam.ky) * Math.min(1, dt * (fp ? 18 : 6)); cam.g += ((k.glide ? 1 : 0) - cam.g) * Math.min(1, dt * 2.6); cam.roll += ((k.roll || 0) * (fp ? 1 : .55) * back - cam.roll) * Math.min(1, dt * (fp ? 8 : 4));
     const s = Math.sin(cam.h) * back, c = Math.cos(cam.h) * back, g = cam.g; if (k.boost > 0) fov += k.rocket > 0 ? .22 : .13;
@@ -1958,7 +1967,8 @@ function render(dt){
     gl.enable(gl.DEPTH_TEST); gl.uniformMatrix4fv(U.uVP, false, VP); gl.uniform2f(U.uFogR, 30, 90); DYN = [1, 1, 1];
     const spinning = !(reduce || tab === 'paint' || tab === 'cpaint'), yaw = (tab === 'cpaint' ? 0 : tab === 'paint' ? Math.PI : 2.5) + homeYaw + (spinning ? time * .4 : 0);
     setT(0, 0, 0, 0); d('disc', 0, 0, 0, 30, 1, 30, [.1, .115, .16]); d('disc', 0, .01, 0, 9.5, 1, 9.5, [.16, .18, .25]); d('disc', 0, .02, 0, 9, 1, 9, [.115, .13, .18]); d('disc', 0, .05, 0, 3.4, 1, 4, [0, 0, 0], .4);
-    setT(0, 0, 0, yaw); drawKart(myKt(), hex(COLS[sel.col]), 0, carT.has ? carT : 0, false); drawChar(CH[sel.ch], spinning ? Math.sin(time * 1.4) : 0, sel.skin && chT.has ? chT : 0, sel.hide); if (tab === 'kart') drawGlider(GLD[sel.gl], CH[sel.ch].suit);
+    const cu = cuOn() ? rkCu.cu : null, v = cu || sel;      // ランキングで見ている人のマシン（ペイント・スキンは出さない）か、自分のマシン
+    setT(0, 0, 0, yaw); drawKart(cu ? mkKt(cu) : myKt(), hex(COLS[v.col]), 0, !cu && carT.has ? carT : 0, false); drawChar(CH[v.ch], spinning ? Math.sin(time * 1.4) : 0, !cu && sel.skin && chT.has ? chT : 0, !cu && sel.hide); if (tab === 'kart' || cu) drawGlider(GLD[v.gl], CH[v.ch].suit);
     flush(); return;
   }
   const pl = PL; gl.clearColor(pl.sky[0], pl.sky[1], pl.sky[2], 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -2060,31 +2070,56 @@ function drawFace(cvs, ch){
 }
 
 // ================================================================ input
+// ハンドル：画面のどこでも（ボタン以外）触って左右にスライド。触れた場所が中心。
+// 以前のバグ：ハンドルの指を「離した」知らせを1回でも取りこぼすと、steerId が残ったままになり、
+// ハンドルが最後の向きで固まる＋新しく触っても無視される（ずっと同じ方向に曲がり続ける）。
+// いまは次の5つで必ず元に戻る：
+//  1. ハンドルの指は #stage でつかまえる（離した知らせが #stage に必ず届く）
+//  2. 新しい指が「1本目」として触れたら（＝ほかに触れている指はない）、前の指の状態はすべて捨てる
+//  3. 画面から指が全部離れたら、ハンドルとボタンをリセットする
+//  4. 前のハンドルの指がしばらく動いていない状態で、その近くに新しい指が触れたら、新しい指に引き継ぐ
+//  5. アプリの切り替え・画面の向きの変更・レース開始・ホームに戻るときもリセットする
 const ring = $('#ring'), knob = $('#knob'), RANGE = 66;
-let steerId = null, cx = 0;
+let steerId = null, cx = 0, steerAt = 0, steerP = { x: 0, y: 0 };
+const holdBy = {}, keys = {};      // holdBy：DRIFT などのボタンを押している指（key → pointerId）
+function releaseSteer(){ steerId = null; input.steer = 0; ring.style.display = knob.style.display = 'none'; }
+function releaseTouch(){ releaseSteer(); for (const key in holdBy) { input[key] = false; delete holdBy[key]; } for (const b of document.querySelectorAll('#hud .btn.down')) b.classList.remove('down'); }
+function releaseAll(){ releaseTouch(); for (const c in keys) keys[c] = false; input.steer = 0; input.drift = input.brake = input.item = input.back = false; }
+// 2：1本目の指が触れたら、残っている古い指の状態を捨てる（ボタンの処理より先に動くよう capture で受ける）
+addEventListener('pointerdown', e => { if (e.pointerType === 'touch' && e.isPrimary) releaseTouch(); }, true);
 stageEl.addEventListener('pointerdown', e => {
   if (state !== 'race' && state !== 'count') return;
-  if (e.target.closest('button') || steerId !== null) return;
-  const p = loc(e); steerId = e.pointerId; cx = p.x; input.steer = 0;
+  if (e.target.closest('button')) return;
+  const p = loc(e);
+  if (steerId !== null) {      // 4：前の指が0.4秒以上動いておらず、新しい指がそのすぐ近く（画面の幅の3割以内）なら、同じ指が触り直したとみなして引き継ぐ
+    const near = Math.abs(p.x - steerP.x) < stageEl.clientWidth * .3 && Math.abs(p.y - steerP.y) < stageEl.clientHeight * .45;
+    if (!(near && performance.now() - steerAt > 400)) return;
+  }
+  steerId = e.pointerId; cx = p.x; steerP = p; steerAt = performance.now(); input.steer = 0;
+  try { stageEl.setPointerCapture(e.pointerId); } catch (x) {}      // 1
   ring.style.display = knob.style.display = 'block'; ring.style.left = knob.style.left = p.x + 'px'; ring.style.top = knob.style.top = p.y + 'px';
 });
 stageEl.addEventListener('pointermove', e => {
   if (e.pointerId !== steerId) return;
-  const p = loc(e); let dx = p.x - cx;
+  const p = loc(e); let dx = p.x - cx; steerP = p; steerAt = performance.now();
   if (Math.abs(dx) > RANGE) { cx = p.x - Math.sign(dx) * RANGE; dx = p.x - cx; ring.style.left = cx + 'px'; }   // 引っ張りすぎたら中心が追従
   const raw = dx / RANGE, m = Math.abs(raw); input.steer = m < .08 ? 0 : Math.sign(raw) * Math.pow((m - .08) / .92, 1.3);      // 小さく動かしたときは少しだけ曲がる
   knob.style.left = p.x + 'px'; knob.style.top = p.y + 'px';
 });
-const endSteer = e => { if (e.pointerId !== steerId) return; steerId = null; input.steer = 0; ring.style.display = knob.style.display = 'none'; };
-addEventListener('pointerup', endSteer); addEventListener('pointercancel', endSteer);
+const endSteer = e => { if (e.pointerId === steerId) releaseSteer(); };
+addEventListener('pointerup', endSteer, true); addEventListener('pointercancel', endSteer, true);
+stageEl.addEventListener('lostpointercapture', e => { if (e.target === stageEl) endSteer(e); });
+// 3：指が画面から全部離れたら、ハンドルもボタンも押されていないはず
+for (const ev of ['touchend', 'touchcancel']) addEventListener(ev, e => { if (!e.touches || e.touches.length === 0) releaseTouch(); }, { capture: true, passive: true });
+// 5：アプリを切り替えた・通知などで画面から離れたとき
+addEventListener('blur', releaseAll); addEventListener('pagehide', releaseAll); document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });
 function hold(el, key){
-  el.addEventListener('pointerdown', e => { e.preventDefault(); try { el.setPointerCapture(e.pointerId); } catch (x) {} input[key] = true; el.classList.add('down'); });
-  const up = () => { input[key] = false; el.classList.remove('down'); };
+  el.addEventListener('pointerdown', e => { e.preventDefault(); try { el.setPointerCapture(e.pointerId); } catch (x) {} holdBy[key] = e.pointerId; input[key] = true; el.classList.add('down'); });
+  const up = e => { if (holdBy[key] !== undefined && holdBy[key] !== e.pointerId) return; delete holdBy[key]; input[key] = false; el.classList.remove('down'); };      // 押している指が離れたときだけ（2本で押していたら最後の指まで）
   el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up); el.addEventListener('lostpointercapture', up);
 }
 hold($('#bDrift'), 'drift'); hold($('#bBrake'), 'brake'); hold($('#bBack'), 'back');
 $('#bItem').addEventListener('pointerdown', e => { e.preventDefault(); input.item = true; });
-const keys = {};
 const keySteer = () => { if (steerId === null) input.steer = (keys.ArrowRight || keys.KeyD ? 1 : 0) - (keys.ArrowLeft || keys.KeyA ? 1 : 0); };
 addEventListener('keydown', e => { if (state !== 'race' && state !== 'count') return; keys[e.code] = true; keySteer();
   if (e.code === 'Space' || e.code === 'ShiftLeft') { input.drift = true; e.preventDefault(); } if (e.code === 'ArrowDown' || e.code === 'KeyS') input.brake = true; if (e.code === 'KeyE' || e.code === 'Enter') input.item = true; if (e.code === 'KeyQ' || e.code === 'KeyB') input.back = true; if (e.code === 'KeyC' && !e.repeat) { opt.view = opt.view === 'fp' ? 'tp' : 'fp'; save(); } });
@@ -2099,11 +2134,14 @@ stageEl.addEventListener('click', e => { if (moved) { e.stopPropagation(); e.pre
 
 // ================================================================ home UI
 let tab = 'top', raceStep = 'mode', setMsg = '', rkMsg = '', setEdit = -1;
+let rkCu = null;      // ランキングで開いている「その人のカスタム」（null = 一覧を表示）
+const cuOn = () => tab === 'rank' && !!rkCu && !!rkCu.cu;      // その人のマシンを真ん中に表示しているか
 // もどるボタン：行き先は決まっている。ルームに参加中ならルームへ、試合の準備中（コース選びなど）ならその画面へ、ペイント中ならカスタム／キャラへ。どれでもなければ出さない
 let raceOpen = false;      // 試合の準備画面（モードを選んだあと）を開いたままか
 const navStack = [], navPush = () => {};
 function navTarget(){
   if (tab === 'paint') return { tab: 'kart', n: 'カスタム' }; if (tab === 'cpaint') return { tab: 'char', n: 'キャラ' };
+  if (tab === 'rank' && rkCu) return { tab: 'rank', n: 'ランキング' };      // その人のカスタム → 一覧
   if (tab === 'race' || tab === 'top') return null;
   if (room.id) return { tab: 'race', n: 'ルーム' };
   if (raceOpen) return { tab: 'race', n: sel.mode === 'vs' ? 'VSレース' : sel.mode === 'on' ? 'オンライン対戦' : 'タイムアタック' };
@@ -2113,11 +2151,11 @@ const imp = { car: null, ch: null };
 const bar = (v, base) => `<span class="bar${base === undefined || Math.abs(v - base) < .004 ? '' : v > base ? ' up' : ' dn'}"><i style="width:${clamp(Math.round((v - .7) / .6 * 100), 8, 100)}%"></i></span>`;
 // カスタム画面でマシンの横に出しっぱなしにする性能表（緑=標準より高い / 赤=低い）
 const SPEC = [['pad', 'ダッシュパネル'], ['jump', '着地ダッシュ'], ['air', '空中ハンドル'], ['dc', 'ドリフトのたまり'], ['bst', 'ブースト全部'], ['gsp', 'グライダー速度']];
-function statHtml(kt){
-  const g = GLD[sel.gl], pct = v => (v >= 1 ? '+' : '−') + Math.abs(Math.round((v - 1) * 100)) + '%', tags = SPEC.filter(q => Math.abs(kt[q[0]] - 1) > .005).map(q => `<i>${q[1]} ${pct(kt[q[0]])}</i>`);
+function statHtml(kt, gi = sel.gl, other = false){
+  const g = GLD[gi], pct = v => (v >= 1 ? '+' : '−') + Math.abs(Math.round((v - 1) * 100)) + '%', tags = SPEC.filter(q => Math.abs(kt[q[0]] - 1) > .005).map(q => `<i>${q[1]} ${pct(kt[q[0]])}</i>`);
   if (kt.bsp) tags.push(`<i>ブースト中の速さ +${Math.round(kt.bsp * 100)}%</i>`); if (kt.tough < .995) tags.push(`<i>立ち直り ${Math.round((1 - kt.tough) * 100)}%早い</i>`);
   if (g.lch) tags.push(`<i>発進ブースト長い</i>`); if (g.ring) tags.push(`<i>リングブースト長い</i>`); if (g.rr) tags.push(`<i>リングが広い</i>`);
-  return `<b>いまの性能<em>ハンドル ${Math.round(opt.hdl * 100)}%</em></b><span class="bars"><span>最高速</span>${bar(1 + (kt.top - 1) * 6, 1)}<span>加速</span>${bar(1 + (kt.acc - 1) * .6, 1)}<span>ハンドリング</span>${bar(1 + (kt.turn - 1) * 1, 1)}<span>ドリフトブースト</span>${bar(1 + (kt.mt - 1) * .3, 1)}<span>コース外</span>${bar(1 + kt.offRes * .5, 1)}</span>` +
+  return `<b>${other ? 'この人の性能' : `いまの性能<em>ハンドル ${Math.round(opt.hdl * 100)}%</em>`}</b><span class="bars"><span>最高速</span>${bar(1 + (kt.top - 1) * 6, 1)}<span>加速</span>${bar(1 + (kt.acc - 1) * .6, 1)}<span>ハンドリング</span>${bar(1 + (kt.turn - 1) * 1, 1)}<span>ドリフトブースト</span>${bar(1 + (kt.mt - 1) * .3, 1)}<span>コース外</span>${bar(1 + kt.offRes * .5, 1)}</span>` +
     `<span class="bars"><span>空のスピード</span>${bar(1 + (g.spd * kt.gsp - 1) * 2, 1)}<span>空の操作性</span>${bar(1 + (g.ctl - 1) * .42, 1)}<span>着地ブースト</span>${bar(.8 + g.land * .34, .97)}</span><span class="tags">${tags.join('') || '<i class="none">とくべつな効果なし</i>'}</span>`;
 }
 const chip = (act, label, on, extra = '') => `<button class="chip" type="button" data-act="${act}" ${extra} aria-pressed="${!!on}">${label}</button>`;
@@ -2164,15 +2202,15 @@ function roomHtml(){
 let panelKey = '';
 function renderPanel(){
   const el = $('#panel'), home = $('#home'); let h = '';
-  const oldSc = el.querySelector('.scroll'), keepTop = oldSc ? oldSc.scrollTop : 0, pkey = tab + '/' + (tab === 'race' ? raceStep + sel.mode : '');      // 同じ画面を描き直すときは、スクロールの位置をそのままにする（ルームの情報が届くたびに上へ戻らないように）
+  const oldSc = el.querySelector('.scroll'), keepTop = oldSc ? oldSc.scrollTop : 0, pkey = tab + '/' + (tab === 'race' ? raceStep + sel.mode : tab === 'rank' && rkCu ? 'cu' : '');      // 同じ画面を描き直すときは、スクロールの位置をそのままにする（ルームの情報が届くたびに上へ戻らないように）
   home.classList.toggle('top', tab === 'top'); home.classList.toggle('pv', PV());
-  const card = (tab === 'race' && raceStep === 'go') || tab === 'rank';
+  const card = (tab === 'race' && raceStep === 'go') || (tab === 'rank' && !rkCu);
   $('#scard').hidden = !card; $('#go').hidden = !(tab === 'race' && raceStep === 'go' && sel.mode !== 'on');
   document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.t === tab || (tab === 'paint' && b.dataset.t === 'kart') || (tab === 'cpaint' && b.dataset.t === 'char')));
   const modeName = sel.mode === 'vs' ? 'VSレース' : sel.mode === 'on' ? 'オンライン対戦' : 'タイムアタック', kt = myKt();
   $('#pName').textContent = myName(); drawFace($('#pIcon'), CH[sel.ch]);
-  $('#stat').hidden = tab !== 'kart'; if (tab === 'kart') $('#stat').innerHTML = statHtml(kt);
-  $('#who').innerHTML = tab === 'kart' ? '' : PV() ? `<b>${CH[sel.ch].n}${sel.skin && chT.has ? '<small>＋自分のスキン</small>' : ''}</b>${kt.n}／${kt.tire.n}／${kt.wg.n}／${kt.eng.n}` : card && tab === 'race' ? `${modeName}　／　${sel.tod === 'night' ? '夜' : '昼'}` : '';
+  $('#stat').hidden = !(tab === 'kart' || cuOn()); if (tab === 'kart') $('#stat').innerHTML = statHtml(kt); else if (cuOn()) $('#stat').innerHTML = statHtml(mkKt(rkCu.cu), rkCu.cu.gl, true);
+  $('#who').innerHTML = tab === 'kart' || cuOn() ? '' : PV() ? `<b>${CH[sel.ch].n}${sel.skin && chT.has ? '<small>＋自分のスキン</small>' : ''}</b>${kt.n}／${kt.tire.n}／${kt.wg.n}／${kt.eng.n}` : card && tab === 'race' ? `${modeName}　／　${sel.tod === 'night' ? '夜' : '昼'}` : '';
   if (card) drawCard();
   if (tab === 'top') { el.innerHTML = ''; return; }
   if (tab === 'race') {
@@ -2202,6 +2240,8 @@ function renderPanel(){
   } else if (tab === 'item') {
     h = `<h2>アイテム図鑑<small>VS・オンラインで光る箱から出現</small></h2><div class="scroll">` + Object.keys(ITEMS).map(id => `<div class="item"><canvas width="96" height="96" data-item="${id}"></canvas><div><b>${ITEMS[id].n}${ITEMS[id].low ? '<em>下位専用</em>' : ''}</b><p>${ITEMS[id].d}</p></div></div>`).join('') +
       `<div class="grp">コースのしかけ</div><p class="note"><b>ジャンプ台</b>：ピンクの板に乗るとジャンプ＋ブースト。<br><b>着地ダッシュ</b>：大きく飛んでから道に着地すると、少しだけブースト。坂のてっぺんを勢いよく越えても浮く。<br><b>動く障害物</b>：道を左右に横切る。当たるとスピン。<br><b>体当たり</b>：マシン同士がぶつかると、ぶつけられた側が少し減速する。<br><b>グライダー</b>：左右に広く動ける。カーブの内側を飛ぶと少しだけ近道。外側のブーストリングはその近道ライン上にある。<br><b>空のアイテムボックス</b>：グライダー区間のまん中に浮いている。飛んでいるあいだに取れる。<br><b>ダッシュパネル</b>：黄色い板で加速（VS・オンラインでは数が少なめ）。<br><b>柵</b>：カーブの外側などにあり、落ちるのを防ぐ。ジャンプ中なら飛び越えられる。<br><b>道のとぎれ目</b>：青と白の発射台に乗ると、自動で向こう側まで飛ぶ。<br><b>傾いた道</b>：道が横に傾いている区間。低いほうへ少しずつ流される。<br><b>隠し近道</b>：各コースに3本。カーブの内側を少しだけ縮める細い道で、目印はない。切れ目があるものは踏み切り板から飛び越える。<br><b>落ちたとき</b>：すぐには救助されない。飛んだ先に道があればそのまま走れる。近くの道よりずっと下まで落ちるとドローンが来る。<br><b>コース外</b>：約3割の減速（道から遠いほど重くなる）。コース外に強いパーツでも減速は残る。木・岩・柱などのオブジェにぶつかると大きく減速する。溶岩の上は1秒ほどなら渡れる。<br><b>飛ばしすぎ</b>：一度にコースの7%より先へは進めない（進んだことにならない）。</p></div>`;
+  } else if (tab === 'rank' && rkCu) {
+    h = rkCuHtml();
   } else if (tab === 'rank') {
     h = `<h2>ランキング<small>最速ラップ上位10件。名前の下にその人の総プレイ時間</small></h2>
       <div class="chips">` + STAGES.map((s, i) => `<button class="chip" type="button" data-stage="${i}" aria-pressed="${i === sel.stage}">${i + 1}. ${s.name}</button>`).join('') + `</div><div class="scroll" id="rkList"></div>`;
@@ -2228,29 +2268,63 @@ function renderPanel(){
   { const cl = $('#chatL'); if (cl) cl.scrollTop = cl.scrollHeight; }
 }
 function renderRank(){
-  const el = $('#rkList'); if (!el) return; const tip = `<p class="note">${rkMsg ? esc(rkMsg) : '名前を押すと、その記録の走り（リプレイ）を見られます。'}</p>`;
-  const mine = best[ST.id] && LS.get('rm_rep4_' + ST.id, null) ? `<button class="rk me" type="button" data-rep="local"><span class="r">▶</span><canvas width="68" height="68" data-face="${sel.ch}"></canvas><span class="nm2">${esc(myName())}<small>この端末の自己ベスト　総プレイ ${fmtPlay(acct.play)}</small></span><span class="tm">${fmt(best[ST.id])}</span></button>` : '';
+  const el = $('#rkList'); if (!el) return; const tip = `<p class="note">${rkMsg ? esc(rkMsg) : '名前を押すとその記録の走り（リプレイ）、「カスタム」を押すとその人のマシン（パーツ・カラー・グライダー）を見られます。'}</p>`, cuB = i => `<button class="rkcu" type="button" data-cu="${i}" aria-label="この記録のカスタムを見る">カスタム<small>を見る</small></button>`;
+  const mine = best[ST.id] && LS.get('rm_rep4_' + ST.id, null) ? `<div class="rkrow"><button class="rk me" type="button" data-rep="local"><span class="r">▶</span><canvas width="68" height="68" data-face="${sel.ch}"></canvas><span class="nm2">${esc(myName())}<small>この端末の自己ベスト　総プレイ ${fmtPlay(acct.play)}</small></span><span class="tm">${fmt(best[ST.id])}</span></button>${cuB('local')}</div>` : '';
   if (net.err) el.innerHTML = `<p class="note">${net.err}</p>` + (mine ? tip + mine : '');
   else if (!net.rows || net.stage !== ST.id) el.innerHTML = '<p class="note">読み込み中…</p>';
   else if (!net.rows.length) el.innerHTML = '<p class="note">まだ記録がありません。タイムアタックで最初の記録を出そう。</p>' + mine;
-  else el.innerHTML = tip + net.rows.slice(0, 10).map((r, i) => `<button class="rk${r.pid === acct.pid ? ' me' : ''}" type="button" data-rep="${esc(r.id)}" data-i="${i}"><span class="r">${i + 1}</span><canvas width="68" height="68" data-face="${clamp(parseInt(String(r.icon).slice(3)) || 0, 0, CH.length - 1)}"></canvas><span class="nm2">${esc(r.name || 'PLAYER')}<small>▶ リプレイ　総プレイ ${r.pid === acct.pid ? fmtPlay(Math.max(acct.play || 0, playOf[r.pid] || 0)) : playOf[r.pid] >= 0 ? fmtPlay(playOf[r.pid]) : '…'}</small></span><span class="tm">${fmt(r.lapMs / 1000)}</span></button>`).join('');
+  else el.innerHTML = tip + net.rows.slice(0, 10).map((r, i) => `<div class="rkrow"><button class="rk${r.pid === acct.pid ? ' me' : ''}" type="button" data-rep="${esc(r.id)}" data-i="${i}"><span class="r">${i + 1}</span><canvas width="68" height="68" data-face="${clamp(parseInt(String(r.icon).slice(3)) || 0, 0, CH.length - 1)}"></canvas><span class="nm2">${esc(r.name || 'PLAYER')}<small>▶リプレイ　総プレイ ${r.pid === acct.pid ? fmtPlay(Math.max(acct.play || 0, playOf[r.pid] || 0)) : playOf[r.pid] >= 0 ? fmtPlay(playOf[r.pid]) : '…'}</small></span><span class="tm">${fmt(r.lapMs / 1000)}</span></button>${cuB(i)}</div>`).join('');
   el.querySelectorAll('[data-face]').forEach(c => drawFace(c, CH[+c.dataset.face]));
 }
-function openReplay(ds){
-  const local = LS.get('rm_rep4_' + ST.id, null), row = ds.rep === 'local' ? null : (net.rows || [])[+ds.i];
-  if (ds.rep === 'local' || (row && row.pid === acct.pid && local && local.ms === row.lapMs)) { if (local && startReplay(local, myName())) return; }
-  if (!row) return; rkMsg = 'リプレイを読み込み中…'; renderRank(); const sid = ST.id;
-  jf(`${FB.db}/${RP}/${sid}/${row.id}.json`).then(rp => { rkMsg = ''; if (state !== 'home' || tab !== 'rank' || ST.id !== sid) return; if (!rp || !rp.d || !startReplay(rp, row.name || 'PLAYER')) { rkMsg = 'この記録にはリプレイがありません。'; renderRank(); } })
-    .catch(() => { rkMsg = 'リプレイを読み込めませんでした。通信状態を確認してください。'; renderRank(); });
+// ---- ランキング：その人のカスタムを見る
+// 記録のリプレイ（replays_v4/{コース}/{記録ID}）に、走ったときのパーツ・グライダー（kt）とカラー（col）とキャラ（ch）が入っている。
+// その3つだけを読むので軽い。ルールの変更はいらず、いまある記録もそのまま見られる
+const rkNote = () => rkCu ? renderPanel() : renderRank();
+const cuCache = {};      // 「コース/記録ID」→ カスタム（記録は書き換えられないので、一度読めば十分）
+const cuOf = (o, ch0) => ({ ...decKt(o.kt), col: ci(o.col, COLS.length), ch: ci(typeof o.ch === 'number' ? o.ch : ch0, CH.length) });
+const NOCU = 'この記録にはカスタムの情報がありません（リプレイが保存されていない記録です）。';
+function openCu(ds){
+  const sid = ST.id, local = LS.get('rm_rep4_' + sid, null), hasKt = o => !!o && typeof o.kt === 'number';
+  homeYaw = 0; homeZoom = 1; rkMsg = '';
+  if (ds.cu === 'local') { rkCu = { local: true, sid, name: myName(), ms: Math.round((best[sid] || 0) * 1000), cu: hasKt(local) ? cuOf(local, sel.ch) : null, msg: hasKt(local) ? '' : NOCU }; return renderPanel(); }
+  const row = (net.rows || [])[+ds.cu]; if (!row) return;
+  const ch0 = clamp(parseInt(String(row.icon).slice(3)) || 0, 0, CH.length - 1), key = sid + '/' + row.id;
+  rkCu = { row, i: +ds.cu, sid, name: row.name || 'PLAYER', ms: row.lapMs, mode: row.mode, cu: cuCache[key] || null, msg: '' };
+  if (!rkCu.cu && row.pid === acct.pid && hasKt(local) && local.ms === row.lapMs) rkCu.cu = cuCache[key] = cuOf(local, ch0);      // 自分の記録なら端末のリプレイから
+  renderPanel(); if (rkCu.cu) return;
+  const v = rkCu, base = `${FB.db}/${RP}/${sid}/${encodeURIComponent(row.id)}/`;
+  Promise.all(['kt', 'col', 'ch'].map(f => jf(base + f + '.json'))).then(([kt, col, ch]) => { if (typeof kt === 'number') v.cu = cuCache[key] = cuOf({ kt, col, ch }, ch0); else v.msg = NOCU; },
+    () => { v.msg = '読み込めませんでした。通信状態を確認してください。'; }).then(() => { if (rkCu === v && state === 'home' && tab === 'rank') renderPanel(); });
 }
-$('#home').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (!b) return; if (b.dataset.t === 'top') raceOpen = false; tab = b.dataset.t; if (tab === 'race') raceStep = room.id || raceOpen ? 'go' : 'mode'; pe.msg = setMsg = rkMsg = ''; audioInit(); se(520, .05, 'square', .04); renderPanel(); });
+function rkCuHtml(){
+  const r = rkCu, c = r.cu, h2 = `<h2>${esc(r.name)}のカスタム<small>${esc(ST.name)}　${r.ms ? fmt(r.ms / 1000) : ''}</small></h2><div class="scroll">`;
+  if (!c) return h2 + `<p class="note">${esc(r.msg || '読み込み中…')}</p></div>`;
+  const kt = mkKt(c), P = (label, p) => `<div class="cup"><span class="lb">${label}</span><b>${p.n}</b><small>${p.d}</small></div>`;
+  const repB = r.local ? `<button class="chip" type="button" data-rep="local">▶ リプレイを見る</button>` : `<button class="chip" type="button" data-rep="${esc(r.row.id)}" data-i="${r.i}">▶ リプレイを見る</button>`;
+  const mode = r.local ? 'この端末の自己ベスト' : r.mode === 'room' ? 'ルーム戦（アイテムなし）の記録' : 'タイムアタックの記録';
+  return h2 + `<div class="chips">${chip('cuuse', 'このカスタムを使う')}${r.prev ? chip('cuundo', '元にもどす') : ''}${chip('cusave', 'マイセットに保存')}${repB}</div>` +
+    (rkMsg || r.msg ? `<p class="note">${esc(rkMsg || r.msg)}</p>` : '') +
+    `<div class="cul">` + P('ボディ', kt.body) + P('タイヤ', kt.tire) + P('ウィング', kt.wg) + P('エンジン', kt.eng) + P('グライダー', GLD[c.gl]) +
+    `<div class="cup"><span class="lb">カラー</span><b><span class="dot" style="background:${COLS[c.col]}"></span>カラー ${c.col + 1}</b></div>` +
+    `<div class="cup"><span class="lb">キャラ</span><b><canvas width="68" height="68" data-face="${c.ch}"></canvas>${CH[c.ch].n}</b><small>性能差なし</small></div></div>` +
+    `<p class="note">${mode}を出したときのマシンです。性能はマシンの左に出ています（緑＝標準より高い／赤＝低い）。ペイント・スキン・ハンドルの曲がる量は見られません。マシンは指でドラッグすると回せます。</p></div>`;
+}
+function openReplay(ds){
+  const local = LS.get('rm_rep4_' + ST.id, null), rows = net.rows || [], row = ds.rep === 'local' ? null : rows.find(r => r.id === ds.rep) || (rkCu && rkCu.row && rkCu.row.id === ds.rep ? rkCu.row : null) || rows[+ds.i];
+  if (ds.rep === 'local' || (row && row.pid === acct.pid && local && local.ms === row.lapMs)) { if (local && startReplay(local, myName())) return; }
+  if (!row) return; rkMsg = 'リプレイを読み込み中…'; rkNote(); const sid = ST.id;
+  jf(`${FB.db}/${RP}/${sid}/${row.id}.json`).then(rp => { rkMsg = ''; if (state !== 'home' || tab !== 'rank' || ST.id !== sid) return; if (!rp || !rp.d || !startReplay(rp, row.name || 'PLAYER')) { rkMsg = 'この記録にはリプレイがありません。'; rkNote(); } })
+    .catch(() => { rkMsg = 'リプレイを読み込めませんでした。通信状態を確認してください。'; rkNote(); });
+}
+$('#home').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (!b) return; if (b.dataset.t === 'top') raceOpen = false; tab = b.dataset.t; rkCu = null; if (tab === 'race') raceStep = room.id || raceOpen ? 'go' : 'mode'; pe.msg = setMsg = rkMsg = ''; audioInit(); se(520, .05, 'square', .04); renderPanel(); });
 $('#panel').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return; const ds = b.dataset, keep = $('#panel .scroll') ? $('#panel .scroll').scrollTop : 0;
   if (ds.rep) { audioInit(); return openReplay(ds); }
+  if (ds.cu) { audioInit(); se(660, .06, 'square', .04); return openCu(ds); }
   if (ds.act && ACT[ds.act]) { audioInit(); se(660, .06, 'square', .04); ACT[ds.act](b, ds); const sc1 = $('#panel .scroll'); if (sc1) sc1.scrollTop = keep; return; }
   if (ds.mode) { if (room.id && ds.mode !== 'on') roomLeave(''); sel.mode = ds.mode; raceStep = 'go'; }
   else if (ds.stage) { const host = sel.mode === 'on' && room.id && tab === 'race'; if (host && !room.host) return;
-    if (ds.stage === 'r') sel.rnd = true; else { if (tab !== 'rank') sel.rnd = false; selectStage(+ds.stage); rkMsg = ''; }
+    if (ds.stage === 'r') sel.rnd = true; else { if (tab !== 'rank') sel.rnd = false; selectStage(+ds.stage); rkMsg = ''; rkCu = null; }
     if (host) roomPut('/stageId', sel.rnd ? 'random' : ST.id); }
   else if (ds.laps || ds.items) { const host = sel.mode === 'on' && room.id && tab === 'race'; if (host && !room.host) return;      // 周回数・アイテムのあり/なし（ルーム戦ではホストが決める）
     if (ds.laps) { sel.laps = [1, 2, 3, 5].includes(+ds.laps) ? +ds.laps : 3; if (host) roomPut('/laps', sel.laps); } else { sel.items = ds.items === '1'; if (host) roomPut('/items', sel.items ? 1 : 0); } }
@@ -2389,7 +2463,7 @@ const PKEY = /^data:image\/(png|webp|jpeg);base64,[A-Za-z0-9+/=]+$/;
 const ACT = {
   paint(){ navPush('paint'); pe.zoom = 1; pe.pan = false; pe.sx = pe.sy = .5; tab = 'paint'; pe.t = 'car'; pe.undo = []; pe.stamp = null; pe.msg = ''; renderPanel(); }, cpaint(){ navPush('cpaint'); pe.zoom = 1; pe.pan = false; pe.sx = pe.sy = .5; tab = 'cpaint'; pe.t = 'ch'; pe.undo = []; pe.stamp = null; pe.msg = ''; homeYaw = 0; renderPanel(); },
   pback(){ tab = pe.t === 'car' ? 'kart' : 'char'; pe.stamp = null; homeZoom = 1; homeYaw = 0; renderPanel(); }, gotab(b, ds){ navPush(ds.to); tab = ds.to; renderPanel(); },
-  navback(){ const n = navTarget(); if (!n) return; tab = n.tab; if (tab === 'race') raceStep = 'go'; pe.stamp = null; pe.msg = setMsg = rkMsg = ''; setEdit = -1; homeZoom = 1; homeYaw = 0; renderPanel(); },
+  navback(){ const n = navTarget(); if (!n) return; rkCu = null; tab = n.tab; if (tab === 'race') raceStep = 'go'; pe.stamp = null; pe.msg = setMsg = rkMsg = ''; setEdit = -1; homeZoom = 1; homeYaw = 0; renderPanel(); },
   pcol(b, ds){ pe.col = ds.c; pe.erase = false; renderPanel(); }, psize(b, ds){ pe.size = +ds.s; renderPanel(); }, perase(){ pe.erase = !pe.erase; renderPanel(); },
   pundo(){ const im = pe.undo.pop(), o = PO(); if (im) { o.ctx.putImageData(im, 0, 0); upTex(o); saveTex(o); peRedraw(); } },
   pclear(){ const o = PO(); peUndoPush(); clearTex(o); saveTex(o); peRedraw(); },
@@ -2432,11 +2506,21 @@ const ACT = {
       if (LS.set('rm_sets', sets)) setMsg = 'いまのカスタムを保存しました。'; else { sets.pop(); setMsg = '保存できませんでした（端末の保存容量がいっぱいです）。'; } }
     renderPanel(); },
   sload(b, ds){ const s = sets[+ds.i]; if (!s) return; sel.kt = ci(s.kt, KT.length); sel.tire = ci(s.tire, TIRE.length); sel.wing = ci(s.wing, WING.length); sel.eng = ci(s.eng, ENG.length); sel.col = ci(s.col, COLS.length); sel.gl = ci(s.gl, GLD.length); pe.undo = []; save(); roomSyncMe();
-    setMsg = '「' + s.n + '」を読み込みました。'; if (s.p) drawTexUrl(carT, s.p, () => saveTex(carT)); else { clearTex(carT); saveTex(carT); } renderPanel(); },
+    setMsg = '「' + s.n + '」を読み込みました。'; if (s.p) drawTexUrl(carT, s.p, () => saveTex(carT)); else if (s.p === undefined) loadTex(carT); else { clearTex(carT); saveTex(carT); } renderPanel(); },      // ランキングから保存したセット（p なし）は、そのボディの自分のペイントを使う
   sdel(b, ds){ sets.splice(+ds.i, 1); LS.set('rm_sets', sets); setEdit = -1; setMsg = '削除しました。'; renderPanel(); },
   sren(b, ds){ setEdit = +ds.i; setMsg = ''; renderPanel(); const f = $('#setName'); if (f) { try { f.focus(); f.select(); } catch (x) {} } },
   srenok(b, ds){ const st = sets[+ds.i], v = (($('#setName') || {}).value || '').trim().slice(0, 12); setEdit = -1; if (st && v) { st.n = v; LS.set('rm_sets', sets); setMsg = '名前を「' + v + '」に変えました。'; } else setMsg = '名前を1文字以上入力してください。'; renderPanel(); },
   srenno(){ setEdit = -1; renderPanel(); },
+  // ---- ランキングで見ているその人のカスタム
+  cuuse(){ const r = rkCu, c = r && r.cu; if (!c) return; rkMsg = ''; if (!r.prev) r.prev = { kt: sel.kt, tire: sel.tire, wing: sel.wing, eng: sel.eng, gl: sel.gl, col: sel.col };
+    const body = sel.kt !== c.kt; Object.assign(sel, { kt: c.kt, tire: c.tire, wing: c.wing, eng: c.eng, gl: c.gl, col: c.col }); if (body) { pe.undo = []; loadTex(carT); } save(); roomSyncMe();
+    r.msg = '自分のカスタム（パーツ・カラー・グライダー）を ' + r.name + ' と同じにしました。キャラとペイントはそのままです。'; renderPanel(); },
+  cuundo(){ const r = rkCu, p = r && r.prev; if (!p) return; rkMsg = ''; const body = sel.kt !== p.kt; Object.assign(sel, p); if (body) { pe.undo = []; loadTex(carT); } r.prev = null; save(); roomSyncMe(); r.msg = '元のカスタムにもどしました。'; renderPanel(); },
+  cusave(){ const r = rkCu, c = r && r.cu; if (!c) return; rkMsg = '';
+    if (sets.length >= 8) r.msg = 'マイセットは8つまでです。カスタムの画面で、いらないセットを削除してください。';
+    else { const n = r.name.length <= 7 ? r.name + 'のカスタム' : r.name.slice(0, 12); sets.push({ n, kt: c.kt, tire: c.tire, wing: c.wing, eng: c.eng, col: c.col, gl: c.gl });      // ペイントは持たない（読み込むと、そのボディの自分のペイントになる）
+      if (LS.set('rm_sets', sets)) r.msg = 'マイセットに「' + n + '」として保存しました。カスタムの画面からいつでも読み込めます。'; else { sets.pop(); r.msg = '保存できませんでした（端末の保存容量がいっぱいです）。'; } }
+    renderPanel(); },
   // ---- そのほか
   name(){ const v = $('#pname').value.trim().slice(0, 12); if (!v) { net.note = '名前を1文字以上入力してください。'; return renderPanel(); } pname = v; saveAcct(); net.note = '名前を保存しました。'; roomSyncMe(); syncProfile().then(() => { if (tab === 'rank') loadTop(ST.id); }); renderPanel(); },
   copy(){ try { navigator.clipboard.writeText(acct.code).then(() => { net.note = 'コピーしました'; renderPanel(); }, () => {}); } catch (x) {} },
@@ -2583,7 +2667,7 @@ function boot(){
 // ================================================================ 更新のお知らせ
 // 公開しているページ（index.html）が新しくなっていたら、試合のあとに「ゲームの更新があります」を出して読み込み直してもらう。
 // BUILD は公開するたびに変える番号。番号を変え忘れても、ページの中身が起動時と変わっていれば気づく
-const BUILD = '2026-11-11-17'; let updBase = null, updReady = false;
+const BUILD = '2026-11-13-1'; let updBase = null, updReady = false;
 async function updCheck(show){
   if (/^https?:$/.test(location.protocol) && !updReady) { try { const t = await (await fetch(location.pathname + '?upd=' + Date.now(), { cache: 'no-store' })).text(); let h = t.length; for (let i = 0; i < t.length; i += 7) h = (h * 31 + t.charCodeAt(i)) | 0;
     const m = /const BUILD = '([^']+)'/.exec(t); if (m && m[1] !== BUILD) updReady = true; else if (updBase === null) updBase = h; else if (h !== updBase) updReady = true; } catch (e) {} }
